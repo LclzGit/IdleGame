@@ -1,0 +1,639 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daemon Bar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#0e0c1d; --win:#17142b; --winhi:#201c3d; --line:#2e2856;
+    --text:#e7e3ff; --mute:#8f89b8; --amber:#ffb454; --cyan:#5ce1e6;
+    --pink:#ff3d7f; --green:#6ee7a8; --dock:#0a0916; --bar:#07060f;
+  }
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--text);
+    font:14px/1.55 "IBM Plex Sans",system-ui,sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  main{
+    flex:1; overflow:auto; padding:28px 16px 20px;
+    background:
+      radial-gradient(600px 300px at 12% 0%, rgba(255,180,84,.10), transparent 70%),
+      linear-gradient(rgba(46,40,86,.35) 1px, transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg, rgba(46,40,86,.35) 1px, transparent 1px) 0 0/32px 32px,
+      var(--bg);
+  }
+  .brand{max-width:1100px; margin:0 auto 20px; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 18px}
+  .brand h1{
+    margin:0; font-family:"Silkscreen",ui-monospace,monospace; font-weight:400;
+    font-size:clamp(30px,6vw,54px); line-height:1; color:var(--amber);
+    letter-spacing:.03em; text-shadow:3px 3px 0 #3a1d00;
+  }
+  .brand h1 span{color:var(--pink)}
+  .brand p{margin:0; color:var(--mute); font:13px/1.4 "IBM Plex Mono",ui-monospace,monospace}
+  .wins{max-width:1100px; margin:0 auto; display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); align-items:start}
+  .win{background:var(--win); border:1px solid var(--line); box-shadow:5px 5px 0 #000}
+  .win h2{
+    margin:0; display:flex; justify-content:space-between; gap:8px;
+    font:600 12px/1 "IBM Plex Mono",ui-monospace,monospace; letter-spacing:.04em;
+    background:var(--winhi); border-bottom:1px solid var(--line); padding:8px 10px; color:var(--text);
+  }
+  .win h2 small{color:var(--mute); font-weight:400}
+  .body{padding:14px 16px}
+  .readme p{margin:0 0 10px; max-width:62ch}
+  .readme p:last-child{margin:0}
+  .readme b{color:var(--amber); font-weight:600}
+  .readme .k{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; color:var(--cyan)}
+  #squad{display:grid; gap:12px}
+  .d{display:grid; gap:4px}
+  .dh{display:flex; justify-content:space-between; font:12px "IBM Plex Mono",ui-monospace,monospace}
+  .dh b{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:13px; letter-spacing:.04em}
+  .dh span{color:var(--mute)}
+  .hp{height:6px; background:#0b0a16; border:1px solid var(--line)}
+  .hp i{display:block; height:100%; background:var(--green)}
+  .st{font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute); font-variant-numeric:tabular-nums}
+  .st em{color:var(--pink); font-style:normal}
+  .gear{font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--rc); border-left:3px solid var(--rc); padding-left:8px}
+  .gear small{opacity:.8}
+  #log{list-style:none; margin:0; padding:0; font:12px/1.5 "IBM Plex Mono",ui-monospace,monospace; display:grid; gap:4px; min-height:9em}
+  #log li{color:var(--mute)}
+  #log li time{color:#5d5790; margin-right:6px; font-variant-numeric:tabular-nums}
+  #log li.hl{color:var(--text)}
+
+  .dock{background:var(--dock); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px)}
+  .hud{display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; padding:8px 16px; font:12px "IBM Plex Mono",ui-monospace,monospace}
+  .sector{display:flex; align-items:center; gap:8px}
+  #secName{font-family:"Silkscreen",ui-monospace,monospace; font-size:13px; color:var(--sec,var(--cyan)); min-width:9ch}
+  .prog{width:90px; height:6px; border:1px solid var(--line); background:#0b0a16}
+  .prog i{display:block; height:100%; width:0; background:var(--sec,var(--cyan))}
+  #secTxt{color:var(--mute); font-variant-numeric:tabular-nums; min-width:5ch}
+  .data{display:flex; align-items:baseline; gap:6px}
+  .data .lbl{color:var(--mute); letter-spacing:.08em; font-size:11px}
+  #data{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:15px; color:var(--amber); font-variant-numeric:tabular-nums; min-width:8ch}
+  .upg{display:flex; flex-wrap:wrap; gap:6px}
+  .ctl{display:flex; gap:10px; align-items:center; margin-left:auto}
+  button{
+    font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--text); background:var(--winhi);
+    border:1px solid var(--line); padding:4px 8px; cursor:pointer; box-shadow:2px 2px 0 #000;
+  }
+  button:hover:not(:disabled){border-color:var(--amber)}
+  button:active:not(:disabled){transform:translate(1px,1px); box-shadow:1px 1px 0 #000}
+  button:disabled{opacity:.45; cursor:default}
+  button b{color:var(--amber); font-weight:600}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  label{display:flex; align-items:center; gap:5px; color:var(--mute); cursor:pointer}
+  .stripwrap{line-height:0; border-top:1px solid #000}
+  #strip{display:block; image-rendering:pixelated; image-rendering:crisp-edges}
+  .taskbar{
+    height:32px; display:flex; align-items:stretch; gap:2px; padding-inline:6px; background:var(--bar);
+    border-top:1px solid #000; font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute);
+    overflow:hidden; white-space:nowrap;
+  }
+  .taskbar span{display:flex; align-items:center; padding-inline:10px}
+  .start{color:var(--amber); font-size:15px}
+  .task{border-bottom:2px solid transparent}
+  .task.on{color:var(--text); border-bottom-color:var(--amber); background:#12102a}
+  .clock{margin-left:auto; font-variant-numeric:tabular-nums}
+  @media (max-width:560px){ .task.opt{display:none} .ctl{margin-left:0} }
+</style>
+
+<main>
+  <header class="brand">
+    <h1>DAEMON<span>//</span>BAR</h1>
+    <p>protótipo v0.1 · um idle RPG que mora na sua barra de tarefas</p>
+  </header>
+
+  <div class="wins">
+    <section class="win readme">
+      <h2>LEIA-ME.txt <small>_ □ ×</small></h2>
+      <div class="body">
+        <p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
+        <p>Três daemons patrulham o seu próprio computador enquanto você trabalha. Eles começam na pasta temporária, descem até o kernel e depois saem pra rede, caçando bugs, worms e trojans.</p>
+        <p>Cada vírus apagado vira dados. A moeda sobe como um disco enchendo: <span class="k">KB → MB → GB → TB</span>. Dados compram upgrades. Às vezes um vírus deixa cair um módulo, e os mais raros são <span class="k" style="color:#c38cff">Zero-Day</span> e <span class="k" style="color:var(--amber)">Quântico</span>.</p>
+        <p>No fim de cada setor aparece um <span class="k" style="color:var(--pink)">RANSOMWARE</span>. Se o esquadrão cair, o sistema faz rollback do setor, mas você não perde os dados.</p>
+        <p>Como jogar: não precisa fazer nada, é só deixar rodando. Compre upgrades na barra lá embaixo ou deixe o <span class="k">auto</span> ligado.</p>
+      </div>
+    </section>
+
+    <section class="win">
+      <h2>daemons.cfg <small>esquadrão</small></h2>
+      <div class="body"><div id="squad"></div></div>
+    </section>
+
+    <section class="win">
+      <h2>syslog <small>eventos</small></h2>
+      <div class="body"><ol id="log"></ol></div>
+    </section>
+  </div>
+</main>
+
+<footer class="dock">
+  <div class="hud">
+    <div class="sector"><span id="secName">C:\TEMP</span><div class="prog"><i id="secBar"></i></div><span id="secTxt">0/10</span></div>
+    <div class="data"><span class="lbl">DADOS</span><b id="data">0 KB</b></div>
+    <div class="upg" id="upg"></div>
+    <div class="ctl">
+      <label for="auto"><input type="checkbox" id="auto"> auto</label>
+      <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
+      <button id="reset" type="button" title="Apagar o progresso salvo">wipe</button>
+    </div>
+  </div>
+  <div class="stripwrap"><canvas id="strip" aria-label="Esquadrão de daemons lutando contra vírus"></canvas></div>
+  <div class="taskbar">
+    <span class="start">▣</span>
+    <span class="task opt">relatorio_q3.xlsx</span>
+    <span class="task opt">Reunião 14h</span>
+    <span class="task on">daemon.exe</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const SCALE = 3, H = 48, GROUND = 40, KEY = 'daemonbar.v1';
+const cv = $('#strip'), ctx = cv.getContext('2d');
+let W = 320;
+
+// ---------- sprites ----------
+function mk(rows, pal, white) {
+  const c = document.createElement('canvas');
+  c.width = rows[0].length; c.height = rows.length;
+  const g = c.getContext('2d');
+  rows.forEach((r, y) => [...r].forEach((ch, x) => {
+    if (pal[ch]) { g.fillStyle = white ? '#ffffff' : pal[ch]; g.fillRect(x, y, 1, 1); }
+  }));
+  return c;
+}
+const ART = {
+  fw: [[
+    '..aaaaaa..','.abbbbbba.','abbccccbba','abcbbbbcba','abcbddbcba',
+    'abcbddbcba','abcbbbbcba','.abbccbba.','..abbbba..','...aaaa...'],
+    {a:'#1b3a6b',b:'#3f7fd1',c:'#9fd0ff',d:'#ffb454'}],
+  sc: [[
+    '...aaaa...','..abbbba..','.abbccbba.','abbcddcbba','abbcddcbba',
+    '.abbccbba.','..abbbba..','...a..a...','..a....a..','..........'],
+    {a:'#0f4f55',b:'#2aa9b0',c:'#5ce1e6',d:'#ffffff'}],
+  pt: [[
+    '...aaaa...','..abbbba..','..abccba..','..acccca..','..abccba..',
+    '..abbbba..','.aabbbbaa.','.a.abba.a.','...a..a...','...a..a...'],
+    {a:'#1e5a33',b:'#3fbf6a',c:'#d8ffe0'}],
+  bug: [[
+    'a........a','.a......a.','..abbbba..','.abcbbcba.','abbbbbbbba',
+    '.abbbbbba.','a.abbbba.a','..a....a..'],
+    {a:'#6b1238',b:'#ff3d7f',c:'#ffffff'}],
+  worm: [[
+    '.aa.......','abca..aa..','abbba.abba','.abbbabbba','..abbbbba.','...aaaaa..'],
+    {a:'#2b4a0a',b:'#a6e22e',c:'#ffffff'}],
+  trojan: [[
+    'aaaaaaaaaa','abbbbbbbba','abccbbccba','abbbbbbbba','abbddddbba',
+    'abbbbbbbba','aaaaaaaaaa','.a......a.'],
+    {a:'#4a2a00',b:'#b86b12',c:'#ff3d7f',d:'#2a1600'}],
+  boss: [[
+    '...aaaa...','..a....a..','..a....a..','aaaaaaaaaa','abbbbbbbba',
+    'abbbccbbba','abbbccbbba','abbbbcbbba','abbbbbbbba','aaaaaaaaaa'],
+    {a:'#3d0a1f',b:'#ff3d7f',c:'#ffb454'}],
+};
+const SPR = {}, SPRW = {};
+for (const k in ART) { SPR[k] = mk(...ART[k]); SPRW[k] = mk(ART[k][0], ART[k][1], true); }
+
+// ---------- data ----------
+const SECTORS = [
+  {name:'C:\\TEMP', tint:'#5ce1e6'}, {name:'CACHE L2', tint:'#7aa2ff'},
+  {name:'RAM', tint:'#b98cff'}, {name:'KERNEL', tint:'#ffb454'},
+  {name:'REDE LOCAL', tint:'#6ee7a8'}, {name:'DEEP WEB', tint:'#ff3d7f'},
+];
+const sec = (i = S.sector) => {
+  const s = SECTORS[i % SECTORS.length], loop = Math.floor(i / SECTORS.length);
+  return {name: s.name + (loop ? ' ×' + (loop + 1) : ''), tint: s.tint};
+};
+const HERO_DEF = [
+  {id:'pt', name:'PATCHER',  role:'suporte', hp:70,  atk:3,  range:80,  cd:1.5, x:22},
+  {id:'sc', name:'SCANNER',  role:'dano',    hp:55,  atk:10, range:110, cd:1.1, x:40},
+  {id:'fw', name:'FIREWALL', role:'tanque',  hp:130, atk:5,  range:6,   cd:0.9, x:58},
+];
+const TYPES = {
+  bug:{hp:1, atk:1, rw:1, cd:1.2}, worm:{hp:1.5, atk:.8, rw:1.2, cd:1.0},
+  trojan:{hp:2.3, atk:1.4, rw:1.8, cd:1.5}, boss:{hp:6, atk:1.6, rw:12, cd:1.6},
+};
+const RAR = [
+  {n:'Comum', c:'#9aa0b5', m:1, w:60}, {n:'Otimizado', c:'#6ee7a8', m:1.6, w:25},
+  {n:'Criptografado', c:'#5ca8ff', m:2.5, w:10}, {n:'Zero-Day', c:'#c38cff', m:4, w:4},
+  {n:'Quântico', c:'#ffb454', m:7, w:1},
+];
+const GEAR = {
+  fw:['Sandbox','Proxy Reverso','Honeypot','Firewall L7'],
+  sc:['Heurística','Regex Afiada','Assinatura','Sonda DPI'],
+  pt:['Hotfix','Patch Cumulativo','Snapshot','Ponto de Restauração'],
+};
+const UPG = [
+  {k:'dmg', label:'Overclock', base:40, max:99},
+  {k:'hp',  label:'Blindagem', base:40, max:99},
+  {k:'spd', label:'Threads',   base:60, max:12},
+];
+
+const S0 = {data:0, sector:0, kills:0, upg:{dmg:0,hp:0,spd:0}, gear:{fw:null,sc:null,pt:null}, auto:true, last:0};
+let S = load();
+function load() {
+  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.upg) return Object.assign(structuredClone(S0), r); } catch (e) {}
+  return structuredClone(S0);
+}
+function save() { S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+const gm = id => 1 + (S.gear[id] ? S.gear[id].b / 100 : 0);
+const maxHp = h => h.def.hp * 1.3 ** S.upg.hp * gm(h.def.id);
+const atk = h => h.def.atk * 1.3 ** S.upg.dmg * gm(h.def.id);
+const cdOf = h => h.def.cd * 0.92 ** S.upg.spd;
+const cost = u => Math.floor(u.base * 1.55 ** S.upg[u.k]);
+const rewardAt = L => 6 * 1.15 ** L;
+
+function fmt(kb) {
+  const u = ['KB','MB','GB','TB','PB','EB']; let i = 0;
+  while (kb >= 1024 && i < u.length - 1) { kb /= 1024; i++; }
+  return (kb < 10 ? kb.toFixed(2) : kb < 100 ? kb.toFixed(1) : Math.floor(kb)) + ' ' + u[i];
+}
+const fmtN = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toString();
+
+// ---------- runtime ----------
+let heroes, enemies = [], shots = [], parts = [], floats = [];
+let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0;
+function resetHeroes() {
+  heroes = HERO_DEF.map(def => ({def, hp:0, t:Math.random()*.5, dead:false, respawn:0, flash:0, lunge:0}));
+  heroes.forEach(h => h.hp = maxHp(h));
+}
+resetHeroes();
+
+function say(txt, hl) {
+  const li = document.createElement('li');
+  const d = new Date();
+  li.innerHTML = `<time>${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</time>` + txt;
+  if (hl) li.className = 'hl';
+  const log = $('#log'); log.prepend(li);
+  while (log.children.length > 9) log.lastChild.remove();
+}
+function showBanner(text, color) { banner = {text, color: color || '#ffb454', life: 2.2}; }
+
+function spawn(boss) {
+  const L = S.sector * 10 + spawned;
+  const pool = S.sector === 0 ? ['bug'] : S.sector === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
+  const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
+  const T = TYPES[tn], s = boss ? 2 : 1;
+  const w = SPR[tn].width * s, h = SPR[tn].height * s;
+  const last = enemies[enemies.length - 1];
+  enemies.push({
+    tn, boss, w, h, x: Math.max(W + 4, last ? last.x + last.w + 4 : 0),
+    hp: 22 * 1.13 ** L * T.hp, max: 22 * 1.13 ** L * T.hp,
+    atk: 3 * 1.11 ** L * T.atk, cd: T.cd, t: T.cd * .6,
+    reward: rewardAt(L) * T.rw, flash: 0, lunge: 0, atStop: false,
+  });
+}
+
+function burst(x, y, c, n) {
+  for (let i = 0; i < n; i++) parts.push({x, y, vx:(Math.random()-.5)*60, vy:-Math.random()*50-10, life:.5+Math.random()*.4, c});
+}
+function float(x, y, txt, c) { floats.push({x, y, txt, c, life: 1}); }
+
+function hit(e, d) {
+  e.hp -= d; e.flash = .08;
+  float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
+  if (e.hp <= 0) kill(e);
+}
+function kill(e) {
+  enemies.splice(enemies.indexOf(e), 1);
+  S.data += e.reward;
+  burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
+  float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
+  if (e.boss || Math.random() < .15) drop(e.boss);
+  if (e.boss) sectorClear(); else S.kills++;
+}
+function drop(boss) {
+  let roll = Math.random() * 100, r = 0;
+  for (; r < RAR.length - 1; r++) { roll -= RAR[r].w; if (roll < 0) break; }
+  if (boss) r = Math.max(r, 1);
+  const ids = ['fw','sc','pt'], id = ids[Math.random() * 3 | 0];
+  const names = GEAR[id];
+  const item = {
+    name: names[Math.random() * names.length | 0] + ' v' + (S.sector + 1) + '.' + (Math.random() * 10 | 0),
+    r, b: Math.round(12 * RAR[r].m * 1.35 ** S.sector * (.8 + Math.random() * .4)),
+  };
+  const hero = HERO_DEF.find(d => d.id === id).name;
+  const tag = `<span style="color:${RAR[r].c}">${item.name} [${RAR[r].n}]</span>`;
+  if (!S.gear[id] || item.b > S.gear[id].b) {
+    S.gear[id] = item;
+    say(`${hero} instalou ${tag} +${item.b}%`, true);
+    if (r >= 3) showBanner(RAR[r].n.toUpperCase() + '!', RAR[r].c);
+  } else {
+    const kb = rewardAt(S.sector * 10) * 2 * RAR[r].m;
+    S.data += kb;
+    say(`${tag} reciclado → +${fmt(kb)}`);
+  }
+}
+function sectorClear() {
+  say(`<span style="color:${sec().tint}">${sec().name}</span> limpo. Descendo para <span style="color:${sec(S.sector+1).tint}">${sec(S.sector+1).name}</span>`, true);
+  S.sector++; S.kills = 0; spawned = 0; bossUp = false;
+  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
+  showBanner('SETOR LIMPO', sec().tint);
+  save();
+}
+function rollback() {
+  enemies = []; shots = []; S.kills = 0; spawned = 0; bossUp = false; spawnT = 2;
+  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
+  showBanner('ROLLBACK', '#ff3d7f');
+  say('Esquadrão derrubado. Rollback do setor (os dados ficam).', true);
+}
+
+function buy(u) {
+  const c = cost(u);
+  if (S.data < c || S.upg[u.k] >= u.max) return false;
+  S.data -= c; S.upg[u.k]++;
+  heroes.forEach(h => { if (!h.dead) h.hp = Math.min(maxHp(h), h.hp * 1.3); });
+  return true;
+}
+
+function update(dt) {
+  t += dt;
+  const alive = heroes.filter(h => !h.dead);
+  if (!alive.length) { rollback(); return; }
+  const front = alive.reduce((a, h) => h.def.x > a.def.x ? h : a);
+  const stopX = front.def.x + 12;
+
+  // enemies close in and queue up
+  let slot = stopX;
+  for (const e of enemies) {
+    if (e.x > slot) e.x = Math.max(slot, e.x - 32 * dt);
+    e.atStop = e.x <= slot + .01;
+    slot = e.x + e.w + 3;
+    e.flash = Math.max(0, e.flash - dt); e.lunge = Math.max(0, e.lunge - dt * 6);
+  }
+  const engaged = enemies.length > 0 && enemies[0].atStop;
+  if (!engaged) scroll += 22 * dt;
+
+  // heroes
+  for (const h of heroes) {
+    h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
+    if (h.dead) {
+      h.respawn -= dt;
+      if (h.respawn <= 0) { h.dead = false; h.hp = maxHp(h) * .4; say(`${h.def.name} reiniciado`); }
+      continue;
+    }
+    if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
+    h.t -= dt;
+    if (h.t > 0) continue;
+    if (h.def.id === 'pt') {
+      const hurt = alive.filter(a => !a.dead && a.hp < maxHp(a) * .8).sort((a, b) => a.hp / maxHp(a) - b.hp / maxHp(b))[0];
+      if (hurt) {
+        const amt = atk(h) * 4;
+        hurt.hp = Math.min(maxHp(hurt), hurt.hp + amt);
+        burst(hurt.def.x + 5, GROUND - 6, '#6ee7a8', 6);
+        float(hurt.def.x + 5, GROUND - 18, '+' + fmtN(amt), '#6ee7a8');
+        h.t = cdOf(h); h.lunge = 1;
+        continue;
+      }
+    }
+    const e = enemies[0];
+    if (!e || e.x > W - 6) continue;
+    if (e.x - (h.def.x + 10) > h.def.range) continue;
+    h.t = cdOf(h); h.lunge = 1;
+    if (h.def.id === 'fw') { hit(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
+    else shots.push({x: h.def.x + 10, y: GROUND - (h.def.id === 'sc' ? 7 : 5), dmg: atk(h), c: h.def.id === 'sc' ? '#5ce1e6' : '#6ee7a8'});
+  }
+
+  // shots
+  for (let i = shots.length - 1; i >= 0; i--) {
+    const s = shots[i], e = enemies[0];
+    if (!e) { shots.splice(i, 1); continue; }
+    s.x += 170 * dt;
+    if (s.x >= e.x) { shots.splice(i, 1); hit(e, s.dmg); }
+  }
+
+  // enemies attack the front daemon
+  const e = enemies[0];
+  if (e && e.atStop) {
+    e.t -= dt;
+    if (e.t <= 0) {
+      e.t = e.cd; e.lunge = 1;
+      front.hp -= e.atk; front.flash = .1;
+      burst(front.def.x + 9, GROUND - 5, '#ff3d7f', 3);
+      if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; say(`${front.def.name} caiu`); }
+    }
+  }
+
+  // spawning
+  spawnT -= dt;
+  if (!bossUp) {
+    if (spawned < 10) {
+      if (spawnT <= 0 && enemies.length < 3) { spawn(false); spawned++; spawnT = 1.2 + Math.random() * 1.6; }
+    } else if (!enemies.length) {
+      spawn(true); bossUp = true; showBanner('!! RANSOMWARE !!', '#ff3d7f');
+      say(`<span style="color:var(--pink)">RANSOMWARE</span> detectado em ${sec().name}`, true);
+    }
+  }
+
+  // fx
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i]; p.life -= dt; p.vy += 120 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.y > GROUND) { p.y = GROUND; p.vy *= -.3; p.vx *= .6; }
+    if (p.life <= 0) parts.splice(i, 1);
+  }
+  for (let i = floats.length - 1; i >= 0; i--) { const f = floats[i]; f.life -= dt; f.y -= 14 * dt; if (f.life <= 0) floats.splice(i, 1); }
+  if (banner) { banner.life -= dt; if (banner.life <= 0) banner = null; }
+
+  autoT -= dt;
+  if (S.auto && autoT <= 0) {
+    autoT = .5;
+    const u = UPG.filter(u => S.upg[u.k] < u.max).sort((a, b) => cost(a) - cost(b))[0];
+    if (u && buy(u)) say(`auto: ${u.label} → nv ${S.upg[u.k]}`);
+  }
+}
+
+// ---------- drawing ----------
+const rgbaCache = {};
+function rgba(hex, a) {
+  const k = hex + a;
+  if (!rgbaCache[k]) {
+    const n = parseInt(hex.slice(1), 16);
+    rgbaCache[k] = `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+  }
+  return rgbaCache[k];
+}
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+function text(str, x, y, c, center) {
+  ctx.font = '8px Silkscreen, monospace';
+  ctx.textBaseline = 'top';
+  const w = ctx.measureText(str).width;
+  const px = Math.round(center ? x - w / 2 : x), py = Math.round(y);
+  ctx.fillStyle = '#000'; ctx.fillText(str, px + 1, py + 1);
+  ctx.fillStyle = c; ctx.fillText(str, px, py);
+}
+
+function draw() {
+  const tint = sec().tint;
+  ctx.fillStyle = '#0b0a16'; ctx.fillRect(0, 0, W, H);
+
+  // far layer: via grid
+  ctx.fillStyle = rgba(tint, .12);
+  const o1 = (scroll * .25) % 8;
+  for (let x = -o1; x < W; x += 8) for (let y = 4; y < GROUND - 2; y += 8) ctx.fillRect(Math.round(x), y, 1, 1);
+
+  // mid layer: circuit traces
+  const cw = 28, par = .5, first = Math.floor(scroll * par / cw) - 2;
+  for (let c = first; c < first + W / cw + 4; c++) {
+    const r = hash(c + S.sector * 97);
+    if (r < .25) continue;
+    const x = Math.round(c * cw - scroll * par), y = 5 + Math.floor(r * 24);
+    const len = 8 + Math.floor(hash(c * 7.3) * 34), dy = hash(c * 3.1) > .5 ? 6 : -6;
+    ctx.fillStyle = rgba(tint, .25);
+    ctx.fillRect(x, y, len, 1);
+    ctx.fillRect(x + len, Math.min(y, y + dy), 1, Math.abs(dy));
+    ctx.fillRect(x + len, y + dy, 10, 1);
+    ctx.fillStyle = rgba(tint, .55); ctx.fillRect(x - 1, y - 1, 3, 3);
+    ctx.fillStyle = '#0b0a16'; ctx.fillRect(x, y, 1, 1);
+  }
+
+  // ground bus
+  ctx.fillStyle = rgba(tint, .6); ctx.fillRect(0, GROUND, W, 1);
+  ctx.fillStyle = rgba(tint, .18); ctx.fillRect(0, GROUND + 5, W, 1);
+  const o2 = scroll % 6;
+  for (let x = -o2; x < W; x += 6) ctx.fillRect(Math.round(x), GROUND + 1, 1, 4);
+  ctx.fillStyle = rgba(tint, .9);
+  for (let i = 0; i < 5; i++) ctx.fillRect(Math.round((i * 97 + t * 45) % (W + 20)) - 10, GROUND + 3, 3, 1);
+
+  // heroes
+  for (const h of heroes) {
+    const k = h.def.id;
+    let x = h.def.x + Math.round(h.lunge * 2), y = GROUND - 10;
+    if (k === 'sc') y -= 3 + Math.round(Math.sin(t * 3) * 1.2);
+    else if (!enemies[0]?.atStop && !h.dead) y -= Math.abs(Math.round(Math.sin(t * 9 + h.def.x) * 1));
+    if (h.dead) {
+      ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
+      ctx.drawImage(SPR[k], x, y);
+      ctx.globalAlpha = 1;
+      text(Math.ceil(h.respawn) + 's', x + 5, y - 10, '#8f89b8', true);
+      continue;
+    }
+    ctx.drawImage(h.flash > 0 ? SPRW[k] : SPR[k], x, y);
+    const p = Math.max(0, h.hp / maxHp(h));
+    ctx.fillStyle = '#000'; ctx.fillRect(x, y - 3, 10, 2);
+    ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(10 * p), 1);
+  }
+
+  // enemies
+  for (const e of enemies) {
+    const x = Math.round(e.x - e.lunge * 2), y = GROUND - e.h;
+    ctx.drawImage(e.flash > 0 ? SPRW[e.tn] : SPR[e.tn], x, y, e.w, e.h);
+    const p = Math.max(0, e.hp / e.max);
+    ctx.fillStyle = '#000'; ctx.fillRect(x, y - 3, e.w, 2);
+    ctx.fillStyle = e.boss ? '#ffb454' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(e.w * p), 1);
+  }
+
+  // shots
+  for (const s of shots) {
+    ctx.fillStyle = rgba(s.c, .35); ctx.fillRect(Math.round(s.x) - 5, s.y, 5, 1);
+    ctx.fillStyle = s.c; ctx.fillRect(Math.round(s.x), s.y, 3, 1);
+  }
+  // particles
+  for (const p of parts) { ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
+  // floating numbers
+  for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life * 2); text(f.txt, f.x, f.y, f.c, true); }
+  ctx.globalAlpha = 1;
+
+  if (banner) {
+    ctx.globalAlpha = Math.min(1, banner.life * 2);
+    text(banner.text, W / 2, 10, banner.color, true);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ---------- UI ----------
+const upgEl = $('#upg');
+const upgBtns = UPG.map(u => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.addEventListener('click', () => { if (buy(u)) { say(`${u.label} → nv ${S.upg[u.k]}`); renderHud(); } });
+  upgEl.appendChild(b);
+  return b;
+});
+$('#auto').checked = S.auto;
+$('#auto').addEventListener('change', e => { S.auto = e.target.checked; save(); });
+$('#speed').addEventListener('click', e => {
+  speed = speed === 1 ? 3 : speed === 3 ? 10 : 1;
+  e.target.textContent = speed + '×';
+});
+let wipeArmed = 0;
+$('#reset').addEventListener('click', e => {
+  if (Date.now() - wipeArmed > 3000) { wipeArmed = Date.now(); e.target.textContent = 'confirmar?'; setTimeout(() => e.target.textContent = 'wipe', 3000); return; }
+  S = structuredClone(S0); enemies = []; shots = []; spawned = 0; bossUp = false; resetHeroes(); save();
+  $('#auto').checked = S.auto; e.target.textContent = 'wipe'; say('Progresso apagado. Sistema limpo.', true);
+});
+
+function renderHud() {
+  const s = sec();
+  document.querySelector('.dock').style.setProperty('--sec', s.tint);
+  $('#secName').textContent = s.name;
+  $('#secBar').style.width = (bossUp ? 100 : S.kills / 10 * 100) + '%';
+  $('#secTxt').textContent = bossUp ? 'BOSS' : S.kills + '/10';
+  $('#data').textContent = fmt(S.data);
+  UPG.forEach((u, i) => {
+    const maxed = S.upg[u.k] >= u.max;
+    upgBtns[i].innerHTML = `${u.label} ${S.upg[u.k]} · <b>${maxed ? 'máx' : fmt(cost(u))}</b>`;
+    upgBtns[i].disabled = maxed || S.data < cost(u);
+  });
+}
+function renderSquad() {
+  $('#squad').innerHTML = heroes.slice().reverse().map(h => {
+    const g = S.gear[h.def.id], p = h.dead ? 0 : h.hp / maxHp(h) * 100;
+    return `<div class="d">
+      <div class="dh"><b>${h.def.name}</b><span>${h.def.role}</span></div>
+      <div class="hp"><i style="width:${p.toFixed(1)}%;${p < 35 ? 'background:var(--pink)' : ''}"></i></div>
+      <div class="st">ATK ${fmtN(atk(h))} · HP ${fmtN(h.hp)}/${fmtN(maxHp(h))}${h.dead ? ' · <em>reiniciando…</em>' : ''}</div>
+      <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} <small>[${RAR[g.r].n}] +${g.b}%</small>` : 'sem módulo instalado'}</div>
+    </div>`;
+  }).join('');
+}
+function clock() { const d = new Date(); $('#clock').textContent = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
+
+function offline(ms) {
+  const sec_ = Math.min(ms / 1000, 8 * 3600);
+  if (sec_ < 30) return;
+  const gain = sec_ * rewardAt(S.sector * 10 + 5) * .3;
+  S.data += gain;
+  const h = Math.floor(sec_ / 3600), m = Math.floor(sec_ % 3600 / 60);
+  say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min), seus daemons coletaram <span style="color:var(--amber)">${fmt(gain)}</span>`, true);
+  showBanner('+' + fmt(gain) + ' OFFLINE', '#ffb454');
+}
+
+function resize() {
+  const w = cv.parentElement.clientWidth;
+  W = Math.max(160, Math.floor(w / SCALE));
+  cv.width = W; cv.height = H;
+  cv.style.width = W * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
+  ctx.imageSmoothingEnabled = false;
+}
+new ResizeObserver(resize).observe(cv.parentElement);
+resize();
+
+// boot
+say('daemon.exe iniciado. Varredura em C:\\TEMP…', true);
+if (S.last) offline(Date.now() - S.last);
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); save(); }
+  else if (hiddenAt) { offline(Date.now() - hiddenAt); hiddenAt = 0; }
+});
+setInterval(save, 5000);
+setInterval(() => { renderHud(); renderSquad(); }, 250);
+setInterval(clock, 10000); clock();
+renderHud(); renderSquad();
+
+let lastT = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  for (let i = 0; i < speed; i++) update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
