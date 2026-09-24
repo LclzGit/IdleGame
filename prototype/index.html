@@ -133,7 +133,7 @@
   .tdef b{font:400 14px var(--pix)}
   .tsum{padding:4px 0; border-top:1px dashed var(--line)}
   .tsum small{color:var(--mute)}
-  @media (max-width:760px){ .tree2{grid-template-columns:1fr} .tside{max-height:none} .pnav{display:none} }
+  @media (max-width:760px){ .tree2{grid-template-columns:1fr} .tside{max-height:none} }
   /* tela de agente: diagnóstico */
   .procs{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; margin-bottom:8px}
   .proc{display:grid; grid-template-columns:24px 1fr; gap:2px 8px; align-items:center; padding:4px 6px; text-align:left; background:#0b0a16; border:1px solid #1f5a60; box-shadow:none}
@@ -374,7 +374,7 @@
   @media (max-width:560px){ .dx{grid-template-columns:1fr} .procs{grid-template-columns:1fr} .rd{grid-template-columns:1fr} .inv{grid-template-columns:repeat(6, minmax(0, 48px))} .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
   @media (prefers-reduced-motion:reduce){ .res .card{animation:none} }
   /* ===== modo compacto: janelas pequenas, como no Task Bar Hero (o jogo fica no canto da tela) ===== */
-  .panel{width:min(500px, calc(100% - 16px)); max-height:min(560px, calc(100vh - 120px)); left:auto; right:8px; transform:none}
+  .panel{width:min(500px, calc(100% - 16px)); max-height:min(560px, calc(100vh - var(--dockH, 150px) - 16px)); left:auto; right:8px; transform:none}
   .panel.wide{width:min(760px, calc(100% - 16px))}
   .pbar{padding:3px 4px 3px 6px; gap:6px}
   .ppath{font-size:11px} .ppath b{font-size:10px}
@@ -420,8 +420,12 @@
   .packs{display:flex; flex-wrap:wrap; align-items:center; gap:3px; margin:0 0 6px; padding:4px 6px; background:#0b0a16; border:1px solid #1f5a60}
   .packs .lbl{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#3f8f94; margin-right:4px}
   .cell.pk{width:32px; height:32px; aspect-ratio:auto} .cell.pk img{width:18px; height:18px}
-  .inv{grid-template-columns:repeat(8, 1fr); gap:3px}
-  .inv .cell{aspect-ratio:auto; height:44px; max-width:none}
+  .inv{grid-template-columns:repeat(8, 44px); gap:3px; justify-content:center}
+  .inv .cell{aspect-ratio:auto; width:44px; height:44px; max-width:none}
+  /* painel estreito (tela pequena ou zoom alto): nada some, tudo encolhe */
+  .pcur span{display:inline-flex; align-items:center; gap:3px} .pcur span + span{margin-left:8px}
+  .pbody{container-type:inline-size}
+  @container (max-width:400px){ .inv{grid-template-columns:repeat(6, 44px)} }
   .ivh{font-size:11px; margin-right:10px} .ivh small{color:var(--mute); font-weight:400}
   .sets:empty{display:none}
   .inv .cell{align-content:center; gap:0} .inv .cell img{width:26px; height:26px; image-rendering:pixelated; margin:0 auto}
@@ -441,7 +445,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13.1</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13.2</p>
 </main>
 
 <footer class="dock">
@@ -3000,7 +3004,7 @@ function burst(x, y, c, n) {
 function float(x, y, txt, c) { floats.push({x, y: Math.max(2, y), txt, c, life: 1}); }
 
 function hit(e, d) {
-  e.hp -= d; e.flash = .08;
+  e.hp -= d; if (!(e.fcd > 0)) { e.flash = .08; e.fcd = .22; }   // pisca no máximo ~4× por segundo, senão o chefe vira um borrão branco
   if (CFG.dmg) float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
   if (e.hp > 0 && !e.boss && tv('exec') && e.hp / e.max < tv('exec')) { e.hp = 0; float(e.x + e.w / 2, GROUND - e.h - 18, 'DELETADO', '#ff8a3a'); }
   if (e.hp <= 0) kill(e);
@@ -3761,7 +3765,7 @@ function update(dt) {
     if (e.x > slot) e.x = Math.max(slot, e.x - 32 * dt);
     e.atStop = e.x <= slot + .01;
     slot = e.x + e.w + 3;
-    e.flash = Math.max(0, e.flash - dt); e.lunge = Math.max(0, e.lunge - dt * 6);
+    e.flash = Math.max(0, e.flash - dt); e.fcd = (e.fcd || 0) - dt; e.lunge = Math.max(0, e.lunge - dt * 6);
   }
   const engaged = enemies.length > 0 && enemies[0].atStop;
 
@@ -4133,9 +4137,10 @@ function draw() {
       const cx = x + e.w / 2, gy = GROUND;
       ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx, gy - .3, e.w * .42 * Math.max(.4, 1 - hop * .06), 1.2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.save(); ctx.translate(cx, gy - hop); ctx.scale(sx, sy);
-      ctx.drawImage((e.flash > 0 ? ESPRW : ESPR)[e.tn][fr], -e.w / 2, -e.h, e.w, e.h);
+      ctx.drawImage(ESPR[e.tn][fr], -e.w / 2, -e.h, e.w, e.h);
+      if (e.flash > 0) { ctx.globalAlpha = .55; ctx.drawImage(ESPRW[e.tn][fr], -e.w / 2, -e.h, e.w, e.h); ctx.globalAlpha = 1; }
       ctx.restore();
-    } else ctx.drawImage(e.flash > 0 ? SPRW[e.tn] : SPR[e.tn], x, y, e.w, e.h);
+    } else { ctx.drawImage(SPR[e.tn], x, y, e.w, e.h); if (e.flash > 0) { ctx.globalAlpha = .55; ctx.drawImage(SPRW[e.tn], x, y, e.w, e.h); ctx.globalAlpha = 1; } }
     const p = Math.max(0, e.hp / e.max);
     ctx.fillStyle = '#000'; ctx.fillRect(x, y - 3, e.w, 2);
     ctx.fillStyle = e.boss ? '#ffb454' : e.armored ? '#c9cfe0' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(e.w * p), 1);
@@ -4771,7 +4776,7 @@ function renderPanel() {
   livePanel();
 }
 function livePanel() {
-  $('#pCur').innerHTML = `<img src="${uiIcon('coin')}" width="12" height="12" alt=""> <b>${fmtNum(S.data)}</b> créditos · <img src="${uiIcon('defs')}" width="12" height="12" alt=""> <i>${fmtNum(S.def)}</i> definições`;
+  $('#pCur').innerHTML = `<span title="Créditos"><img src="${uiIcon('coin')}" width="12" height="12" alt=""> <b>${fmtNum(S.data)}</b></span> <span title="Definições"><img src="${uiIcon('defs')}" width="12" height="12" alt=""> <i>${fmtNum(S.def)}</i></span>`;
   $('#pStatus').innerHTML = `<span class="ok">● PROTEÇÃO ATIVA</span><span>fase ${stageLabel(S.stage)} · ${ST().n}</span><span>${invUsed()}/${invCap()} itens</span><span>poder ${fmtN(power())}</span><span>créditos: ${fmtNum(S.data)}</span><span>definições: ${fmtNum(S.def)}</span>`;
   if (openP === 'agent') for (const [k] of SLOTS) {
     const h = heroOf(k), aid = slotAid(k), lv = lvOf(aid), el = $('#hp-' + k);
@@ -4801,6 +4806,9 @@ document.addEventListener('click', e => {
 $('#pClose').addEventListener('click', () => openPanel(null, true));
 $('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="20" height="20" alt=""><span>${n}</span></button>`).join('');
 $('#pLogo').src = treeIcon('core');
+// o painel nunca passa do topo da tela: altura máxima = janela − barra do jogo
+const fitPanel = () => document.documentElement.style.setProperty('--dockH', document.querySelector('.dock').offsetHeight + 'px');
+addEventListener('resize', fitPanel); fitPanel();
 document.querySelectorAll('.taskbar [data-open]').forEach(b => b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(b.dataset.open)}" width="12" height="12" alt="">`));
 $('#icCoin').src = uiIcon('coin'); $('#icPow').src = uiIcon('pow'); $('#icDef').src = uiIcon('defs');
 document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });

@@ -23,6 +23,15 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.13.2: tela pequena
+
+- Menus sempre acessíveis: a coluna de ícones do painel não some mais em telas estreitas ou com zoom alto (antes, abaixo de 760 px, Compilador, Upload, Bestiário, Ranking, Log, Coleção e Chances ficavam sem acesso).
+- O painel nunca passa do topo da tela: a altura máxima desconta a altura real da barra do jogo. Conteúdo e ícones rolam por dentro.
+- Inventário com células fixas de 44 px: 8 colunas (24 espaços = 3 linhas cheias), ou 6 colunas quando o painel é muito estreito (4 linhas). Sem células esticadas.
+- Topo do painel mostra só ícone + número de créditos e definições (com dica), então o título não é mais cortado.
+- Chefes não viram mais um borrão branco: o brilho de dano pisca no máximo ~4× por segundo e é translúcido.
+- `tools/overflow-check.cjs` rodado em 1366×768, 752×775 e 600×560 nos 3 idiomas: nada vazando. `tools/small-screen.cjs` confere se o menu de ícones aparece em cada tamanho.
+
 ## v1.13.1: nada vazando
 
 - Inventário volta a fechar certinho: 8 colunas, então 24 espaços viram 3 linhas cheias. As células ocupam a largura do painel.
