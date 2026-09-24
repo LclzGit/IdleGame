@@ -388,7 +388,8 @@
   .shop{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:4px} .sh{padding:4px 6px; font-size:10px}
   .raid{grid-template-columns:40px 1fr auto; gap:6px; padding:5px} .raid img{width:40px; height:40px} .raid .ri p{font-size:10px}
   .sgrid{gap:2px} .sc{padding:2px 1px}
-  .tmap{height:min(380px, calc(100vh - 220px))}
+  .tmap{height:min(380px, calc(100vh - 220px)); scrollbar-width:none; touch-action:none} .tmap::-webkit-scrollbar{display:none}
+  .tside{scrollbar-width:thin; scrollbar-color:#1f5a60 transparent}
   .tree2{grid-template-columns:1fr 200px}
   button{padding:2px 6px}
   .opbox{padding:5px 8px} .opl{font-size:14px}
@@ -399,7 +400,14 @@
   .tip{width:240px; font-size:10px}
   .packs{display:flex; flex-wrap:wrap; align-items:center; gap:3px; margin:0 0 6px; padding:4px 6px; background:#0b0a16; border:1px solid #1f5a60}
   .packs .lbl{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#3f8f94; margin-right:4px}
-  .cell.pk{width:40px; height:42px; aspect-ratio:auto}
+  .cell.pk{width:32px; height:32px; aspect-ratio:auto} .cell.pk img{width:18px; height:18px}
+  .inv{grid-template-columns:repeat(10, 40px); gap:3px; justify-content:start}
+  .ivh{font-size:11px; margin-right:10px} .ivh small{color:var(--mute); font-weight:400}
+  .sets:empty{display:none}
+  .inv .cell img{width:20px; height:20px} .inv .cell b{font-size:8px; line-height:1} .inv .cell .ct{font-size:7px}
+  .packs{padding:3px 5px; margin:0 0 4px}
+  .invft{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-top:6px}
+  .invft .setlist{margin:0; flex:1; min-width:0} .invft > button{font-size:10px; white-space:nowrap}
   .socks{grid-template-columns:repeat(5, 36px); gap:3px; justify-content:start; align-content:start}
   .socks .lbl{grid-column:1 / -1; margin:2px 0 0}
   .sock, .sock.empty{display:grid; grid-template-columns:1fr; place-items:center; width:36px; height:36px; padding:0; border-left-width:1px; border-bottom:3px solid var(--rc, #2e2856)}
@@ -412,7 +420,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.10.1</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.11.2</p>
 </main>
 
 <footer class="dock">
@@ -2296,10 +2304,10 @@ function itemIcon(it) {
 // Pacotes de download ficam num compartimento próprio: continuam em S.inv (mesmos índices), mas não ocupam espaço.
 const invUsed = () => S.inv.filter(x => x.k !== 'chip').length;
 const gearIdx = () => S.inv.map((x, i) => x.k !== 'chip' ? i : -1).filter(i => i >= 0);
-function packStrip(sel) {
+function packStrip(sel, head) {
   const P = S.inv.map((x, i) => x.k === 'chip' ? i : -1).filter(i => i >= 0).sort((a, b) => S.inv[b].r - S.inv[a].r || !!S.inv[a].b - !!S.inv[b].b);
-  return `<div class="packs"><span class="lbl">pacotes</span>${P.length ? P.map(i => { const it = S.inv[i];
-    return `<button type="button" class="cell pk${i === sel ? ' sel' : ''}" data-cell="${i}" data-tip="inv:${i}" style="--rc:${itemColor(it)}"><img src="${itemIcon(it)}" width="22" height="22" alt=""><b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}</button>`; }).join('') : '<span class="hint">nenhum · guardados aqui sem ocupar o inventário</span>'}</div>`;
+  return `<div class="packs">${head || ''}<span class="lbl">pacotes</span>${P.length ? P.map(i => { const it = S.inv[i];
+    return `<button type="button" class="cell pk${i === sel ? ' sel' : ''}" data-cell="${i}" data-tip="inv:${i}" style="--rc:${itemColor(it)}"><img src="${itemIcon(it)}" width="22" height="22" alt=""><b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}</button>`; }).join('') : '<span class="hint">nenhum (não ocupam espaço)</span>'}</div>`;
 }
 function addItem(it) {
   if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r && !!x.b === !!it.b); if (st) st.n += it.n; else S.inv.push(it); return true; }   // pacotes nunca ficam sem espaço
@@ -2865,7 +2873,6 @@ function update(dt) {
     e.flash = Math.max(0, e.flash - dt); e.lunge = Math.max(0, e.lunge - dt * 6);
   }
   const engaged = enemies.length > 0 && enemies[0].atStop;
-  scroll += 3 * dt;   // o esquadrão defende o núcleo parado; o cenário só deriva devagar
 
   for (const h of heroes) {
     h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
@@ -3059,7 +3066,13 @@ function drawSheetHero(h, SI, walking) {
     bob = -Math.abs(Math.sin(cyc)) * (veh ? .4 : 1);
     rot = veh ? 0 : .02 + Math.sin(cyc * 2) * .006;
     if (!veh) return drawWalk(h, P, cyc, bob, rot);
-  } else { P = SI.w[0]; sy = 1 + Math.sin(t * 2.5 + ph) * .015; }
+  } else if (!h.dead) {
+    // posição de guarda: arma em pronto, respirando e trocando o peso de leve enquanto espera
+    P = SI.a[0];
+    sy = 1 + Math.sin(t * 2.2 + ph) * .014;
+    rot = Math.sin(t * 1.1 + ph) * .006;
+    dx = Math.sin(t * .9 + ph) * .25;
+  } else P = SI.w[0];
   const ax = h.def.x + h.def.w / 2 + dx, gy = GROUND + 1;
   // sombra
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ax + 1, gy - .5, P.w * .28 * (1 + bob * .05), 1.3, 0, 0, Math.PI * 2); ctx.fill();
@@ -3079,31 +3092,75 @@ function drawSheetHero(h, SI, walking) {
 // Núcleo do sistema: o gabinete que o esquadrão protege, na ponta esquerda da barra. LEDs piscam, o disco
 // trabalha e um escudo holográfico pulsa; fica vermelho e piscando quando o esquadrão está caindo.
 function drawCore(sc, panic) {
-  const x = 4, w = 20, top = GROUND - 30, danger = heroes.filter(h => !h.dead).length < heroes.length, tint = danger ? '#ff3d7f' : panic ? '#ff5a2a' : sc.tint;
-  // escudo
-  const pr = .55 + .15 * Math.sin(t * 2.4), g = ctx.createRadialGradient(x + w / 2, GROUND - 14, 4, x + w / 2, GROUND - 14, 24);
-  g.addColorStop(0, rgba(tint, 0)); g.addColorStop(.75, rgba(tint, .10 * pr)); g.addColorStop(1, rgba(tint, 0));
-  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x + w / 2, GROUND - 12, 22, 20, 0, Math.PI, 0); ctx.fill();
-  ctx.strokeStyle = rgba(tint, .45 * pr); ctx.lineWidth = .5; ctx.beginPath(); ctx.ellipse(x + w / 2, GROUND, 20, 30, 0, Math.PI, 2 * Math.PI); ctx.stroke();
-  // gabinete
-  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(x - 1, GROUND - .5, w + 3, 1.5);
-  const body = ctx.createLinearGradient(x, 0, x + w, 0); body.addColorStop(0, '#2a2d40'); body.addColorStop(.6, '#1a1c2a'); body.addColorStop(1, '#101220');
-  ctx.fillStyle = body; ctx.fillRect(x, top, w, 30);
-  ctx.fillStyle = '#3a3f5c'; ctx.fillRect(x, top, w, 1); ctx.fillRect(x, top, 1, 30);
-  // baias com LEDs
-  for (let i = 0; i < 4; i++) {
-    const y = top + 3 + i * 5; ctx.fillStyle = '#0b0a16'; ctx.fillRect(x + 2, y, w - 4, 3.5);
-    for (let k = 0; k < 3; k++) { const on = Math.sin(t * (3 + i + k) + i * 1.7 + k) > .2; ctx.fillStyle = on ? (k === 2 && danger ? '#ff3d7f' : tint) : '#1f2233'; ctx.fillRect(x + w - 4 - k * 2.2, y + 1.2, 1, 1); }
-    ctx.fillStyle = '#2a2d40'; ctx.fillRect(x + 3, y + 1.5, 7, .5);
+  const x = 5, w = 19, d = 3, top = GROUND - 33, hgt = 31, cx = x + w / 2,
+    danger = heroes.filter(h => !h.dead).length < heroes.length, tint = danger ? '#ff3d7f' : panic ? '#ff5a2a' : sc.tint,
+    near = enemies.length ? Math.max(0, 1 - (enemies[0].x - 40) / 80) : 0;
+  // escudo: cúpula de hexágonos que acende quando os vírus chegam perto
+  const pr = .5 + .2 * Math.sin(t * 2.4) + near * .4;
+  const g = ctx.createRadialGradient(cx, GROUND - 10, 6, cx, GROUND - 10, 28);
+  g.addColorStop(0, rgba(tint, 0)); g.addColorStop(.8, rgba(tint, .08 * pr)); g.addColorStop(1, rgba(tint, 0));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx, GROUND, 24, 40, 0, Math.PI, 0); ctx.fill();
+  for (let a = 0; a < 15; a++) for (let r = 0; r < 2; r++) {
+    const an = Math.PI + (a + r * .5 + .5) / 15.5 * Math.PI, rx = 23 - r * 2.2, ry = 39 - r * 3.2;
+    const hx = cx + Math.cos(an) * rx, hy = GROUND + Math.sin(an) * ry;
+    if (hy > GROUND - 2) continue;
+    const wave = Math.max(0, Math.sin(t * 3 - a * .6 + r));
+    ctx.fillStyle = rgba(tint, (.1 + .25 * wave * wave) * pr); ctx.fillRect(Math.round(hx * 2) / 2 - .5, Math.round(hy * 2) / 2 - .5, 1, 1);
   }
-  // ventoinha girando
-  const fx = x + w / 2, fy = top + 25; ctx.fillStyle = '#0b0a16'; ctx.beginPath(); ctx.arc(fx, fy, 3.2, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = rgba(tint, .8); ctx.lineWidth = .6;
-  for (let k = 0; k < 3; k++) { const a = t * 9 + k * 2.09; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx + Math.cos(a) * 2.8, fy + Math.sin(a) * 2.8); ctx.stroke(); }
-  // símbolo do antivírus no topo
-  ctx.fillStyle = rgba(tint, .9); ctx.beginPath(); ctx.moveTo(x + w / 2, top - 7); ctx.lineTo(x + w / 2 + 4, top - 5.5); ctx.lineTo(x + w / 2 + 3.5, top - 2); ctx.lineTo(x + w / 2, top); ctx.lineTo(x + w / 2 - 3.5, top - 2); ctx.lineTo(x + w / 2 - 4, top - 5.5); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#0b0a16'; ctx.fillRect(x + w / 2 - .5, top - 5, 1, 3); ctx.fillRect(x + w / 2 - 1.5, top - 4, 3, 1);
-  if (danger && Math.sin(t * 8) > 0) text('!', x + w / 2, top - 16, '#ff3d7f', true);
+  // cabos saindo da base pro chão
+  ctx.lineWidth = 1; ctx.lineCap = 'round';
+  [[x + w + 1, 9, '#141626'], [x + w, 15, '#1b1d30'], [x - 1, -3, '#141626']].forEach(([sx, ex, c]) => {
+    ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(sx, GROUND - 3); ctx.quadraticCurveTo(sx + ex * .6, GROUND - 3, sx + ex, GROUND + 1.5); ctx.stroke();
+  });
+  const pulse = (t * .8) % 1; ctx.fillStyle = rgba(tint, .8 * (1 - pulse)); ctx.fillRect(x + w + 2 + pulse * 12, GROUND + .5, 1, .5);
+  // base
+  ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x - 3, GROUND - .5, w + d + 6, 1.5);
+  ctx.fillStyle = '#12131f'; ctx.fillRect(x - 2, GROUND - 3, w + d + 4, 3);
+  ctx.fillStyle = '#2b2f47'; ctx.fillRect(x - 2, GROUND - 3, w + d + 4, .5);
+  ctx.fillStyle = rgba(tint, .55 + .25 * Math.sin(t * 2)); ctx.fillRect(x, GROUND - 1.5, w, .5);
+  // lateral (dá volume) e tampa
+  ctx.fillStyle = '#0c0d18'; ctx.beginPath(); ctx.moveTo(x + w, top); ctx.lineTo(x + w + d, top - 2); ctx.lineTo(x + w + d, top + hgt - 4); ctx.lineTo(x + w, top + hgt - 2); ctx.fill();
+  ctx.fillStyle = '#353a57'; ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x + d, top - 2); ctx.lineTo(x + w + d, top - 2); ctx.lineTo(x + w, top); ctx.fill();
+  for (let i = 0; i < 5; i++) { ctx.fillStyle = '#07080f'; ctx.fillRect(x + w + .8, top + 4 + i * 4 - i * .25, 1.4, .5); }
+  // frente
+  const body = ctx.createLinearGradient(x, 0, x + w, 0); body.addColorStop(0, '#2c3048'); body.addColorStop(.5, '#1e2134'); body.addColorStop(1, '#161827');
+  ctx.fillStyle = body; ctx.fillRect(x, top, w, hgt - 2);
+  ctx.fillStyle = '#454b6e'; ctx.fillRect(x, top, w, .5); ctx.fillStyle = '#3a3f5c'; ctx.fillRect(x, top, .5, hgt - 2);
+  ctx.fillStyle = rgba(tint, .7); ctx.fillRect(x + 1, top + 1, .5, hgt - 4);   // friso de luz
+  // monitor com batimento
+  const mx = x + 2.5, my = top + 2, mw = w - 5, mh = 7;
+  ctx.fillStyle = '#05060c'; ctx.fillRect(mx - .5, my - .5, mw + 1, mh + 1);
+  ctx.fillStyle = rgba(tint, .12); ctx.fillRect(mx, my, mw, mh);
+  ctx.strokeStyle = tint; ctx.lineWidth = .5; ctx.beginPath();
+  for (let k = 0; k <= mw * 2; k++) {
+    const px = mx + k / 2, ph = ((k / 2 + t * (danger ? 22 : 10)) % 14);
+    const v = ph < 1 ? 0 : ph < 2 ? -2.6 : ph < 3 ? 2 : ph < 3.6 ? -.8 : 0;
+    k ? ctx.lineTo(px, my + mh / 2 + v) : ctx.moveTo(px, my + mh / 2 + v);
+  }
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fillRect(mx, my, mw, 1);
+  // baias de disco
+  for (let i = 0; i < 3; i++) {
+    const y = top + 11 + i * 4;
+    ctx.fillStyle = '#0b0c16'; ctx.fillRect(x + 2.5, y, w - 5, 3);
+    ctx.fillStyle = '#2f3450'; ctx.fillRect(x + 2.5, y + 3, w - 5, .5);
+    ctx.fillStyle = '#20233a'; ctx.fillRect(x + 4, y + 1.2, 7, .6);
+    const on = Math.sin(t * (4 + i * 1.3) + i * 2.1) > -.1, busy = Math.sin(t * 17 + i * 5) > .3;
+    ctx.fillStyle = on && busy ? (danger && i === 2 ? '#ff3d7f' : tint) : '#1d2034'; ctx.fillRect(x + w - 5, y + 1, 1, 1);
+    ctx.fillStyle = '#6ee7a8'; ctx.globalAlpha = .6 + .4 * Math.sin(t * 1.5 + i); ctx.fillRect(x + w - 3.5, y + 1, 1, 1); ctx.globalAlpha = 1;
+  }
+  // grade de ventilação com o brilho interno
+  const vy = top + 24, glow = .35 + .25 * Math.sin(t * 5) + near * .3;
+  ctx.fillStyle = rgba(tint, glow * .5); ctx.fillRect(x + 2.5, vy, w - 5, 4);
+  ctx.fillStyle = '#0b0c16'; for (let k = 0; k < 4; k++) ctx.fillRect(x + 2.5, vy + k + .5, w - 5, .5);
+  // emblema do antivírus flutuando em cima
+  const ey = top - 9 + Math.sin(t * 2) * .8;
+  ctx.fillStyle = rgba(tint, .15); ctx.beginPath(); ctx.arc(cx + 1, ey, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = rgba(tint, .5); ctx.lineWidth = .5; ctx.beginPath(); ctx.ellipse(cx + 1, ey + 5, 5 + Math.sin(t * 2) * .5, 1.2, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = tint; ctx.beginPath(); ctx.moveTo(cx + 1, ey - 4); ctx.lineTo(cx + 4.5, ey - 2.6); ctx.lineTo(cx + 4, ey + .8); ctx.lineTo(cx + 1, ey + 3.5); ctx.lineTo(cx - 2, ey + .8); ctx.lineTo(cx - 2.5, ey - 2.6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#0b0a16'; ctx.fillRect(cx + .5, ey - 2.5, 1, 4); ctx.fillRect(cx - 1, ey - 1, 4, 1);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(cx - 1.5, ey - 2.4, 1, 1);
+  if (danger && Math.sin(t * 8) > 0) text('!', cx + 1, top - 20, '#ff3d7f', true);
 }
 function draw() {
   const sc = sec(), tint = sc.tint, panic = stagePos(S.stage).d === 4, SC = sceneOf(sc.idx, tint, panic);
@@ -3124,8 +3181,11 @@ function draw() {
   ctx.fillStyle = rgba(tint, .18); ctx.fillRect(0, GROUND + 4, W, 1);
   const o2 = scroll % 6;
   for (let x = -o2; x < W; x += 6) ctx.fillRect(Math.round(x), GROUND + 1, 1, 3);
-  ctx.fillStyle = rgba(tint, .9);
-  for (let i = 0; i < 5; i++) ctx.fillRect(Math.round((i * 97 + t * 45) % (W + 20)) - 10, GROUND + 2, 3, 1);
+  // nós da placa piscando no lugar (nada desliza, então a fase não parece andar)
+  for (let i = 0; i < 9; i++) {
+    const nx = Math.round((i * 131 + 17) % W), a = Math.max(0, Math.sin(t * 1.7 + i * 2.3));
+    ctx.fillStyle = rgba(tint, .25 + .65 * a * a); ctx.fillRect(nx, GROUND + 2, 1, 1);
+  }
 
   drawCore(sc, panic);
   for (const h of heroes) {
@@ -3297,7 +3357,7 @@ function rootPicker(it) {
     <div class="row"><button type="button" data-rgo="${selInv}" ${rootSel.length === it.pick ? '' : 'disabled'}>Gravar passivas (permanente)</button>
     <span class="hint">Depois de gravar não dá pra mudar. Um Root sem passivas pode ir pro mercado assim, e quem comprar escolhe.</span></div></div>`;
 }
-function invItems() {
+function invItems(head) {
     const GI = gearIdx();
     const cells = Array.from({length: invCap()}, (_, j) => {
       const i = GI[j], it = S.inv[i];
@@ -3306,7 +3366,7 @@ function invItems() {
         <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}" title="Conjunto ${SETS[it.set].n}"></span>` : ''}${it.af && it.af.length ? `<span class="afd">${'+'.repeat(it.af.length)}</span>` : ''}`}</button>`;
     }).join('');
     const it = S.inv[selInv];
-    let det = '<p class="hint">Clique num item pra ver detalhes.</p>';
+    let det = '';
     if (it && it.k === 'gear') {
       const cur = gearOf(it.cls)[it.type], diff = Math.round(itemScore(it) - (cur ? itemScore(cur) : 0));
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div>${gearTag(it)} · ${RAR[it.t].n}<br>
@@ -3322,10 +3382,9 @@ function invItems() {
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br>${tradeTag(it)}</div></div>
         <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar ataque</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
-    return `${packStrip(selInv)}<div class="inv">${cells}</div><div class="det">${det}</div>
-      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Chances de drop e de tier no menu Chances. Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai dos Chefões</b> (CODE RED em diante) e não sai do Compilador.</p>
-      <details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
-      <div class="opts"><button type="button" data-sellworse>Reciclar itens piores que os equipados</button></div>`;
+    return `${packStrip(selInv, head)}<div class="inv">${cells}</div>${det ? `<div class="det">${det}</div>` : ''}
+      <div class="invft"><details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
+      <button type="button" data-sellworse>Reciclar piores que os equipados</button></div>`;
   }
 
 function compView() {
@@ -3402,7 +3461,7 @@ function agentTop() {
       ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">&gt; trocar agente</button>`}
     </div>
   </div>
-  <div class="sets">${setsOn.length ? setsOn.map(x => setTxt(k, x)).join('<br>') : '<span class="hint">Nenhum conjunto ativo: 2 peças do mesmo conjunto ativam o bônus.</span>'}</div>`;
+  <div class="sets">${setsOn.length ? setsOn.map(x => setTxt(k, x)).join('<br>') : ''}</div>`;
 }
 
 // Regras de comércio no modelo do Task Bar Hero, com as proteções que eles tiveram que criar depois.
@@ -3593,7 +3652,7 @@ function buyShop(id) {
 const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['raid', 'Chefões'], ['quest', 'Contratos'], ['codex', 'Bestiário'], ['rank', 'Ranking'], ['odds', 'Chances'], ['log', 'Log']];
 
 const RENDER = {
-  agent: () => agentTop() + `<p class="sub">Inventário <small>${invUsed()}/${invCap()}</small></p>` + invItems() + `
+  agent: () => agentTop() + invItems(`<b class="ivh">Inventário <small>${invUsed()}/${invCap()}</small></b>`) + `
       <div class="opts">
         <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
         <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar itens melhores</label>

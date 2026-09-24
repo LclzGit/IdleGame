@@ -23,6 +23,14 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.11.2: guarda, cenário parado e núcleo novo
+
+- Agentes esperam os vírus em posição de guarda (arma pronta, respiração e troca de peso), não mais em pé parados.
+- O cenário não desliza mais: fundo, chão e trilhas ficam fixos; só os nós da placa piscam. A fase não parece mais andar.
+- Núcleo redesenhado: torre com monitor de batimento, baias com LEDs, ventilação brilhando, cabos, emblema flutuante e escudo de hexágonos que acende quando os vírus chegam perto.
+- Inventário compacto: grade de 10 colunas, pacotes na mesma linha do título, detalhes só com item selecionado e texto de regras removido.
+- Árvore de talentos sem barras de rolagem: navega só arrastando (ou com a roda do mouse).
+
 ## v1.11.1: compartimento de pacotes
 
 - Todos os pacotes de download (os garantidos, os das fases, os vinculados e os negociáveis) ficam num compartimento **Pacotes** acima do inventário. Não ocupam os 24 espaços e não têm limite, então dá pra guardar e abrir quando quiser.
