@@ -23,6 +23,41 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.0: tela de diagnóstico, créditos, tooltip e novas taxas
+
+- **Agentes** virou uma tela de **diagnóstico**: processos no topo (`firewall.sys PID 0421`), câmara de varredura com feixe animado, **soquetes de equipamento** em lista e leitura de atributos em terminal (`> dano ..... 13`) com comandos `> overclock` / `> blindagem`.
+- **Inventário com 24 espaços** (4 linhas de 6).
+- **Tooltip:** passar o mouse num item (inventário, soquetes, compilador) abre uma janela com atributos, passivas, conjunto, comparação com o equipado e valor de reciclagem.
+- **Créditos:** o dinheiro agora se chama créditos e é escrito como a gente fala (12,4 mil · 3,1 mi · 2 bi), com ícone de moeda. DEF virou **definições**.
+
+**Pacotes de download** (chance por vírus derrotado):
+
+| Pacote | Fase comum | Fase de chefe (Chefão) |
+|---|---|---|
+| Comum | 5% | 20% |
+| Raro | 1% | 5% |
+| Lendário | 0,5% | 1% |
+
+**O que cada pacote baixa** (garantias contam por banner e por tipo de pacote):
+
+| Pacote | ★5 | ★4 | Garantias |
+|---|---|---|---|
+| Comum | 0,2% | 2% | ★5 em 500 downloads · ★4 em 50 |
+| Raro | 2% | 15% | ★5 em 180 downloads · ×10 garante ★4 |
+| Lendário | 10% | 90% | nunca ★3 |
+
+**Itens** (chance por vírus: 8% em fase comum, 15% em fase de chefe; o chefe de cada fase sempre dá item, mínimo T2):
+
+| Tier | Fase comum | Fase de chefe |
+|---|---|---|
+| T1 Comum | 70% | 50% |
+| T2 Otimizado | 22% | 30% |
+| T3 Criptografado | 6,5% | 14% |
+| T4 Zero-Day | 1,3% | 5% |
+| T5 Quântico | 0,2% | 1% |
+
+Garantias de item: um T4 ou melhor a cada 150 itens sem T4, e um T5 a cada 1000 itens sem T5.
+
 ## v0.9: identidade própria, vacinas e árvore grande
 
 - **Janela em estilo console de antivírus:** barra de título `daemon.exe › seção` com botões de janela, trilho de ícones na lateral e barra de status ("● PROTEÇÃO ATIVA · fase · itens · poder · definições").
