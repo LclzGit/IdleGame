@@ -409,7 +409,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.7</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.10.1</p>
 </main>
 
 <footer class="dock">
@@ -2679,6 +2679,10 @@ const seed = n => { let x = n * 9301 + 49297; return () => (x = (x * 9301 + 4929
 const pick3 = (L, n) => { const r = seed(n), a = L.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, 3); };
 function ctrSync() {
   const d = dayIdx(), w = weekIdx();
+  // contratos salvos que não existem mais (ex.: removidos numa atualização) fazem o sorteio ser refeito
+  const valid = (arr, L) => Array.isArray(arr) && arr.length && arr.every(c => c && L.some(x => x.id === c.id));
+  if (!valid(S.ctr.d, CT_D)) S.ctr.day = null;
+  if (!valid(S.ctr.w, CT_W)) S.ctr.week = null;
   if (S.ctr.day !== d) { S.ctr.day = d; S.ctr.d = pick3(CT_D, d).map(c => ({id:c.id, n:0, ok:false})); }
   if (S.ctr.week !== w) { S.ctr.week = w; S.ctr.w = pick3(CT_W, w * 7 + 3).map(c => ({id:c.id, n:0, ok:false})); }
 }
@@ -2686,7 +2690,7 @@ const ctrDef = (list, c) => list.find(x => x.id === c.id);
 function ev(type, n = 1) {
   S.stat[type] = (S.stat[type] || 0) + n;
   if (!S.ctr.d) return;
-  for (const [arr, L] of [[S.ctr.d, CT_D], [S.ctr.w, CT_W]]) for (const c of arr) { const D = ctrDef(L, c); if (D.ev === type && !c.ok) c.n = Math.min(D.g, c.n + n); }
+  for (const [arr, L] of [[S.ctr.d, CT_D], [S.ctr.w, CT_W]]) for (const c of arr || []) { const D = ctrDef(L, c); if (D && D.ev === type && !c.ok) c.n = Math.min(D.g, c.n + n); }
   if (type === 'kill' && openP !== 'quest') return;
   if (openP === 'quest') livePanelQ = true;
 }
@@ -2706,7 +2710,7 @@ function claimPres() {
   give(rw, `Presença, dia ${S.pres.n}`);
   renderPanel(); save();
 }
-const ctrReady = () => (S.ctr.d || []).concat(S.ctr.w || []).filter((c, i, a) => !c.ok && c.n >= ctrDef(i < 3 ? CT_D : CT_W, c).g).length + (S.pres.last < dayIdx() ? 1 : 0);
+const ctrReady = () => (S.ctr.d || []).concat(S.ctr.w || []).filter((c, i) => { const D = ctrDef(i < 3 ? CT_D : CT_W, c); return D && !c.ok && c.n >= D.g; }).length + (S.pres.last < dayIdx() ? 1 : 0);
 function questView() {
   ctrSync();
   const G = guestRaid(), left = ms => waitTxt(ms);

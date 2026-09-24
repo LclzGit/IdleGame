@@ -18,7 +18,10 @@ const loaded = {
   upl:{slots:[0, Date.now() + 3600e3, 0, 0], steam:[{k:'chip', r:1, n:1}]}, last:Date.now() - 2 * 3600e3,
 };
 const late = {...loaded, stage:125, maxStage:130, lv:{bulwark7:{a:180, h:180}, archer:{a:180, h:180}, pt:{a:150, h:150}}};
-const SAVES = {novo:null, carregado:loaded, fim:late, antigo:{lv:{}, gear:{fw:{b:1}}, inv:[{k:'chip', r:0, n:3}, {junk:1}], pity:{fw:0}}};
+// save com contratos que já foram removidos do jogo (quebrava na v1.10)
+const dayN = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+const staleCtr = {...loaded, ctr:{day:dayN, week:Math.floor((dayN + 3) / 7), d:[{id:'pull', n:3, ok:false}, {id:'kill', n:1, ok:false}, {id:'raid', n:0, ok:false}], w:[{id:'pull', n:5, ok:false}, {id:'kill', n:1, ok:false}, {id:'t4', n:0, ok:false}]}};
+const SAVES = {novo:null, carregado:loaded, fim:late, contratos:staleCtr, antigo:{lv:{}, gear:{fw:{b:1}}, inv:[{k:'chip', r:0, n:3}, {junk:1}], pity:{fw:0}}};
 const PANELS = ['agent', 'col', 'comp', 'gacha', 'upload', 'tree', 'stages', 'raid', 'quest', 'codex', 'rank', 'odds', 'log', 'readme'];
 (async () => {
   const b = await chromium.launch(); let fail = 0;
