@@ -55,27 +55,61 @@
   .clock{margin-left:auto; font-variant-numeric:tabular-nums}
 
   /* painel que abre acima da barra */
-  .panel{position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 10px); width:min(600px, calc(100% - 24px)); max-height:calc(100vh - 200px); display:flex; flex-direction:column; z-index:5;
-    background:linear-gradient(rgba(92,225,230,.035) 1px, transparent 1px) 0 0/100% 4px, var(--win);
-    border:2px solid #3d3578; outline:2px solid #000; box-shadow:inset 0 0 0 1px #5a4fa6, 8px 8px 0 rgba(0,0,0,.6)}
-  .panel::before,.panel::after{content:""; position:absolute; width:10px; height:10px; border:2px solid var(--amber); pointer-events:none}
-  .panel::before{left:-4px; top:-4px; border-right:0; border-bottom:0}
-  .panel::after{right:-4px; bottom:-4px; border-left:0; border-top:0}
-  .ptitle{position:absolute; left:50%; top:-12px; transform:translateX(-50%); margin:0; padding:5px 26px 4px; white-space:nowrap;
-    font:400 15px var(--pix); letter-spacing:.1em; color:var(--amber); text-shadow:2px 2px 0 #000;
-    background:linear-gradient(#5b1e45, #2e0f26); border:2px solid #000; box-shadow:inset 0 0 0 1px #ff3d7f;
-    clip-path:polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%)}
-  .pcur{font:11px var(--mono); color:var(--mute); padding:2px 8px; background:#0b0a16; border:1px solid var(--line)}
+  .panel{position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 10px); width:min(660px, calc(100% - 24px)); max-height:calc(100vh - 190px); display:flex; flex-direction:column; z-index:5;
+    background:#0f0d1e; border:1px solid #5ce1e6; box-shadow:0 0 0 1px #000, 0 0 24px rgba(92,225,230,.18), 6px 6px 0 rgba(0,0,0,.55)}
+  .panel.wide{width:min(1020px, calc(100% - 24px))}
+  .panel[hidden]{display:none}
+  .pbar{display:flex; align-items:center; gap:8px; padding:5px 6px 5px 8px; background:linear-gradient(90deg, #0f3a40, #16122c 60%); border-bottom:1px solid #1f5a60}
+  .pbar img{image-rendering:pixelated}
+  .ppath{margin:0; font:12px var(--mono); color:#7fd6da; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ppath span{color:#3f8f94} .ppath b{font:400 12px var(--pix); color:var(--text); letter-spacing:.06em; text-transform:uppercase}
+  .pcur{margin-left:auto; font:11px var(--mono); color:var(--mute); padding:1px 8px; background:#0b0a16; border:1px solid #1f5a60; white-space:nowrap}
   .pcur b{font:400 11px var(--pix); color:var(--amber)} .pcur i{font-style:normal; color:var(--cyan)}
-  .pnav{display:flex; justify-content:center; flex-wrap:wrap; gap:6px; padding:8px; background:#110e22; border-top:2px solid #000; box-shadow:inset 0 1px 0 #3d3578}
-  .nb{display:grid; justify-items:center; gap:2px; width:62px; padding:5px 2px 3px; background:radial-gradient(circle at 50% 35%, #2a2452, #15122b 70%); border:2px solid #3d3578; box-shadow:0 2px 0 #000; clip-path:polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)}
+  .pwin{display:flex; gap:2px}
+  .pwin i{display:grid; place-items:center; width:20px; height:18px; font:11px var(--mono); font-style:normal; color:#3f8f94; border:1px solid #1f5a60}
+  .pwin button{width:22px; height:18px; padding:0; box-shadow:none; background:#3a1024; border-color:#ff3d7f; color:#ffd0dc}
+  .pmain{display:flex; min-height:0; flex:1}
+  .pnav{display:flex; flex-direction:column; gap:2px; padding:6px 4px; background:#0a0918; border-right:1px solid #1f5a60}
+  .nb{position:relative; display:grid; justify-items:center; gap:1px; width:54px; padding:5px 2px 3px; background:none; border:1px solid transparent; box-shadow:none}
   .nb img{image-rendering:pixelated}
   .nb span{font:9px var(--mono); color:var(--mute)}
-  .nb[aria-pressed="true"]{border-color:var(--amber); background:radial-gradient(circle at 50% 35%, #4a3a1a, #1d1608 70%)}
-  .nb[aria-pressed="true"] span{color:var(--amber)}
+  .nb:hover{background:#15122b; border-color:#1f5a60}
+  .nb[aria-pressed="true"]{background:#10272b; border-color:#1f5a60}
+  .nb[aria-pressed="true"]::before{content:""; position:absolute; left:-5px; top:6px; bottom:6px; width:3px; background:var(--cyan)}
+  .nb[aria-pressed="true"] span{color:var(--cyan)}
+  .pbody{flex:1; min-width:0; overflow:auto; padding:12px; font:12px/1.45 var(--mono);
+    background:linear-gradient(rgba(92,225,230,.03) 1px, transparent 1px) 0 0/100% 3px}
+  .pstatus{display:flex; flex-wrap:wrap; gap:4px 16px; padding:3px 10px; font:10px var(--mono); color:#3f8f94; background:#0a0918; border-top:1px solid #1f5a60}
+  .pstatus .ok{color:var(--green)}
+  /* árvore do antivírus */
+  .tree2{display:grid; grid-template-columns:1fr 250px; gap:10px; min-height:0}
+  .tmap{position:relative; height:min(470px, calc(100vh - 290px)); overflow:auto; cursor:grab; border:1px solid #1f5a60; user-select:none;
+    background:radial-gradient(circle at 50% 50%, rgba(255,180,84,.08), transparent 45%), linear-gradient(rgba(46,40,86,.5) 1px, transparent 1px) 0 0/25px 25px, linear-gradient(90deg, rgba(46,40,86,.5) 1px, transparent 1px) 0 0/25px 25px, #09081a;
+    scrollbar-width:thin}
+  .tmap.dragging{cursor:grabbing}
+  .tcan{position:relative}
+  .tcan svg{position:absolute; inset:0; pointer-events:none; z-index:0}
+  .tn{position:absolute; z-index:1; transform:translate(-50%, -50%); display:grid; place-items:center; width:32px; height:32px; padding:0; background:#110f24; border:2px solid #2e2856; box-shadow:none}
+  .tn img{image-rendering:pixelated}
+  .tn small{position:absolute; bottom:-9px; font:8px var(--mono); color:var(--mute); background:#09081a; padding:0 2px}
+  .tn.locked{opacity:.35}
+  .tn.open{border-color:var(--bc); border-style:dashed}
+  .tn.has{border-color:var(--bc); background:color-mix(in srgb, var(--bc) 18%, #110f24); box-shadow:0 0 8px color-mix(in srgb, var(--bc) 45%, transparent)}
+  .tn.max small{color:var(--bc)}
+  .tn.key{width:42px; height:42px; clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); border-width:0; background:color-mix(in srgb, var(--bc) 30%, #110f24)}
+  .tn.key.has{background:var(--bc)}
+  .tn.core{width:48px; height:48px; border-color:var(--amber); border-radius:50%; background:#2a1d08; box-shadow:0 0 18px rgba(255,180,84,.45)}
+  .tn.sel{outline:2px solid #ffffff; outline-offset:2px}
+  .tside > * + *{margin-top:8px}
+  .tside{display:block; font-size:11px; max-height:min(470px, calc(100vh - 290px)); overflow:auto}
+  .tdef b{font:400 14px var(--pix)}
+  .tsum{padding:4px 0; border-top:1px dashed var(--line)}
+  .tsum small{color:var(--mute)}
+  @media (max-width:760px){ .tree2{grid-template-columns:1fr} .tside{max-height:none} .pnav{display:none} }
   /* tela de agente */
   .ag{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start; padding:12px; background:radial-gradient(ellipse at 50% 30%, #1d1840, #0b0a16 75%); border:1px solid var(--line); box-shadow:inset 0 0 0 1px #000}
   .ag-eq{display:grid; grid-template-columns:repeat(2, 48px); gap:6px}
+  .ag{background:radial-gradient(ellipse at 50% 30%, #102a30, #0b0a16 75%); border-color:#1f5a60}
   .eqs.big{width:48px; height:48px}
   .eqs.big i{font-size:8px; right:2px; bottom:1px}
   .eqs.na{opacity:.25; cursor:default}
@@ -221,14 +255,14 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.8</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.9</p>
 </main>
 
 <footer class="dock">
   <section class="panel" id="panel" hidden>
-    <header><span class="pcur" id="pCur"></span><h2 class="ptitle" id="pTitle"></h2><button type="button" id="pClose" aria-label="Fechar painel">×</button></header>
-    <div class="pbody" id="pBody"></div>
-    <nav class="pnav" id="pNav" aria-label="Menus"></nav>
+    <header class="pbar"><img id="pLogo" width="16" height="16" alt=""><h2 class="ppath">daemon.exe <span>›</span> <b id="pTitle"></b></h2><span class="pcur" id="pCur"></span><span class="pwin"><i>_</i><i>□</i><button type="button" id="pClose" aria-label="Fechar painel">×</button></span></header>
+    <div class="pmain"><nav class="pnav" id="pNav" aria-label="Menus"></nav><div class="pbody" id="pBody"></div></div>
+    <footer class="pstatus" id="pStatus"></footer>
   </section>
   <div class="hud">
     <button class="stg" id="stgBtn" type="button" data-open="stages" title="Escolher fase"></button>
@@ -812,29 +846,62 @@ const stageType = s => s % PER === PER - 1 ? 'boss' : ['horde', 'armor'][(s + Ma
 const ST = () => STYPES[stageType(S.stage)];
 
 // Árvore do antivírus: comprada com DEF (definições de vírus), que caem dos inimigos.
+// Árvore do antivírus: um mapa com núcleo no centro e 4 braços. Cada braço tem 8 nós no eixo
+// e 3 ramificações laterais (3, 4 e 5 nós) que terminam num nó-chave (KEY) de efeito grande.
+// Custo em DEF cresce com a distância do núcleo e com o nível do nó.
 const BRANCHES = [
-  {n:'Varredura', c:'#ff8a3a'}, {n:'Firewall', c:'#5ca8ff'},
-  {n:'Quarentena', c:'#6ee7a8'}, {n:'Kernel', c:'#c38cff'},
+  {n:'Varredura', c:'#ff8a3a', d:'dano'}, {n:'Quarentena', c:'#6ee7a8', d:'farm e drops'},
+  {n:'Firewall', c:'#5ca8ff', d:'defesa e vacinas'}, {n:'Kernel', c:'#c38cff', d:'velocidade e sistema'},
 ];
-const TREE = [
-  {id:'dmg',   br:0, ab:'DMG', name:'Varredura profunda', d:'+5% de dano de todos os agentes', max:10, base:10, eff:{dmg:.05}},
-  {id:'crit',  br:0, ab:'CRT', req:'dmg', name:'Heurística', d:'+3% de chance de crítico pro DPS', max:5, base:40, eff:{crit:.03}},
-  {id:'aoe',   br:0, ab:'AOE', req:'crit', name:'Varredura em massa', d:'+10% de dano em área', max:5, base:90, eff:{aoe:.1}},
-  {id:'bossd', br:0, ab:'RKT', req:'crit', name:'Remoção de rootkit', d:'+10% de dano contra chefes', max:5, base:90, eff:{boss:.1}},
-  {id:'hp',    br:1, ab:'HP', name:'Firewall reforçado', d:'+6% de HP de todos os agentes', max:10, base:10, eff:{hp:.06}},
-  {id:'red',   br:1, ab:'SBX', req:'hp', name:'Sandbox', d:'-3% de dano recebido', max:5, base:40, eff:{red:.03}},
-  {id:'regen', br:1, ab:'REP', req:'red', name:'Autorreparo', d:'Esquadrão regenera +1% do HP por segundo em combate', max:3, base:120, eff:{regen:.01}},
-  {id:'gold',  br:2, ab:'ZIP', name:'Compressão', d:'+8% de dados ganhos', max:10, base:10, eff:{gold:.08}},
-  {id:'drop',  br:2, ab:'QTN', req:'gold', name:'Quarentena', d:'+10% de chance de módulo', max:5, base:40, eff:{drop:.1}},
-  {id:'chip',  br:2, ab:'REV', req:'drop', name:'Engenharia reversa', d:'+15% de chance de chip de invocação', max:5, base:100, eff:{chip:.15}},
-  {id:'spd',   br:3, ab:'THR', name:'Multithread', d:'+4% de velocidade de ataque', max:5, base:20, eff:{spd:.04}},
-  {id:'inv',   br:3, ab:'INV', req:'spd', name:'Armazenamento', d:'+2 espaços no inventário', max:4, base:60, eff:{inv:2}},
-  {id:'off',   br:3, ab:'BGS', req:'spd', name:'Serviço em segundo plano', d:'+20% de ganho offline', max:5, base:50, eff:{off:.2}},
+const TK = {   // efeito por nível, nível máximo e nome curto de cada tipo de nó
+  dmg:{v:.03, max:5, n:'Dano'}, crit:{v:.01, max:5, n:'Crítico'}, aoe:{v:.05, max:5, n:'Dano em área'}, boss:{v:.05, max:5, n:'Dano em chefes'},
+  hp:{v:.04, max:5, n:'HP'}, red:{v:.015, max:5, n:'Redução de dano'}, regen:{v:.004, max:3, n:'Regeneração'}, vac:{v:.06, max:5, n:'Eficácia de vacinas'},
+  gold:{v:.05, max:5, n:'Dados'}, drop:{v:.05, max:5, n:'Drop de itens'}, chip:{v:.05, max:5, n:'Drop de pacotes'}, wdrop:{v:.08, max:5, n:'Drop de armas'}, def:{v:.06, max:5, n:'DEF ganho'},
+  spd:{v:.02, max:5, n:'Vel. de ataque'}, inv:{v:1, max:2, n:'Espaço de inventário'}, off:{v:.1, max:5, n:'Ganho offline'},
+};
+const KS = (k, v, name) => ({key:true, k, v, name});
+const ARMS = [
+  {br:0, dx:0, dy:-1, main:['dmg', 'crit', 'dmg', 'aoe', 'dmg', 'boss', 'dmg', 'crit'], sides:[
+    ['aoe', 'aoe', KS('aoe', .25, 'Varredura total')],
+    ['boss', 'boss', 'crit', KS('boss', .3, 'Caçador de rootkits')],
+    ['dmg', 'spd', 'dmg', 'crit', KS('dmg', .25, 'Execução em tempo real')]]},
+  {br:1, dx:1, dy:0, main:['gold', 'drop', 'gold', 'chip', 'gold', 'wdrop', 'def', 'gold'], sides:[
+    ['def', 'def', KS('def', .5, 'Banco de assinaturas')],
+    ['chip', 'chip', 'drop', KS('chip', .3, 'Honeypot')],
+    ['gold', 'gold', 'wdrop', 'drop', KS('gold', .4, 'Mineração profunda')]]},
+  {br:2, dx:0, dy:1, main:['hp', 'red', 'hp', 'regen', 'hp', 'red', 'hp', 'vac'], sides:[
+    ['hp', 'hp', KS('hp', .3, 'Firewall de borda')],
+    ['red', 'red', 'regen', KS('red', .1, 'Imunidade')],
+    ['vac', 'vac', 'hp', 'red', KS('vac', .3, 'Vacinação em massa')]]},
+  {br:3, dx:-1, dy:0, main:['spd', 'off', 'spd', 'inv', 'spd', 'off', 'spd', 'inv'], sides:[
+    ['off', 'off', KS('off', .5, 'Serviço persistente')],
+    ['inv', 'inv', 'spd', KS('inv', 4, 'Particionamento')],
+    ['spd', 'spd', 'off', 'spd', KS('spd', .15, 'Overclock extremo')]]},
 ];
-const nodeLv = id => S.tree[id] || 0;
-const nodeCost = n => Math.floor(n.base * 1.6 ** nodeLv(n.id));
+const TREE = [{id:'core', br:-1, x:0, y:0, name:'Núcleo do antivírus', eff:{}, max:1, base:0}];
+const mkNode = (spec, id, br, x, y, req) => {
+  const sp = typeof spec === 'string' ? {k:spec, v:TK[spec].v, max:TK[spec].max, name:TK[spec].n} : {...spec, max:1};
+  const dist = Math.abs(x) + Math.abs(y);
+  return {id, br, x, y, req, key:!!sp.key, name:sp.name, k:sp.k, eff:{[sp.k]:sp.v}, max:sp.max,
+    base:Math.round((sp.key ? 60 : 8) * 1.3 ** dist)};
+};
+ARMS.forEach(A => {
+  let prev = 'core';
+  A.main.forEach((sp, i) => { const id = `b${A.br}m${i}`; TREE.push(mkNode(sp, id, A.br, A.dx * (i + 1), A.dy * (i + 1), prev)); prev = id; });
+  // ramificações no sentido horário: saem dos nós 2, 4 e 6 do eixo
+  A.sides.forEach((chain, j) => {
+    const at = j * 2 + 1, bx = A.dx * (at + 1), by = A.dy * (at + 1), px = -A.dy, py = A.dx;
+    let p = `b${A.br}m${at}`;
+    chain.forEach((sp, i) => { const id = `b${A.br}s${j}_${i}`; TREE.push(mkNode(sp, id, A.br, bx + px * (i + 1), by + py * (i + 1), p)); p = id; });
+  });
+});
+const nodeLv = id => id === 'core' ? 1 : S.tree[id] || 0;
+const nodeCost = n => Math.floor(n.base * 1.55 ** nodeLv(n.id));
 const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
 const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
+const tfmt = (k, v) => k === 'inv' ? `+${v} espaço${v > 1 ? 's' : ''} no inventário` : `${k === 'red' ? '-' : '+'}${+(v * 100).toFixed(1)}% ${k === 'red' ? 'de dano recebido' : TK[k].n.toLowerCase()}`;
+// saves da árvore antiga (13 nós): devolve o DEF gasto
+const OLD_TREE = {dmg:10, crit:40, aoe:90, bossd:90, hp:10, red:40, regen:120, gold:10, drop:40, chip:100, spd:20, inv:60, off:50};
 const invCap = () => 18 + tv('inv');
 
 // Passivas dos itens: sorteadas no drop. Quantidade por tier: T1 0, T2 1, T3 1, T4 2, T5 3.
@@ -866,7 +933,7 @@ const WEAR = new Set(['hp', 'atk', 'spd', 'red']);
 const GEAR_BASE = .08;
 const W_SHARE = (1 / 5 + 1 / 4 + 1 / 4) / 3;   // fração dos itens que são armas
 const gearChance = () => GEAR_BASE * (1 + tv('drop') + glob('idrop'));
-const weaponChance = () => gearChance() * W_SHARE * (1 + glob('wdrop'));
+const weaponChance = () => gearChance() * W_SHARE * (1 + glob('wdrop') + tv('wdrop'));
 const chipChance = (r, boss) => (boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + tv('chip') + glob('pkg'));
 const bonusTxt = (k, v) => `${k === 'red' ? '-' : '+'}${+v.toFixed(1)}% ${BN[k]}`;
 function setCounts(cls) {
@@ -902,6 +969,7 @@ function load() {
       // saves antigos tinham um único módulo por personagem: descarta e começa os equipamentos do zero
       for (const c of ['fw', 'sc', 'pt']) if (!st.gear[c] || typeof st.gear[c] !== 'object' || 'b' in st.gear[c]) st.gear[c] = {};
       st.inv = st.inv.filter(x => x.k === 'chip' || x.type);
+      for (const id in OLD_TREE) if (st.tree[id]) { for (let l = 0; l < st.tree[id]; l++) st.def += Math.floor(OLD_TREE[id] * 1.6 ** l); delete st.tree[id]; }
       return st;
     }
   } catch (e) {}
@@ -986,6 +1054,7 @@ function hit(e, d) {
 function deal(e, d, area, dps) {
   if (area) d *= (1 + tv('aoe') + glob('aoe')) * (e.armored ? .5 : 1);
   if (e.boss) d *= 1 + tv('boss') + glob('boss');
+  d *= 1 + vaccine(e.tn);
   if (dps) {
     const sb = dpsSub();
     if (sb === 'boss') d *= e.boss ? 1.8 : e.armored ? 1.4 : 1;
@@ -997,12 +1066,12 @@ function kill(e) {
   enemies.splice(enemies.indexOf(e), 1);
   e.reward *= 1 + tv('gold') + glob('gold');
   S.data += e.reward;
-  S.def += Math.round((e.boss ? 15 * (1 + S.stage / 3) : 1 + Math.floor(S.stage / 3)) * (1 + glob('def')));
+  S.def += Math.round((e.boss ? 15 * (1 + S.stage / 3) : 1 + Math.floor(S.stage / 3)) * (1 + glob('def') + tv('def')));
   burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
   if (e.boss || Math.random() < gearChance()) dropGear(e.boss);
   // o bônus de armas soma só a parte extra: chance de arma × bônus
-  if (glob('wdrop') && Math.random() < gearChance() * W_SHARE * glob('wdrop')) dropGear(false, 'weapon');
+  if (glob('wdrop') + tv('wdrop') && Math.random() < gearChance() * W_SHARE * (glob('wdrop') + tv('wdrop'))) dropGear(false, 'weapon');
   dropChip(e);
   if (e.boss) stageClear(); else S.kills++;
 }
@@ -1012,9 +1081,17 @@ function kill(e) {
 // Tier (T1…T5) é sorteado com chances fixas; o nível do item é o número da fase onde caiu.
 const ITYPES = {
   helmet:{n:'Capacete', ab:'CAP'}, armor:{n:'Armadura', ab:'ARM'}, boots:{n:'Botas', ab:'BOT'},
-  weapon:{n:'Arma', ab:'ARMA'}, shield:{n:'Escudo', ab:'ESC'},
+  weapon:{n:'Arma', ab:'ARMA'}, shield:{n:'Escudo', ab:'ESC'}, vaccine:{n:'Vacina', ab:'VAC'},
 };
-const CLS_SLOTS = {fw:['helmet', 'armor', 'boots', 'weapon', 'shield'], sc:['helmet', 'armor', 'boots', 'weapon'], pt:['helmet', 'armor', 'boots', 'weapon']};
+// Vacina: acessório de todas as classes. Cada uma é contra um tipo de vírus e aumenta o dano
+// do esquadrão inteiro contra ele (o sistema fica imunizado).
+const VIR = {bug:'Bug', worm:'Worm', trojan:'Trojan', boss:'Ransomware'};
+function vaccine(tn) {
+  let v = 0;
+  for (const cls of ['fw', 'sc', 'pt']) { const it = gearOf(cls).vaccine; if (it && it.vs === tn) v += itemStats(it).vdmg / 100; }
+  return v * (1 + tv('vac'));
+}
+const CLS_SLOTS = {fw:['helmet', 'armor', 'boots', 'weapon', 'shield', 'vaccine'], sc:['helmet', 'armor', 'boots', 'weapon', 'vaccine'], pt:['helmet', 'armor', 'boots', 'weapon', 'vaccine']};
 const INAMES = {
   fw:{helmet:'Elmo', armor:'Couraça', boots:'Grevas', weapon:'Lâmina de plasma', shield:'Escudo hexagonal'},
   sc:{helmet:'Capacete tático', armor:'Colete balístico', boots:'Botas de salto'},
@@ -1031,6 +1108,7 @@ function itemStats(it) {
     case 'armor':  return {hp: 12 * m * g};
     case 'boots':  return {hp: 5 * m * g, spd: 3 * m};
     case 'shield': return {hp: 8 * m * g, red: Math.min(30, 2 * m)};
+    case 'vaccine': return {vdmg: 10 * m * g, hp: 3 * m * g};
   }
   return {};
 }
@@ -1052,7 +1130,7 @@ function setTxt(cls, set) {
     `<span class="${n >= k ? 'on' : 'off'}">${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}${n >= k ? ' ✓' : ''}</span>`).join(' · ');
 }
 const afTxt = it => (it.af || []).map(a => `<span class="af">${bonusTxt(a.k, a.v)}</span>`).join(' · ');
-const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => `+${Math.round(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))}% ${STATN[k]}`).join(' · ');
+const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => `+${Math.round(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))}% ${k === 'vdmg' ? 'dano contra ' + VIR[it.vs] + ' (esquadrão)' : STATN[k]}`).join(' · ');
 const gearVal = it => rewardAt((it.lv - 1) * 10) * 3 * RAR[it.t].m;
 const chipVal = r => rewardAt(S.maxStage * 10) * CHIPS[r].val;
 const chipCount = r => (S.inv.find(x => x.k === 'chip' && x.r === r) || {n:0}).n;
@@ -1082,6 +1160,10 @@ function itemIcon(it) {
   } else if (it.type === 'boots') {
     P.rect(2, 3, 4, 8, M); P.rect(2, 10, 6, 3, M); P.rect(9, 3, 4, 8, M2); P.rect(9, 10, 6, 3, M2);
     P.line(2, 13, 7, 13, c); P.line(9, 13, 14, 13, c); P.line(2, 6, 5, 6, c); P.line(9, 6, 12, 6, c);
+  } else if (it.type === 'vaccine') {
+    P.line(3, 13, 10, 6, '#dfe4ee', 3); P.line(4, 12, 8, 8, c, 1);
+    P.line(11, 5, 14, 2, '#ffffff'); P.line(1, 13, 3, 15, M, 2); P.line(2, 10, 6, 14, M);
+    P.set(13, 13, c); P.set(14, 12, lt);
   } else if (it.type === 'shield') {
     const hex = [[8, 1], [14, 4], [14, 11], [8, 15], [2, 11], [2, 4]];
     P.poly(hex, dk); hex.forEach((q, i) => { const n = hex[(i + 1) % 6]; P.line(q[0], q[1], n[0], n[1], c); });
@@ -1117,13 +1199,14 @@ function makeItem(boss, forceType) {
   return buildItem(cls, type, wt, rollTier(boss), S.stage + 1, pick(Object.keys(SETS)));
 }
 function buildItem(cls, type, wt, t, lv, set) {
-  const base = wt ? pick(GEARW[wt]) : INAMES[cls][type];
+  const vs = type === 'vaccine' ? pick(Object.keys(VIR)) : undefined;
+  const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : wt ? pick(GEARW[wt]) : INAMES[cls][type];
   const keys = Object.keys(AFFIX), af = [];
   for (let i = 0; i < AFFIX_N[t]; i++) {
     const k = pick(keys.filter(x => !af.some(a => a.k === x))), A = AFFIX[k];
     af.push({k, v: +((A.lo + Math.random() * (A.hi - A.lo)) * RAR[t].m).toFixed(1)});
   }
-  return {k:'gear', cls, type, wt, t, lv, set, af, q:.85 + Math.random() * .3, name:`${base} ${SETS[set].n} Mk${lv}`};
+  return {k:'gear', cls, type, wt, vs, t, lv, set, af, q:.85 + Math.random() * .3, name:`${base} ${SETS[set].n} Mk${lv}`};
 }
 function dropGear(boss, forceType) {
   const it = makeItem(boss, forceType), G = gearOf(it.cls), cur = G[it.type];
@@ -1235,6 +1318,48 @@ function buyUp(slot, k) {
   return true;
 }
 
+let tSel = 'core', tScroll = null;
+function treeDetail() {
+  const n = TREE.find(x => x.id === tSel);
+  if (!n) return '';
+  if (n.br < 0) return `<b style="color:var(--amber)">Núcleo do antivírus</b><div class="hint">O centro do sistema. Os 4 braços saem daqui: Varredura (cima), Quarentena (direita), Firewall (baixo) e Kernel (esquerda).</div>`;
+  const lv = nodeLv(n.id), open = nodeOpen(n), b = BRANCHES[n.br], k = Object.keys(n.eff)[0];
+  return `<div class="dh"><img src="${treeIcon(n.k)}" width="24" height="24" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
+    <div>${n.max > 1 ? 'Por nível: ' : ''}${tfmt(k, n.eff[k])}${lv ? ` · atual: ${tfmt(k, n.eff[k] * lv)}` : ''}</div>
+    ${lv >= n.max ? '<div class="hint">Nível máximo.</div>' : open
+      ? `<div class="row"><button type="button" data-node="${n.id}" ${S.def >= nodeCost(n) ? '' : 'disabled'}>Instalar · <b>${fmtN(nodeCost(n))} DEF</b></button></div>`
+      : '<div class="hint">Bloqueado: instale o nó anterior primeiro.</div>'}`;
+}
+// Ícones 12px dos nós da árvore.
+const TICON = {};
+function treeIcon(k) {
+  if (TICON[k]) return TICON[k];
+  const P = Painter(12, 12), W_ = '#ffffff';
+  const col = {dmg:'#ff8a3a', crit:'#ffb454', aoe:'#ff8a3a', boss:'#ff3d7f', hp:'#ff5a6a', red:'#5ca8ff', regen:'#6ee7a8', vac:'#5ce1e6',
+    gold:'#ffb454', drop:'#6ee7a8', chip:'#5ca8ff', wdrop:'#c9cfe0', def:'#5ce1e6', spd:'#ffe066', inv:'#c38cff', off:'#8f89b8', core:'#ffb454'}[k] || W_;
+  const c = col, d = mix(c, '#000000', .45);
+  switch (k) {
+    case 'dmg': P.line(2, 10, 9, 3, c, 2); P.line(1, 8, 4, 11, d); break;
+    case 'crit': P.ell(6, 6, 4, 4, d); P.ell(6, 6, 2, 2, c); P.set(6, 6, W_); break;
+    case 'aoe': for (let a = 0; a < 8; a++) P.line(6, 6, 6 + Math.round(Math.cos(a * .785) * 5), 6 + Math.round(Math.sin(a * .785) * 5), a % 2 ? d : c); break;
+    case 'boss': P.rect(2, 4, 8, 6, c); P.line(4, 2, 4, 4, c); P.line(8, 2, 8, 4, c); P.set(6, 7, W_); break;
+    case 'hp': P.ell(4, 4, 2, 2, c); P.ell(8, 4, 2, 2, c); P.poly([[1, 5], [11, 5], [6, 11]], c); break;
+    case 'red': P.poly([[2, 1], [10, 1], [10, 6], [6, 11], [2, 6]], c); P.line(6, 3, 6, 8, W_); break;
+    case 'regen': P.rect(5, 1, 3, 10, c); P.rect(1, 5, 10, 3, c); break;
+    case 'vac': P.line(2, 10, 8, 4, '#dfe4ee', 3); P.line(3, 9, 6, 6, c); P.line(9, 3, 11, 1, W_); break;
+    case 'gold': P.ell(6, 6, 5, 5, d); P.ell(6, 6, 3, 3, c); P.ell(6, 6, 1, 1, d); break;
+    case 'drop': P.rect(2, 4, 8, 7, d); P.rect(2, 3, 8, 2, c); P.line(6, 3, 6, 10, c); break;
+    case 'chip': P.poly([[1, 3], [6, 1], [11, 3], [11, 9], [6, 11], [1, 9]], d); P.line(6, 4, 6, 10, c); P.line(1, 3, 6, 5, c); P.line(11, 3, 6, 5, c); break;
+    case 'wdrop': P.rect(1, 4, 9, 3, c); P.rect(3, 7, 2, 3, c); P.set(11, 5, W_); break;
+    case 'def': for (let y = 1; y < 11; y += 3) P.line(2, y, 9, y, c); P.set(10, 1, W_); break;
+    case 'spd': P.poly([[7, 0], [2, 7], [6, 7], [4, 11], [10, 4], [6, 4]], c); break;
+    case 'inv': P.rect(1, 1, 4, 4, c); P.rect(7, 1, 4, 4, c); P.rect(1, 7, 4, 4, c); P.rect(7, 7, 4, 4, d); break;
+    case 'off': P.ell(6, 6, 5, 5, c); P.ell(8, 4, 4, 4, '#0b0a16'); break;
+    case 'core': P.poly([[6, 0], [11, 3], [11, 8], [6, 11], [1, 8], [1, 3]], d); P.poly([[6, 2], [9, 4], [9, 7], [6, 9], [3, 7], [3, 4]], c); P.set(6, 5, W_); break;
+  }
+  P.outline('#05040b');
+  return TICON[k] = P.canvas(false).toDataURL();
+}
 function buyNode(id) {
   const n = TREE.find(x => x.id === id);
   if (!n || !nodeOpen(n) || nodeLv(id) >= n.max) return;
@@ -1242,7 +1367,7 @@ function buyNode(id) {
   if (S.def < c) return;
   S.def -= c; S.tree[id] = nodeLv(id) + 1;
   say(`Antivírus atualizado: ${n.name} nv${S.tree[id]}`);
-  renderPanel(); save();
+  tSel = id; renderPanel(); save();
 }
 
 // ---------- fases ----------
@@ -1557,7 +1682,7 @@ function equip(id) {
 
 // ---------- painéis ----------
 let openP = null, selInv = -1, colCls = 'fw', agSel = 'fw';
-const PANELS = {agent:'AGENTES', col:'COLEÇÃO', comp:'COMPILADOR', tree:'ANTIVÍRUS', gacha:'DOWNLOAD', stages:'FASES', log:'LOG', readme:'LEIA-ME'};
+const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt'};
 const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
 function invItems() {
@@ -1644,7 +1769,7 @@ function agentTop() {
   const setsOn = Object.keys(setCounts(k)).filter(x => setCounts(k)[x] >= 2);
   const role = k === 'sc' ? `<span style="color:${SUBS[dpsSub()].c}">DPS · ${SUBS[dpsSub()].n}</span>` : SLOTS.find(x => x[0] === k)[1];
   return `<div class="ag">
-    <div class="ag-eq">${['weapon', 'shield', 'helmet', 'armor', 'boots'].map(slot).join('')}</div>
+    <div class="ag-eq">${['weapon', 'shield', 'helmet', 'armor', 'boots', 'vaccine'].map(slot).join('')}</div>
     <div class="ag-mid">
       <div class="ag-name"><button type="button" data-agstep="-1" aria-label="Agente anterior">◂</button><span>${h.def.name}</span><button type="button" data-agstep="1" aria-label="Próximo agente">▸</button></div>
       <img class="ag-por" src="${portrait(k)}" width="96" height="96" alt="">
@@ -1745,21 +1870,36 @@ const RENDER = {
   },
 
   tree: () => {
-    const col = (b, i) => {
-      const nodes = TREE.filter(n => n.br === i), rows = [];
-      const depth = n => n.req ? 1 + depth(TREE.find(x => x.id === n.req)) : 0;
-      nodes.forEach(n => { (rows[depth(n)] = rows[depth(n)] || []).push(n); });
-      return `<div class="br"><b style="color:${b.c}">${b.n}</b>${rows.map(r => `<div class="trow">${r.map(n => {
-        const lv = nodeLv(n.id), open = nodeOpen(n), max = lv >= n.max;
-        return `<button type="button" class="node${lv ? ' has' : ''}${open ? '' : ' closed'}" data-node="${n.id}" style="--bc:${b.c}" ${open && !max ? '' : 'disabled'} title="${n.name}: ${n.d}">
-          <span>${n.ab}</span><small>${lv}/${n.max}</small></button>`; }).join('')}</div>`).join('')}</div>`;
-    };
-    const rowsTxt = TREE.filter(n => nodeOpen(n)).map(n => `<li><b style="color:${BRANCHES[n.br].c}">${n.ab}</b> ${n.name}: ${n.d} · nv ${nodeLv(n.id)}/${n.max}${nodeLv(n.id) < n.max ? ` · <span class="${S.def >= nodeCost(n) ? 'k' : 'hint'}">${fmtN(nodeCost(n))} DEF</span>` : ' · máx'}</li>`).join('');
-    return `<p>Você é o antivírus; os heróis são seus agentes. Gaste <b class="k">DEF</b> (definições de vírus, que caem de cada inimigo) pra atualizar o sistema. Clique num nó pra comprar um nível.</p>
-      <p>DEF disponível: <b class="k">${fmtN(S.def)}</b></p>
-      <div class="tree">${BRANCHES.map(col).join('')}</div>
-      <ul class="tlist">${rowsTxt}</ul>
-      <p class="opts"><button type="button" data-freedef>protótipo: +500 DEF</button></p>`;
+    const CELL = 50, xs = TREE.map(n => n.x), ys = TREE.map(n => n.y), x0 = Math.min(...xs), y0 = Math.min(...ys);
+    const W_ = (Math.max(...xs) - x0 + 1) * CELL, H_ = (Math.max(...ys) - y0 + 1) * CELL;
+    const px = n => (n.x - x0) * CELL + CELL / 2, py = n => (n.y - y0) * CELL + CELL / 2;
+    const edges = TREE.filter(n => n.req).map(n => {
+      const p = TREE.find(x => x.id === n.req), on = nodeLv(n.id) > 0, c = on ? BRANCHES[n.br].c : '#2e2856';
+      return `<line x1="${px(p)}" y1="${py(p)}" x2="${px(n)}" y2="${py(n)}" stroke="${c}" stroke-width="${on ? 3 : 2}"/>`;
+    }).join('');
+    const nodes = TREE.map(n => {
+      const lv = nodeLv(n.id), open = nodeOpen(n), c = n.br < 0 ? '#ffb454' : BRANCHES[n.br].c;
+      const cls = `tn${n.key ? ' key' : ''}${n.br < 0 ? ' core' : ''}${lv ? ' has' : open ? ' open' : ' locked'}${lv >= n.max ? ' max' : ''}${tSel === n.id ? ' sel' : ''}`;
+      return `<button type="button" class="${cls}" data-tn="${n.id}" style="left:${px(n)}px; top:${py(n)}px; --bc:${c}" title="${n.name}">
+        <img src="${treeIcon(n.br < 0 ? 'core' : n.k)}" width="${n.key || n.br < 0 ? 24 : 16}" height="${n.key || n.br < 0 ? 24 : 16}" alt="">${n.br >= 0 && n.max > 1 ? `<small>${lv}/${n.max}</small>` : ''}</button>`;
+    }).join('');
+    const totals = {};
+    TREE.forEach(n => { for (const k in n.eff) totals[k] = (totals[k] || 0) + n.eff[k] * nodeLv(n.id); });
+    const owned = TREE.filter(n => n.br >= 0 && nodeLv(n.id) > 0).length;
+    const summary = BRANCHES.map((b, bi) => {
+      const keys = [...new Set(TREE.filter(n => n.br === bi).map(n => n.k))].filter(k => totals[k]);
+      return `<div class="tsum"><b style="color:${b.c}">${b.n}</b> <small>${b.d}</small>${keys.length ? keys.map(k => `<div>· ${tfmt(k, totals[k])}</div>`).join('') : '<div class="hint">· nada ainda</div>'}</div>`;
+    }).join('');
+    return `<div class="tree2">
+      <div class="tmap" id="tmap"><div class="tcan" style="width:${W_}px; height:${H_}px"><svg width="${W_}" height="${H_}" aria-hidden="true">${edges}</svg>${nodes}</div></div>
+      <aside class="tside">
+        <div class="tdef">DEF disponível <b class="k">${fmtN(S.def)}</b> <small>· ${owned}/${TREE.length - 1} nós</small></div>
+        <div id="tdet" class="det">${treeDetail()}</div>
+        <p class="sub">Bônus do sistema</p>${summary}
+        <p class="hint">Arraste o mapa pra navegar. DEF (definições de vírus) cai de todo inimigo.</p>
+        <button type="button" data-freedef>protótipo: +500 DEF</button>
+      </aside>
+    </div>`;
   },
 
   log: () => `<ol class="log">${LOG.map(l => `<li class="${l.hl ? 'hl' : ''}"><time>${l.time}</time>${l.txt}</li>`).join('') || '<li>Nada ainda.</li>'}</ol>`,
@@ -1773,13 +1913,40 @@ const RENDER = {
 function renderPanel() {
   if (!openP) return;
   $('#pTitle').textContent = PANELS[openP];
+  $('#panel').classList.toggle('wide', openP === 'tree');
   const body = $('#pBody'), top = body.scrollTop;
   body.innerHTML = RENDER[openP]();
   body.scrollTop = top;
+  const map = $('#tmap');
+  if (map) {
+    const can = map.firstElementChild;
+    if (tScroll) { map.scrollLeft = tScroll[0]; map.scrollTop = tScroll[1]; }
+    else { map.scrollLeft = (can.offsetWidth - map.clientWidth) / 2; map.scrollTop = (can.offsetHeight - map.clientHeight) / 2; }
+    map.addEventListener('scroll', () => { tScroll = [map.scrollLeft, map.scrollTop]; });
+    // arrastar pra navegar; clique curto seleciona o nó
+    let drag = null;
+    map.addEventListener('pointerdown', ev => { drag = {x:ev.clientX, y:ev.clientY, l:map.scrollLeft, t:map.scrollTop, moved:false}; });
+    map.addEventListener('pointermove', ev => {
+      if (!drag) return;
+      const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+      if (drag.moved) { map.scrollLeft = drag.l - dx; map.scrollTop = drag.t - dy; map.classList.add('dragging'); }
+    });
+    const end = () => { setTimeout(() => { drag = null; }, 0); map.classList.remove('dragging'); };
+    map.addEventListener('pointerup', end); map.addEventListener('pointerleave', end);
+    map.addEventListener('click', ev => {
+      const n = ev.target.closest('[data-tn]');
+      if (!n || (drag && drag.moved)) return;
+      tSel = n.dataset.tn;
+      map.querySelectorAll('.tn.sel').forEach(x => x.classList.remove('sel')); n.classList.add('sel');
+      $('#tdet').innerHTML = treeDetail();
+    });
+  }
   livePanel();
 }
 function livePanel() {
   $('#pCur').innerHTML = `<b>${fmt(S.data)}</b> · <i>${fmtN(S.def)} DEF</i>`;
+  $('#pStatus').innerHTML = `<span class="ok">● PROTEÇÃO ATIVA</span><span>fase ${stageLabel(S.stage)} · ${ST().n}</span><span>${S.inv.length}/${invCap()} itens</span><span>poder ${fmtN(power())}</span><span>definições: ${fmtN(S.def)} DEF</span>`;
   if (openP === 'agent') for (const [k] of SLOTS) {
     const h = heroOf(k), aid = slotAid(k), lv = lvOf(aid), el = $('#hp-' + k);
     if (!el) continue;
@@ -1804,7 +1971,8 @@ document.addEventListener('click', e => {
   if (o) { openPanel(o.dataset.open, !!o.closest('#pNav')); return; }
 });
 $('#pClose').addEventListener('click', () => openPanel(null, true));
-$('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="24" height="24" alt=""><span>${n}</span></button>`).join('');
+$('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="20" height="20" alt=""><span>${n}</span></button>`).join('');
+$('#pLogo').src = treeIcon('core');
 document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });
 let wipeArmed = 0;
 $('#pBody').addEventListener('click', e => {

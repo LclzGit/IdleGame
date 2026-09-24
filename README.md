@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v0.9: identidade própria, vacinas e árvore grande
+
+- **Janela em estilo console de antivírus:** barra de título `daemon.exe › seção` com botões de janela, trilho de ícones na lateral e barra de status ("● PROTEÇÃO ATIVA · fase · itens · poder · definições").
+- **Vacina (acessório):** novo espaço pra todas as classes. Cada vacina é contra um tipo de vírus (Anti-Bug, Anti-Worm, Anti-Trojan, Anti-Ransomware) e dá +% de dano do **esquadrão inteiro** contra ele, além de um pouco de HP. Tem tier, passivas e conjunto como os outros itens.
+- **Núcleo do antivírus (árvore):** mapa arrastável com 81 nós. Do núcleo saem 4 braços: Varredura (dano, cima), Quarentena (farm, direita), Firewall (defesa e vacinas, baixo) e Kernel (velocidade e sistema, esquerda). Cada braço tem 8 nós no eixo e 3 ramificações que terminam em **nós-chave** (Varredura total, Caçador de rootkits, Honeypot, Mineração profunda, Imunidade, Vacinação em massa, Particionamento, Overclock extremo…). O custo em DEF cresce com a distância do núcleo. Quem tinha pontos na árvore antiga recebe o DEF de volta.
+
 ## v0.8: menus no estilo TBH
 
 - Os menus viraram uma **janela centralizada acima da barra**, com moldura, placa de título, dados/DEF no canto e uma **barra de ícones** embaixo (Agentes, Coleção, Compilador, Download, Antivírus, Fases, Log). O HUD da barra também usa esses ícones.
