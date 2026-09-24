@@ -109,7 +109,7 @@
       <h2>LEIA-ME.txt <small>_ □ ×</small></h2>
       <div class="body">
         <p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
-        <p>Três agentes digitais patrulham o seu próprio computador enquanto você trabalha. São programas com corpo humano e armadura de combate: um tanque com escudo de energia, uma atiradora e uma médica de nanobots. Eles começam na pasta temporária, descem até o kernel e depois saem pra rede, caçando bugs, worms e trojans.</p>
+        <p>Três agentes digitais patrulham o seu próprio computador enquanto você trabalha. São programas com corpo humano e armadura de combate: um tanque com escudo de energia, uma atiradora de cachecol e railgun e uma médica de nanobots. Eles começam na pasta temporária, descem até o kernel e depois saem pra rede, caçando bugs, worms e trojans.</p>
         <p>Cada vírus apagado vira dados. A moeda sobe como um disco enchendo: <span class="k">KB → MB → GB → TB</span>. Dados compram upgrades. Às vezes um vírus deixa cair um módulo, e os mais raros são <span class="k" style="color:#c38cff">Zero-Day</span> e <span class="k" style="color:var(--amber)">Quântico</span>.</p>
         <p>No fim de cada setor aparece um <span class="k" style="color:var(--pink)">RANSOMWARE</span>. Se o esquadrão cair, o sistema faz rollback do setor, mas você não perde os dados.</p>
         <p>Como jogar: não precisa fazer nada, é só deixar rodando. Compre upgrades na barra lá embaixo ou deixe o <span class="k">auto</span> ligado.</p>
@@ -198,11 +198,14 @@ const HUMAN = {
     '....oooo....','...ohhhho...','...ohvvvo...','...ohhhho...','..ooaaaaoo..',
     '.obbaaaabbo.','.obaaaaaao.w','.oaaddddao.w','..oaddddaoww','..oaddddao.w','..oaaaaaao..'],
     legs:LEGS_HEAVY, pal:{o:'#0b1830',h:'#2e5e9e',v:'#ffb454',a:'#3f7fd1',b:'#9fd0ff',d:'#1b3a6b',w:'#5ce1e6'}},
-  // SCANNER: atiradora magra, visor longo, rifle de varredura
-  sc: {top:[
-    '....ooo.....','...ohhho....','...ohvvvv...','...ohhho....','....odo.....',
-    '...oaaao....','..oaaaaooooo','..oabbbwwwwv','..oaaaaooooo','...oaaao....','...oddddo...'],
-    legs:LEGS_SLIM, pal:{o:'#062a2e',h:'#1c6f75',v:'#5ce1e6',a:'#2aa9b0',b:'#bff7f5',d:'#0f4f55',w:'#3a3f5c'}},
+  // SCANNER: atiradora de cabelo prateado, óculos de visor, armadura branca e marinho,
+  // cachecol magenta esvoaçante e railgun comprida (2 variações de cachecol)
+  sc: {tops:[[
+    '.....ooooo......','....ohhhhhho....','...ohhhhhhhho...','...oHhgggggo....','...oHhsssso.....',
+    '..rr.ossso......','.rrrroooooo.....','rr..oaaddao.....','r...oadddaakkkkm','....oaddaaKKK...','....oaaaao......'],[
+    '.....ooooo......','....ohhhhhho....','...ohhhhhhhho...','...oHhgggggo....','...oHhsssso.....',
+    '..r..ossso......','rrrrroooooo.....','.r..oaaddao.....','....oadddaakkkkm','....oaddaaKKK...','....oaaaao......']],
+    legs:LEGS_SLIM, pal:{o:'#141a2e',h:'#d4d8ee',H:'#8a90b0',g:'#5ce1e6',s:'#f1c7a8',r:'#ff3d7f',a:'#e9ecf5',d:'#2a3561',k:'#3a3f5c',K:'#6b7194',m:'#ffb454'}},
   // PATCHER: médica de traje branco, mochila de nanobots, injetor
   pt: {top:[
     '....oooo....','...ohhhho...','...ohhvvo...','...ohhhho...','..pp.oo.....',
@@ -212,9 +215,9 @@ const HUMAN = {
 const SPR = {}, SPRW = {};
 for (const k in ART) { SPR[k] = mk(...ART[k]); SPRW[k] = mk(ART[k][0], ART[k][1], true); }
 for (const k in HUMAN) {
-  const {top, legs, pal} = HUMAN[k];
-  SPR[k] = legs.map(l => mk(top.concat(l), pal));
-  SPRW[k] = legs.map(l => mk(top.concat(l), pal, true));
+  const {top, tops = [top], legs, pal} = HUMAN[k];
+  SPR[k] = legs.map(l => tops.map(tp => mk(tp.concat(l), pal)));
+  SPRW[k] = legs.map(l => tops.map(tp => mk(tp.concat(l), pal, true)));
 }
 
 // ---------- data ----------
@@ -229,7 +232,7 @@ const sec = (i = S.sector) => {
 };
 const HERO_DEF = [
   {id:'pt', name:'PATCHER',  role:'médica · nanoinjetor', hp:70,  atk:3,  range:80,  cd:1.5, x:22},
-  {id:'sc', name:'SCANNER',  role:'atiradora · rifle', hp:55,  atk:10, range:110, cd:1.1, x:40},
+  {id:'sc', name:'SCANNER',  role:'atiradora · railgun', hp:55,  atk:10, range:110, cd:1.1, x:40},
   {id:'fw', name:'FIREWALL', role:'tanque · escudo', hp:130, atk:5,  range:6,   cd:0.9, x:58},
 ];
 const TYPES = {
@@ -415,7 +418,7 @@ function update(dt) {
     if (e.x - (h.def.x + 12) > h.def.range) continue;
     h.t = cdOf(h); h.lunge = 1;
     if (h.def.id === 'fw') { hit(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
-    else shots.push({x: h.def.x + 12, y: GROUND - (h.def.id === 'sc' ? 9 : 8), dmg: atk(h), c: h.def.id === 'sc' ? '#5ce1e6' : '#6ee7a8'});
+    else shots.push({x: h.def.x + (h.def.id === 'sc' ? 16 : 12), y: GROUND - 8, dmg: atk(h), c: h.def.id === 'sc' ? '#5ce1e6' : '#6ee7a8'});
   }
 
   // shots
@@ -528,12 +531,13 @@ function draw() {
     if (walking && fr) y -= 1;
     if (h.dead) {
       ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
-      ctx.drawImage(SPR[k][0], x, y);
+      ctx.drawImage(SPR[k][0][0], x, y);
       ctx.globalAlpha = 1;
       text(Math.ceil(h.respawn) + 's', x + 6, y - 10, '#8f89b8', true);
       continue;
     }
-    ctx.drawImage((h.flash > 0 ? SPRW : SPR)[k][fr], x, y);
+    const tf = SPR[k][fr];
+    ctx.drawImage((h.flash > 0 ? SPRW : SPR)[k][fr][Math.floor(t * 5 + h.def.x) % tf.length], x, y);
     const p = Math.max(0, h.hp / maxHp(h));
     ctx.fillStyle = '#000'; ctx.fillRect(x, y - 3, 12, 2);
     ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(12 * p), 1);
