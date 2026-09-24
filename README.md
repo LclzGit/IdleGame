@@ -23,6 +23,68 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.6: repetidos úteis, Formatar C:, contratos, temporadas, vírus dourado, bestiário e conquistas
+
+**Repetidos** (antes viravam poucos créditos):
+
+| Estrelas | Repetidos por passo (v1.0 → v2.0) | Total |
+|---|---|---|
+| ★3 | 5, 6, 8, 10, 12, 14, 17, 20, 25, 33 | 150 |
+| ★4 | 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 | 25 |
+| ★5 | 1 por passo | 10 |
+
+- **Versões:** cada versão dá +6% de vida e dano ao agente. A **v1.5** deixa a passiva 50% mais forte e a **v2.0** libera uma **segunda passiva** exclusiva (ex.: CHECKSUM ganha flechas perfurantes).
+- **Fragmentos de código:** o repetido de um agente já na v2.0 vira fragmentos (★3 1 · ★4 5 · ★5 25). Eles são vinculados à conta e compram na loja do Download:
+
+  | Item | Preço |
+  |---|---|
+  | ★4 à escolha | 300 |
+  | ★5 à escolha | 1200 |
+  | Pacote Raro vinculado | 150 |
+  | ×2 créditos por 1 h | 60 |
+  | ×2 definições por 1 h | 60 |
+
+- **Bônus de coleção:** +0,4% de vida e dano pro esquadrão por versão somada de todos os agentes.
+
+**Formatar C:** libera no Kernel Panic.
+- Zera fase, créditos e aprimoramentos. Mantém agentes, versões, itens, árvore, operador e Chefões.
+- Ganha **setores** = 10 × ((fases no Kernel Panic + 10) / 10)², ou seja, ir mais fundo rende bem mais.
+- Bônus permanente: √(1 + setores/100) de vida e dano e √(1 + setores/50) de créditos.
+- Depois de formatar, os itens funcionam no nível da fase máxima atual +10. O tier, as passivas e os conjuntos continuam valendo.
+- As duas primeiras versões dessas regras viraram loop infinito na simulação: o jogador passava do Kernel Panic 800 em 2 semanas. As regras acima são a correção.
+
+**Contratos e presença** (tudo vinculado à conta; menu **Contratos**):
+- 3 contratos por dia (2 Comuns + 10 fragmentos cada) e 3 por semana (1 Raro + 60 fragmentos cada).
+- Calendário de presença de 7 dias que **não zera se você faltar**.
+
+**Temporadas e modificador semanal:**
+- Cada semana tem um modificador, na ordem: Semana do Worm, Patch Tuesday, Semana do Loot, Semana Blindada, Semana dos Chefões, Semana das Definições.
+- Temporadas duram 4 semanas. O ranking tem a aba da temporada e dá fragmentos por posição no fim (#1 400 · top 3 250 · top 10 120 · top 20 60 · demais 30).
+
+**Momentos na barra:**
+- **Vírus dourado:** passa a cada 5 a 12 min e some em 12 s. Clicar dá créditos, definições, 1 Comum vinculado ou 10 fragmentos.
+- Aviso quando um Chefão fica disponível.
+- As IAs equipadas falam no log.
+
+**Bestiário e conquistas:** malwares reais com a história, vírus com contagem de abates e 18 conquistas com recompensa vinculada.
+
+**Relógio do jogo:** esperas, contratos e semanas contam por um relógio único. Os botões "protótipo: avançar 1 dia / 1 semana" servem pra testar.
+
+**Correção:** o jogo travava ao abrir com uma IA equipada no save. Era a causa das quebras relatadas. A vida dos agentes agora só é calculada no fim do carregamento, e `node tools/smoke-test.cjs` abre o jogo com 4 tipos de save e passa por todos os painéis.
+
+### Simulações (`node tools/balance-sim.cjs 336 raids` · `720 raids casual` · `nometa` pra comparar)
+
+| | 24/7, 14 dias, sem os sistemas novos | 24/7, 14 dias, v1.6 | Casual 3 h/dia, 30 dias, sem | Casual, 30 dias, v1.6 |
+|---|---|---|---|---|
+| Chega ao Kernel Panic | ~120 h | ~120 h | dia ~30 | dia ~20 |
+| Fase máxima no fim | Kernel Panic 49 | Kernel Panic 107 (13 formatações) | Kernel Panic 2 | Kernel Panic 2 (6 formatações) |
+| Pacotes negociáveis das fases (C/R/L) | 413 / 111 / 7 | 371 / 108 / 2 | 78 / 14 / 2 | 98 / 35 / 3 |
+| Agentes na coleção (de 16) | 12 | 14 | 11 | 15 |
+| Versões somadas | 37 | 43 | 45 | 61 |
+| Contratos / vírus dourados | — | 53 / 592 | — | 101 / 530 |
+
+As recompensas novas não aumentam a oferta de itens negociáveis. Os pacotes que vão pro mercado continuam vindo só das fases e variam dentro da sorte normal. A pontuação alta da coluna 24/7 v1.6 vem do Formatar C:, e o ritmo no Kernel Panic ficou constante (~11 fases/dia), sem acelerar.
+
 ## v1.5.3: Comuns dos Chefões vinculados e barra nova
 
 - **Pacotes Comuns que caem dos Chefões ficam vinculados à conta**: podem ser abertos no Download, mas não vão pro mercado. Os Raros e o Lendário garantidos dos Chefões continuam negociáveis, assim como todo pacote que cai nas fases. No inventário, a pilha vinculada fica separada, com a marca **V**. O Download gasta primeiro os pacotes vinculados, pra preservar os negociáveis.
