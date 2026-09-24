@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.3.1: retratos das fichas e aba de Suportes
+
+- **Retratos:** os agentes que têm ficha de personagem mostram o recorte da arte da ficha na tela de diagnóstico e na Coleção. São eles BULWARK-7, SENTINEL BULWARK, VALKYRIE-9, AURA VANGUARD, BULWARK-X1, INFILTRATOR, GHOST, ARCHER, PULSE-R, BLADE, NIGHTHAWK, LASER-T e TANK-M-1. Os recortes ficam em `art/retratos/`. FIREWALL, SCANNER e PATCHER continuam com o busto pintado por código até ganharem ficha própria.
+- **Coleção:** nova aba **Suportes**, por enquanto só com o PATCHER.
+- **Correção:** o jogo travava ao abrir quando havia item equipado no save.
+
 ## v1.3: T6 Root, três classes de ataque, ranking e chances publicadas
 
 - **Retratos novos:** cada agente ganhou um busto 64×64 pintado por código, com rosto ou visor, ombreiras, arma e fundo na cor do tier. Aparece na tela de diagnóstico, na Coleção e no resultado do Download.
