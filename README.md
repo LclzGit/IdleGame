@@ -23,6 +23,17 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.14: ícones novos
+
+- **Itens (24×24, um desenho por classe):**
+  - Capacete: elmo fechado com crista (tanque), capacete tático com óculos e rádio (ataque), tiara-visor dourada (suporte).
+  - Armadura: couraça com ombreiras e núcleo (tanque), colete balístico com bolsos (ataque), manto de nanofibra (suporte).
+  - Botas: grevas blindadas (tanque), botas de salto com propulsor (ataque), sandália antigravidade com asa (suporte).
+  - Escudo hexagonal, vacina, IA (processador com o rosto), driver (placa) e token (chave USB) redesenhados. Pacotes de download viraram caixas isométricas com seta.
+- **Árvore do antivírus:** nós comuns com ícone de 16 px mostrado 1:1 (antes era 12 px esticado). Cada um dos 12 nós-chave tem desenho próprio (Execução, Respingo e Bloqueio apareciam em branco).
+- **Menus:** ícones de 20 px com sombreamento (agentes, coleção, compilador, download, upload, antivírus, fases, chefões, contratos, bestiário, ranking, chances, log, configurações, leia-me). Moedas, poder e definições ganharam versão própria de 12 px.
+- O tier continua pintando a energia dos itens; T4+ ganha brilho nos cantos.
+
 ## v1.13.2: tela pequena
 
 - Menus sempre acessíveis: a coluna de ícones do painel não some mais em telas estreitas ou com zoom alto (antes, abaixo de 760 px, Compilador, Upload, Bestiário, Ranking, Log, Coleção e Chances ficavam sem acesso).

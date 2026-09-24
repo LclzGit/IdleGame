@@ -64,7 +64,7 @@
   .taskbar .tb{display:flex; align-items:center; gap:5px; padding:0 9px; background:none; border:0; box-shadow:none; font:11px var(--mono); color:var(--mute); cursor:pointer}
   .taskbar .tb:hover{color:var(--text); background:#12102a}
   .taskbar .tb[aria-pressed="true"]{color:var(--text); border-bottom:2px solid var(--cyan); background:#12102a}
-  .taskbar .tb img{image-rendering:pixelated}
+  .taskbar .tb img{image-rendering:auto}
   #panel.nocur .pcur{display:none}
   .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
   .cfg section:last-child{border-bottom:0}
@@ -445,7 +445,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13.2</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.14</p>
 </main>
 
 <footer class="dock">
@@ -2510,6 +2510,337 @@ function drawWeapon(P, m, c, t) {
   }
 }
 
+// ---------- ícones de itens (24×24) ----------
+// Cada peça tem um desenho por classe: tanque = placas pesadas, ataque = equipamento tático, suporte = tecido leve e dourado.
+// A cor do tier pinta as partes de energia; o tier alto ganha detalhes.
+function drawGearIcon(P, it, c) {
+  const dk = mix(c, '#000000', .5), lt = mix(c, '#ffffff', .55), W = '#ffffff';
+  const S1 = '#7a82a3', S2 = '#aab2cc', D = '#3a3f5c', DD = '#23263a', G = '#5a3e2c', G2 = '#7a5a40', AU = '#d6a24a', AU2 = '#f0d08a';
+  const CL = '#dfe4ee', CL2 = '#b8bfd4', ON = '#3e5a44', ON2 = '#56785e';
+  const t = it.t || 0, hi = t >= 2, top = t >= 3, cls = it.cls;
+  switch (it.type) {
+    case 'helmet':
+      if (cls === 'fw') {   // elmo fechado com crista e viseira em fenda
+        P.poly([[5, 21], [4, 11], [7, 5], [12, 3], [17, 5], [20, 11], [19, 21]], D);
+        P.poly([[6, 20], [5, 11], [8, 6], [12, 4], [12, 20]], S1); P.line(8, 6, 11, 4, S2);
+        P.rect(6, 11, 12, 3, DD); P.line(7, 12, 17, 12, c); P.set(15, 12, lt);
+        P.line(12, 15, 12, 20, DD); for (let y = 16; y < 20; y += 2) { P.set(9, y, DD); P.set(15, y, DD); }
+        P.poly([[11, 3], [12, 0], [13, 3]], hi ? c : S2); P.rect(4, 20, 16, 2, DD);
+        if (top) { P.set(6, 9, lt); P.set(18, 9, lt); }
+      } else if (cls === 'sc') {   // capacete tático com óculos e rádio
+        P.poly([[4, 15], [5, 8], [9, 4], [15, 4], [19, 8], [20, 15]], ON); P.poly([[5, 14], [6, 8], [9, 5], [12, 5], [12, 14]], ON2);
+        P.rect(3, 14, 18, 3, DD); P.rect(5, 11, 14, 5, D);
+        P.ell(9, 13, 2, 2, dk); P.ell(15, 13, 2, 2, dk); P.set(9, 13, c); P.set(15, 13, c); P.set(8, 12, lt); P.set(14, 12, lt);
+        P.line(19, 6, 22, 2, S1); P.set(22, 2, hi ? c : S2); P.rect(18, 8, 3, 4, DD);
+        P.poly([[6, 17], [18, 17], [16, 21], [8, 21]], '#2a2d3a');
+        if (top) P.line(6, 9, 11, 6, lt);
+      } else {   // tiara-visor: aro dourado e visor translúcido
+        P.ell(12, 13, 9, 7, DD); P.ell(12, 13, 8, 6, '#0b0a16');
+        P.poly([[3, 12], [12, 8], [21, 12], [20, 14], [12, 11], [4, 14]], AU); P.line(4, 12, 12, 8, AU2);
+        P.poly([[10, 9], [12, 3], [14, 9]], AU); P.ell(12, 7, 2, 2, c); P.set(11, 6, W);
+        P.poly([[4, 14], [20, 14], [18, 18], [6, 18]], mix(c, '#0b0a16', .55)); P.line(6, 15, 18, 15, lt);
+        if (hi) { P.set(3, 11, c); P.set(21, 11, c); }
+        if (top) { P.set(12, 1, lt); P.set(8, 5, c); P.set(16, 5, c); }
+      }
+      break;
+    case 'armor':
+      if (cls === 'fw') {   // couraça com ombreiras e núcleo no peito
+        P.poly([[1, 5], [7, 3], [9, 6], [15, 6], [17, 3], [23, 5], [22, 11], [18, 11], [18, 22], [6, 22], [6, 11], [2, 11]], D);
+        P.poly([[2, 6], [7, 4], [8, 10], [3, 10]], S1); P.poly([[22, 6], [17, 4], [16, 10], [21, 10]], S1);
+        P.line(2, 6, 7, 4, S2); P.line(17, 4, 22, 6, S2);
+        P.poly([[7, 8], [17, 8], [17, 16], [12, 19], [7, 16]], S1); P.line(7, 8, 12, 8, S2);
+        P.ell(12, 12, 2, 2, dk); P.ell(12, 12, 1, 1, c); P.set(12, 12, W);
+        P.rect(7, 19, 11, 3, DD); for (let x = 8; x < 17; x += 3) P.set(x, 20, S1);
+        if (hi) { P.line(9, 14, 10, 16, c); P.line(15, 14, 14, 16, c); }
+        if (top) { P.set(4, 7, lt); P.set(20, 7, lt); }
+      } else if (cls === 'sc') {   // colete balístico com bolsos
+        P.poly([[4, 4], [9, 3], [12, 6], [15, 3], [20, 4], [20, 21], [4, 21]], ON); P.poly([[4, 4], [9, 3], [11, 6], [11, 21], [4, 21]], ON2);
+        P.rect(3, 4, 3, 7, DD); P.rect(18, 4, 3, 7, DD);
+        for (let i = 0; i < 3; i++) { P.rect(5 + i * 5, 13, 4, 5, D); P.line(5 + i * 5, 13, 8 + i * 5, 13, '#5a6070'); }
+        P.line(4, 11, 20, 11, DD); P.rect(14, 7, 4, 2, c); P.set(17, 7, lt);
+        if (hi) P.line(5, 20, 19, 20, c);
+        if (top) { P.set(7, 15, c); P.set(12, 15, c); P.set(17, 15, c); }
+      } else {   // manto de nanofibra com gola e barra dourada
+        P.poly([[8, 2], [16, 2], [21, 22], [3, 22]], CL2); P.poly([[8, 2], [12, 2], [11, 22], [3, 22]], CL);
+        P.poly([[6, 3], [12, 8], [18, 3], [16, 7], [12, 11], [8, 7]], AU); P.line(7, 4, 12, 8, AU2);
+        P.ell(12, 9, 1, 1, c); P.set(12, 9, W);
+        P.line(3, 22, 21, 22, c); P.line(4, 20, 20, 20, AU);
+        P.line(12, 11, 12, 19, mix(c, CL2, .4));
+        if (hi) { P.set(7, 15, c); P.set(17, 15, c); }
+        if (top) { P.line(6, 13, 5, 18, lt); P.line(18, 13, 19, 18, lt); }
+      }
+      break;
+    case 'boots':
+      if (cls === 'fw') {   // grevas blindadas
+        [[2, S1, S2], [13, D, S1]].forEach(([x, a, b]) => {
+          P.rect(x + 1, 3, 7, 13, a); P.line(x + 1, 3, x + 7, 3, b); P.rect(x, 15, 10, 5, a); P.rect(x, 19, 10, 2, DD);
+          P.poly([[x + 1, 7], [x + 7, 7], [x + 4, 11]], b); P.set(x + 4, 8, c);
+        });
+        if (hi) { P.line(3, 17, 10, 17, c); P.line(14, 17, 21, 17, c); }
+        if (top) { P.set(6, 5, lt); P.set(17, 5, lt); }
+      } else if (cls === 'sc') {   // botas de salto com propulsor
+        [[3, ON2], [13, ON]].forEach(([x, a]) => {
+          P.rect(x, 4, 6, 11, a); P.rect(x, 14, 9, 4, a); P.rect(x, 18, 9, 2, DD);
+          P.line(x, 7, x + 5, 7, DD); P.line(x, 10, x + 5, 10, DD);
+          P.rect(x + 1, 20, 3, 2, D); P.set(x + 2, 22, c); P.set(x + 2, 23, hi ? lt : dk);
+        });
+        if (top) { P.set(4, 23, c); P.set(14, 23, c); }
+      } else {   // sandália antigravidade: uma peça grande, sola grossa, tiras douradas, asa no calcanhar, brilho embaixo
+        P.poly([[3, 14], [19, 13], [22, 11], [23, 13], [21, 16], [3, 17]], CL2);
+        P.poly([[3, 14], [19, 13], [21, 12], [20, 14], [3, 15]], W);
+        P.line(4, 16, 20, 16, D);
+        P.line(6, 13, 11, 6, AU, 2); P.line(11, 6, 16, 12, AU, 2); P.line(9, 13, 12, 9, AU2); P.line(13, 9, 15, 12, AU2);
+        P.ell(11, 6, 1, 1, c); P.set(11, 5, lt);
+        P.poly([[4, 13], [0, 6], [3, 8], [2, 3], [6, 9], [6, 12]], W); P.line(1, 5, 5, 11, CL2); P.line(3, 4, 6, 10, CL2);
+        P.line(4, 19, 20, 19, c); P.line(6, 21, 18, 21, hi ? lt : dk); if (hi) P.line(8, 23, 16, 23, dk);
+        if (top) { P.set(22, 18, lt); P.set(1, 18, c); P.set(12, 1, c); }
+      }
+      break;
+    case 'shield': {   // escudo hexagonal: moldura de metal e campo de energia
+      const hex = [[12, 1], [22, 6], [22, 17], [12, 23], [2, 17], [2, 6]];
+      P.poly(hex, D); P.poly([[12, 3], [20, 7], [20, 16], [12, 21], [4, 16], [4, 7]], dk);
+      P.poly([[12, 5], [18, 8], [18, 15], [12, 19], [6, 15], [6, 8]], mix(c, '#0b0a16', .35));
+      hex.forEach((q, i) => { const n = hex[(i + 1) % 6]; P.line(q[0], q[1], n[0], n[1], i < 2 ? S2 : S1); });
+      P.line(12, 8, 12, 16, lt); P.line(8, 12, 16, 12, lt); P.set(12, 12, W);
+      if (hi) { P.line(6, 8, 12, 5, c); P.line(12, 5, 18, 8, c); }
+      if (top) { P.set(12, 1, lt); P.set(22, 6, lt); P.set(2, 6, lt); }
+      break;
+    }
+    case 'vaccine':   // seringa com o líquido na cor do tier
+      P.line(4, 20, 16, 8, CL, 5); P.line(5, 19, 15, 9, dk, 3); P.line(6, 18, 12, 12, c, 3); P.line(7, 16, 11, 12, lt);
+      for (let i = 0; i < 3; i++) P.set(10 + i * 2, 14 - i * 2, CL2);
+      P.line(16, 8, 21, 3, S2); P.set(22, 2, W);
+      P.line(2, 18, 6, 22, S1, 2); P.line(1, 23, 4, 20, S1, 2);
+      P.line(14, 5, 19, 10, S1);
+      if (top) { P.set(20, 20, c); P.set(21, 19, lt); P.set(22, 21, c); }
+      break;
+    case 'ai': {   // processador com o rosto da IA no visor
+      const ac = typeof AIS !== 'undefined' && AIS[it.ai] ? AIS[it.ai].c : c;
+      for (let i = 5; i < 20; i += 3) { P.rect(i, 1, 1, 3, S2); P.rect(i, 20, 1, 3, S2); P.rect(1, i, 3, 1, S2); P.rect(20, i, 3, 1, S2); }
+      P.rect(3, 3, 18, 18, D); P.rect(3, 3, 18, 1, S1);
+      P.rect(5, 5, 14, 14, '#0b0a16'); P.rect(6, 6, 12, 12, mix(ac, '#0b0a16', .6));
+      P.rect(8, 9, 3, 3, ac); P.rect(13, 9, 3, 3, ac); P.set(8, 9, W); P.set(13, 9, W);
+      P.line(9, 15, 14, 15, ac); P.set(8, 14, ac); P.set(15, 14, ac);
+      P.line(5, 20, 18, 20, c);
+      if (top) { P.set(6, 6, lt); P.set(17, 17, lt); }
+      break;
+    }
+    case 'driver':   // placa com chips e contatos dourados
+      P.rect(1, 5, 22, 13, '#1f5a3a'); P.line(1, 5, 22, 5, '#2f7a50');
+      P.rect(4, 8, 7, 6, DD); P.rect(5, 9, 5, 4, D); P.set(7, 11, c);
+      P.rect(13, 8, 4, 4, DD); P.rect(18, 8, 3, 3, DD);
+      for (let x = 3; x < 21; x += 2) P.rect(x, 18, 1, 3, AU);
+      P.line(11, 11, 13, 10, '#6ee7a8'); P.line(11, 14, 20, 14, '#2f7a50');
+      P.line(14, 15, 20, 15, c); if (hi) P.set(20, 15, lt);
+      if (top) { P.set(15, 9, c); P.set(19, 9, c); }
+      break;
+    case 'token':   // chave USB com LED
+      P.rect(7, 2, 10, 13, D); P.rect(7, 2, 10, 1, S1); P.rect(8, 3, 1, 11, S1);
+      P.rect(9, 5, 6, 4, '#0b0a16'); P.rect(10, 6, 4, 2, c); P.set(10, 6, lt);
+      P.ell(12, 11, 1, 1, dk); P.set(12, 11, hi ? lt : c);
+      P.rect(8, 15, 8, 7, S2); P.rect(9, 16, 6, 5, S1); P.rect(10, 17, 1, 2, '#0b0a16'); P.rect(13, 17, 1, 2, '#0b0a16');
+      P.line(6, 2, 4, 0, S1); P.line(4, 0, 2, 2, S1);
+      if (top) { P.set(19, 4, c); P.set(20, 9, lt); }
+      break;
+  }
+}
+// pacote de download: caixa isométrica com seta de download
+function drawPackIcon(P, it, c) {
+  const dk = mix(c, '#000000', .55), md = mix(c, '#000000', .3), lt = mix(c, '#ffffff', .5), W = '#ffffff';
+  P.poly([[12, 2], [22, 7], [12, 12], [2, 7]], lt);
+  P.poly([[2, 7], [12, 12], [12, 23], [2, 18]], md);
+  P.poly([[22, 7], [12, 12], [12, 23], [22, 18]], dk);
+  P.line(12, 2, 22, 7, W); P.line(2, 7, 12, 2, mix(lt, W, .5));
+  P.line(7, 4, 17, 9, mix(c, '#000000', .15)); P.line(7, 5, 7, 15, mix(md, '#000000', .2));
+  P.rect(15, 12, 3, 5, W); P.poly([[13, 16], [20, 16], [16, 20]], W);
+  if (it.r >= 1) { P.set(4, 9, W); P.set(12, 5, W); }
+  if (it.r >= 2) { P.set(1, 3, c); P.set(22, 2, lt); P.set(3, 22, c); }
+}
+
+// ---------- ícones da árvore do antivírus ----------
+// Nós comuns: 16×16 (mostrados 1:1). Nós-chave e núcleo: 24×24, cada nó-chave com desenho próprio.
+const TCOL = {dmg:'#ff8a3a', crit:'#ffb454', aoe:'#ff8a3a', boss:'#ff3d7f', hp:'#ff5a6a', red:'#5ca8ff', regen:'#6ee7a8', vac:'#5ce1e6',
+  gold:'#ffb454', drop:'#6ee7a8', chip:'#6ee7a8', wdrop:'#c9cfe0', def:'#5ce1e6', spd:'#ffe066', inv:'#c38cff', off:'#8f89b8', core:'#ffb454'};
+const TICON2 = {};
+function treeIcon(k) {
+  if (TICON2[k]) return TICON2[k];
+  const key = k.startsWith('K:'), big = key || k === 'core', P = Painter(big ? 24 : 16, big ? 24 : 16), W = '#ffffff';
+  const c = TCOL[k] || '#ffb454', d = mix(c, '#000000', .45), l = mix(c, '#ffffff', .45);
+  const S1 = '#7a82a3', S2 = '#aab2cc', D = '#3a3f5c', AU = '#d6a24a';
+  if (key) drawKeyIcon(P, k.slice(2));
+  else switch (k) {
+    case 'dmg': P.line(3, 12, 12, 3, S2, 2); P.line(4, 12, 13, 3, W); P.set(13, 2, W); P.line(2, 10, 6, 14, c, 2); P.line(1, 15, 3, 13, d, 2); break;
+    case 'crit': P.ell(8, 8, 6, 6, d); P.ell(8, 8, 4, 4, '#0b0a16'); P.ell(8, 8, 2, 2, c); P.set(8, 8, W);
+      P.line(8, 0, 8, 3, c); P.line(8, 13, 8, 15, c); P.line(0, 8, 3, 8, c); P.line(13, 8, 15, 8, c); break;
+    case 'aoe': for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4; P.line(8, 8, 8 + Math.round(Math.cos(an) * 7), 8 + Math.round(Math.sin(an) * 7), a % 2 ? d : c, a % 2 ? 1 : 2); }
+      P.ell(8, 8, 3, 3, l); P.ell(8, 8, 1, 1, W); break;
+    case 'boss': P.ell(8, 9, 5, 5, '#dfe4ee'); P.rect(5, 12, 7, 3, '#dfe4ee'); P.rect(5, 8, 2, 3, '#0b0a16'); P.rect(10, 8, 2, 3, '#0b0a16');
+      P.set(7, 13, '#0b0a16'); P.set(9, 13, '#0b0a16'); P.poly([[3, 5], [4, 1], [6, 3], [8, 0], [10, 3], [12, 1], [13, 5]], AU); P.line(3, 5, 13, 5, '#f0d08a'); P.set(8, 3, c); break;
+    case 'hp': P.ell(5, 6, 3, 3, c); P.ell(11, 6, 3, 3, c); P.poly([[2, 7], [14, 7], [8, 14]], c); P.set(4, 5, l); P.set(5, 4, W); P.line(9, 9, 13, 9, d); break;
+    case 'red': P.poly([[2, 2], [14, 2], [14, 8], [8, 15], [2, 8]], d); P.poly([[3, 3], [13, 3], [13, 8], [8, 13], [3, 8]], c);
+      P.poly([[3, 3], [8, 3], [8, 13], [3, 8]], l); P.line(8, 4, 8, 12, W); break;
+    case 'regen': P.ell(8, 8, 7, 7, d); P.ell(8, 8, 6, 6, '#0b0a16'); P.rect(6, 3, 4, 10, c); P.rect(3, 6, 10, 4, c); P.set(7, 4, W);
+      P.set(14, 4, l); P.set(1, 12, l); break;
+    case 'vac': P.line(3, 13, 11, 5, '#dfe4ee', 3); P.line(4, 12, 8, 8, c, 2); P.line(11, 5, 14, 2, W); P.line(1, 11, 5, 15, S1); P.set(13, 12, c); P.set(14, 13, l); break;
+    case 'gold': [[4, 11], [8, 9], [12, 11]].forEach(([x, y]) => { P.ell(x, y, 3, 2, d); P.ell(x, y - 1, 3, 2, c); P.set(x - 1, y - 2, l); });
+      P.ell(8, 5, 3, 2, d); P.ell(8, 4, 3, 2, c); P.set(7, 3, W); break;
+    case 'drop': P.rect(2, 6, 12, 8, '#7a5a40'); P.rect(2, 3, 12, 4, '#5a3e2c'); P.line(2, 3, 13, 3, '#9a7a58');
+      P.rect(2, 6, 12, 1, AU); P.rect(7, 5, 2, 4, AU); P.set(7, 6, c); P.set(8, 6, W); P.line(3, 13, 12, 13, '#4a3020'); break;
+    case 'chip': [[5, 5], [11, 5], [5, 11], [11, 11]].forEach(([x, y]) => P.ell(x, y, 3, 3, c)); P.ell(8, 8, 2, 2, d);
+      P.set(4, 4, l); P.set(10, 4, l); P.line(9, 11, 13, 15, '#3e7a4a'); break;
+    case 'wdrop': P.rect(1, 6, 11, 3, S1); P.line(1, 6, 11, 6, S2); P.rect(11, 7, 3, 1, S2); P.rect(3, 9, 3, 5, '#5a3e2c'); P.rect(7, 9, 2, 2, S1);
+      P.line(3, 2, 3, 4, c); P.line(2, 3, 4, 3, c); P.set(14, 2, W); break;
+    case 'def': P.rect(3, 1, 10, 14, '#1f5a60'); P.rect(3, 1, 10, 1, '#2f8a90');
+      for (let y = 4; y < 14; y += 3) { P.line(5, y, 11, y, c); P.set(5, y, W); } P.poly([[10, 1], [13, 1], [13, 4]], '#0b0a16'); break;
+    case 'spd': P.poly([[10, 0], [3, 9], [7, 9], [5, 15], [13, 6], [9, 6], [12, 0]], c); P.line(10, 1, 6, 8, W); P.line(0, 5, 3, 5, d); P.line(0, 10, 2, 10, d); break;
+    case 'inv': P.rect(3, 4, 10, 11, '#5a3e2c'); P.rect(3, 4, 10, 2, '#7a5a40'); P.poly([[5, 4], [6, 1], [10, 1], [11, 4]], '#4a3020');
+      P.rect(5, 8, 6, 4, '#4a3020'); P.rect(7, 9, 2, 2, c); P.set(7, 9, W); break;
+    case 'off': P.ell(7, 8, 6, 6, c); P.ell(10, 6, 5, 5, '#0b0a16'); P.set(4, 7, l);
+      P.line(11, 10, 14, 10, W); P.line(14, 10, 11, 13, W); P.line(11, 13, 14, 13, W); break;
+    case 'core': {
+      const hex = n => Array.from({length: 6}, (_, i) => [12 + Math.cos(i * Math.PI / 3 - Math.PI / 2) * n, 12 + Math.sin(i * Math.PI / 3 - Math.PI / 2) * n]);
+      P.poly(hex(11), d); P.poly(hex(9), c); P.poly(hex(6), l); P.poly(hex(3), W);
+      P.line(12, 1, 12, 4, W); P.set(6, 8, W);
+      break;
+    }
+  }
+  P.rim('#000000', .25, 1, 1);
+  P.outline('#05040b');
+  return TICON2[k] = P.canvas(false).toDataURL();
+}
+// nós-chave: um desenho por nome, cabendo dentro do losango do nó
+function drawKeyIcon(P, name) {
+  const W = '#ffffff', S1 = '#7a82a3', S2 = '#aab2cc', D = '#3a3f5c', AU = '#d6a24a';
+  const ring = (cx, cy, r, c) => { for (let a = 0; a < 6.3; a += .08) P.set(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), c); };
+  switch (name) {
+    case 'Varredura total': {   // onda de choque em anéis
+      ring(12, 12, 9, '#ff8a3a'); ring(12, 12, 6, '#ffb454'); P.ell(12, 12, 3, 3, '#ffe0b0'); P.ell(12, 12, 1, 1, W);
+      for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4 + .4; P.set(Math.round(12 + Math.cos(an) * 11), Math.round(12 + Math.sin(an) * 11), '#ff8a3a'); }
+      break; }
+    case 'Caçador de rootkits':   // mira sobre o crânio
+      P.ell(12, 12, 6, 6, '#dfe4ee'); P.rect(9, 16, 7, 3, '#dfe4ee'); P.rect(9, 10, 2, 3, '#0b0a16'); P.rect(14, 10, 2, 3, '#0b0a16');
+      ring(12, 12, 9, '#ff3d7f'); P.line(12, 1, 12, 5, '#ff3d7f'); P.line(12, 19, 12, 23, '#ff3d7f'); P.line(1, 12, 5, 12, '#ff3d7f'); P.line(19, 12, 23, 12, '#ff3d7f');
+      break;
+    case 'Execução em tempo real':   // lixeira com X vermelho
+      P.rect(7, 8, 10, 12, S1); P.rect(6, 6, 12, 2, S2); P.rect(10, 4, 4, 2, S2);
+      for (let x = 9; x < 16; x += 3) P.line(x, 10, x, 18, D);
+      P.line(4, 4, 20, 20, '#ff3d7f', 2); P.line(20, 4, 4, 20, '#ff3d7f', 2);
+      break;
+    case 'Banco de assinaturas':   // banco de dados em cilindros
+      [16, 11, 6].forEach((y, i) => { P.ell(12, y + 2, 7, 2, '#1f5a60'); P.rect(5, y, 15, 3, '#1f5a60'); P.ell(12, y, 7, 2, '#2f8a90'); P.set(16, y + 2, i ? '#5ce1e6' : W); });
+      P.ell(12, 4, 7, 2, '#5ce1e6'); P.set(9, 4, W);
+      break;
+    case 'Honeypot':   // pote de mel com abelha-vírus
+      P.ell(12, 14, 7, 7, '#d6a24a'); P.rect(7, 5, 10, 3, '#8a6a30'); P.rect(6, 7, 12, 2, '#b8741a');
+      P.ell(10, 12, 2, 3, '#f0d08a'); P.poly([[9, 16], [11, 16], [10, 19]], '#ffb454');
+      P.ell(19, 5, 2, 2, '#ff3d7f'); P.set(19, 5, '#0b0a16'); P.line(17, 3, 18, 4, W); P.line(21, 3, 20, 4, W);
+      break;
+    case 'Mineração profunda':   // picareta sobre moeda
+      P.ell(14, 15, 6, 6, '#b8741a'); P.ell(14, 15, 5, 5, '#ffb454'); P.rect(13, 12, 2, 6, '#b8741a');
+      P.line(4, 20, 14, 6, '#7a5a40', 2); P.poly([[9, 4], [15, 5], [20, 9], [15, 7]], S2); P.line(15, 5, 20, 9, W);
+      break;
+    case 'Firewall de borda':   // muro de tijolos em chamas
+      P.rect(3, 12, 18, 9, '#8a3a2a');
+      for (let y = 12; y < 21; y += 3) { P.line(3, y, 20, y, '#4a1a12'); for (let x = 3 + ((y / 3) % 2) * 3; x < 21; x += 6) P.line(x, y, x, y + 2, '#4a1a12'); }
+      P.poly([[5, 12], [7, 6], [9, 9], [12, 2], [15, 8], [17, 5], [19, 12]], '#ff8a3a'); P.poly([[8, 12], [10, 8], [12, 5], [14, 9], [16, 12]], '#ffe066');
+      break;
+    case 'Imunidade':   // bolha protetora com vírus ricocheteando
+      ring(12, 12, 9, '#5ca8ff'); ring(12, 12, 8, '#9ccaff'); P.ell(12, 12, 4, 5, '#dfe4ee'); P.ell(12, 9, 2, 2, '#dfe4ee'); P.set(9, 6, W);
+      P.ell(20, 4, 2, 2, '#ff3d7f'); P.set(20, 4, '#0b0a16'); P.line(17, 7, 19, 5, '#ff8098');
+      break;
+    case 'Vacinação em massa':   // três seringas em leque saindo de um suporte
+      [[-1, '#5ce1e6'], [0, '#6ee7a8'], [1, '#5ce1e6']].forEach(([k, c]) => {
+        const an = -Math.PI / 2 + k * .55, pt = r => [12 + Math.cos(an) * r, 21 + Math.sin(an) * r];
+        const [x1, y1] = pt(3), [x2, y2] = pt(14), [xm, ym] = pt(9), [xn, yn] = pt(18);
+        P.line(x1, y1, x2, y2, '#dfe4ee', 3); P.line(x1, y1, xm, ym, c, 2); P.line(x2, y2, xn, yn, S2); P.set(Math.round(xn), Math.round(yn), W);
+      });
+      P.rect(7, 19, 11, 4, S1); P.line(7, 19, 17, 19, S2);
+      break;
+    case 'Serviço persistente':   // lua e engrenagem: roda enquanto você dorme
+      P.ell(9, 10, 7, 7, '#c9c3f0'); P.ell(12, 7, 6, 6, '#0b0a16'); P.set(5, 10, W);
+      P.ell(17, 17, 4, 4, S1); for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4; P.set(Math.round(17 + Math.cos(an) * 5), Math.round(17 + Math.sin(an) * 5), S1); }
+      P.ell(17, 17, 1, 1, '#0b0a16');
+      break;
+    case 'Particionamento':   // disco dividido em fatias
+      P.ell(12, 12, 9, 9, '#3a2f5c'); P.poly([[12, 12], [12, 3], [18, 5], [21, 12]], '#c38cff'); P.poly([[12, 12], [21, 12], [17, 20]], '#9a6ae0');
+      P.ell(12, 12, 2, 2, '#0b0a16'); P.set(15, 6, W);
+      break;
+    case 'Overclock extremo':   // processador com raio
+      for (let i = 6; i < 19; i += 3) { P.rect(i, 2, 1, 3, S2); P.rect(i, 19, 1, 3, S2); P.rect(2, i, 3, 1, S2); P.rect(19, i, 3, 1, S2); }
+      P.rect(5, 5, 14, 14, D); P.rect(6, 6, 12, 12, '#2a2436');
+      P.poly([[14, 6], [8, 13], [11, 13], [9, 18], [16, 10], [13, 10], [15, 6]], '#ffe066'); P.set(13, 8, W);
+      break;
+    default: P.ell(12, 12, 8, 8, AU); P.ell(12, 12, 5, 5, W);
+  }
+}
+
+// ---------- ícones da interface ----------
+// Menus: 20×20 (coluna lateral, abas e barra). Moedas/poder: 12×12, porque aparecem em tamanho de texto.
+const UIICON2 = {};
+function uiIcon(k) {
+  if (UIICON2[k]) return UIICON2[k];
+  const small = k === 'coin' || k === 'defs' || k === 'pow', N = small ? 12 : 20, P = Painter(N, N);
+  const W = '#ffffff', A = '#ffb454', C = '#5ce1e6', M = '#9aa1bd', M2 = '#c9cfe0', D = '#3a3f5c', DD = '#23263a', PK = '#ff3d7f', GR = '#6ee7a8', PU = '#c38cff', BL = '#5ca8ff';
+  switch (k) {
+    case 'coin': P.ell(6, 6, 5, 5, '#8a5410'); P.ell(6, 6, 4, 4, A); P.ell(6, 6, 2, 2, '#e0922a'); P.set(4, 3, '#ffe0a8'); P.line(6, 4, 6, 8, '#8a5410'); break;
+    case 'defs': P.rect(2, 0, 8, 12, '#1f5a60'); for (let y = 2; y < 11; y += 3) { P.line(4, y, 8, y, C); P.set(4, y, W); } break;
+    case 'pow': P.poly([[7, 0], [2, 7], [5, 7], [4, 12], [10, 4], [7, 4], [9, 0]], C); P.line(7, 1, 4, 6, '#d6fbff'); break;
+    case 'agent':   // busto do agente com capacete e visor
+      P.poly([[2, 19], [4, 14], [10, 12], [16, 14], [18, 19]], D); P.poly([[2, 19], [4, 14], [10, 12], [10, 19]], '#4f5a76');
+      P.ell(10, 7, 5, 6, M); P.ell(9, 6, 4, 5, M2); P.rect(5, 7, 10, 3, DD); P.line(6, 8, 14, 8, C); P.set(13, 8, W);
+      P.line(7, 15, 13, 15, A); break;
+    case 'col':   // cartas em leque
+      P.poly([[1, 6], [8, 4], [10, 17], [3, 19]], D); P.poly([[5, 3], [12, 2], [13, 16], [6, 17]], M);
+      P.rect(9, 1, 9, 15, PU); P.rect(10, 2, 7, 7, '#7a4ac0'); P.ell(13, 5, 2, 2, W); P.line(10, 11, 16, 11, '#e0c8ff'); P.line(10, 13, 14, 13, '#e0c8ff'); break;
+    case 'comp':   // bigorna com martelo e faíscas: compilar = forjar
+      P.poly([[2, 11], [17, 11], [15, 14], [12, 14], [13, 17], [6, 17], [7, 14], [4, 14]], M); P.line(2, 11, 17, 11, M2); P.rect(5, 17, 10, 2, D);
+      P.line(9, 9, 16, 2, '#7a5a40', 2); P.rect(13, 1, 6, 3, D); P.line(13, 1, 18, 1, M);
+      P.set(5, 8, A); P.set(3, 6, '#ffe066'); P.set(8, 7, A); P.set(6, 4, '#ffe066'); break;
+    case 'gacha':   // seta de download entrando na bandeja
+      P.rect(8, 1, 4, 9, C); P.poly([[3, 9], [17, 9], [10, 16]], C); P.line(9, 2, 9, 9, '#d6fbff');
+      P.rect(1, 15, 18, 4, D); P.rect(1, 15, 18, 1, M); P.rect(3, 17, 2, 1, GR); break;
+    case 'upload':   // nuvem com seta pra cima
+      P.ell(10, 12, 8, 5, '#2a6f8f'); P.ell(6, 10, 4, 4, '#2a6f8f'); P.ell(12, 8, 5, 5, '#2a6f8f'); P.ell(12, 7, 4, 4, '#3a8fb0');
+      P.rect(9, 9, 3, 9, C); P.poly([[5, 11], [15, 11], [10, 5]], C); P.line(10, 6, 7, 10, '#d6fbff'); break;
+    case 'tree':   // escudo do antivírus com check
+      P.poly([[2, 2], [18, 2], [18, 10], [10, 19], [2, 10]], '#2a4a8a'); P.poly([[3, 3], [17, 3], [17, 10], [10, 17], [3, 10]], BL);
+      P.poly([[3, 3], [10, 3], [10, 17], [3, 10]], '#8ab8ff'); P.line(6, 9, 9, 12, W, 2); P.line(9, 12, 14, 6, W, 2); break;
+    case 'stages':   // bandeira fincada
+      P.line(4, 1, 4, 18, M2); P.rect(3, 17, 5, 2, D);
+      P.poly([[5, 2], [17, 5], [5, 10]], PK); P.poly([[5, 2], [11, 3.5], [5, 6]], '#ff8098'); P.set(4, 1, W); break;
+    case 'raid':   // crânio com chifres
+      P.poly([[2, 1], [5, 6], [3, 7]], '#c02050'); P.poly([[18, 1], [15, 6], [17, 7]], '#c02050');
+      P.ell(10, 9, 7, 6, PK); P.rect(5, 13, 10, 5, PK); P.ell(9, 7, 5, 4, '#ff6a9a');
+      P.rect(6, 8, 3, 3, '#0b0a16'); P.rect(11, 8, 3, 3, '#0b0a16'); P.set(7, 9, '#ffe066'); P.set(12, 9, '#ffe066');
+      for (let x = 6; x < 15; x += 2) P.rect(x, 16, 1, 2, '#0b0a16'); break;
+    case 'quest':   // prancheta com checks
+      P.rect(3, 2, 14, 17, '#dfe4ee'); P.rect(3, 2, 14, 1, W); P.rect(7, 0, 6, 4, M); P.rect(8, 1, 4, 1, D);
+      for (let i = 0; i < 3; i++) { const y = 7 + i * 4; P.rect(5, y, 3, 3, i < 2 ? GR : M); if (i < 2) P.set(6, y + 1, W); P.line(10, y + 1, 15, y + 1, D); } break;
+    case 'codex':   // livro com emblema de vírus
+      P.rect(3, 2, 14, 16, '#5a3a8a'); P.rect(4, 3, 12, 14, PU); P.rect(3, 2, 2, 16, '#3a2460'); P.line(5, 17, 16, 17, '#e0c8ff');
+      P.ell(11, 9, 3, 3, PK); for (let a = 0; a < 6; a++) { const an = a * Math.PI / 3; P.set(Math.round(11 + Math.cos(an) * 5), Math.round(9 + Math.sin(an) * 5), PK); } P.set(10, 8, W); break;
+    case 'rank':   // troféu
+      P.rect(5, 2, 10, 7, A); P.ell(10, 8, 5, 4, A); P.ell(8, 5, 2, 3, '#ffe0a8');
+      P.line(2, 3, 2, 6, A); P.line(2, 6, 5, 8, A); P.line(18, 3, 18, 6, A); P.line(18, 6, 15, 8, A);
+      P.rect(9, 12, 2, 3, '#b8741a'); P.rect(5, 15, 10, 4, D); P.line(5, 15, 14, 15, M); P.rect(8, 16, 4, 2, A); break;
+    case 'odds':   // dado
+      P.rect(2, 2, 16, 16, M); P.rect(3, 3, 14, 14, '#e9ecf5'); P.line(3, 3, 16, 3, W);
+      [[6, 6], [13, 6], [9.5, 9.5], [6, 13], [13, 13]].forEach(([x, y]) => P.rect(Math.round(x) - 1, Math.round(y) - 1, 2, 2, '#1d1d2e')); break;
+    case 'log':   // janela de terminal
+      P.rect(1, 3, 18, 15, D); P.rect(1, 3, 18, 3, M); P.set(3, 4, PK); P.set(5, 4, A); P.set(7, 4, GR);
+      P.rect(2, 6, 16, 11, '#0b0a16'); P.line(4, 9, 6, 11, GR); P.line(6, 11, 4, 13, GR); P.line(8, 13, 12, 13, GR); break;
+    case 'cfg': {   // engrenagem
+      for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4; P.rect(Math.round(10 + Math.cos(an) * 7.5) - 1, Math.round(10 + Math.sin(an) * 7.5) - 1, 3, 3, M); }
+      P.ell(10, 10, 6, 6, M); P.ell(9, 9, 5, 5, M2); P.ell(10, 10, 2, 2, '#0b0a16'); break; }
+    case 'readme':   // folha com canto dobrado
+      P.poly([[4, 1], [13, 1], [17, 5], [17, 19], [4, 19]], '#dfe4ee'); P.poly([[13, 1], [17, 5], [13, 5]], M);
+      for (let y = 8; y < 18; y += 3) P.line(6, y, 15, y, D); P.line(6, 5, 10, 5, C); break;
+  }
+  P.rim('#000000', .25, 1, 1);
+  P.outline('#05040b');
+  return UIICON2[k] = P.canvas(false).toDataURL();
+}
+
 // ---------- data ----------
 const SECTORS = [
   {name:'C:\\TEMP', tint:'#5ce1e6'}, {name:'CACHE L2', tint:'#7aa2ff'},
@@ -2765,6 +3096,7 @@ ARMS.forEach(A => {
     chain.forEach((sp, i) => { const id = `b${A.br}s${j}_${i}`; TREE.push(mkNode(sp, id, A.br, bx + px * (i + 1), by + py * (i + 1), p)); p = id; });
   });
 });
+const tIconKey = n => n.br < 0 ? 'core' : n.key ? 'K:' + n.name : n.k;
 const nodeLv = id => id === 'core' ? 1 : S.tree[id] || 0;
 const nodeCost = n => Math.floor(n.base * 1.6 ** nodeLv(n.id));
 const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
@@ -3132,12 +3464,14 @@ const iconCache = {};
 function itemIcon(it) {
   const key = [it.k, it.type, it.cls, it.wt, it.t, it.r, it.ai, it.type === 'weapon' ? wModel(it) : ''].join('|');
   if (iconCache[key]) return iconCache[key];
-  if (it.k === 'gear' && it.type === 'weapon') {   // armas: desenho próprio em 24×24
-    const P = Painter(24, 24), c = RAR[it.t].c, lt = mix(c, '#ffffff', .5);
-    drawWeapon(P, wModel(it), c, it.t);
+  {   // tudo em 24×24: armas (weapons.js), peças e acessórios por classe e pacotes (icons.js)
+    const P = Painter(24, 24), c = it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c, lt = mix(c, '#ffffff', .5);
+    if (it.k === 'chip') drawPackIcon(P, it, c);
+    else if (it.type === 'weapon') drawWeapon(P, wModel(it), c, it.t);
+    else drawGearIcon(P, it, c);
     P.rim('#000000', .3, 1, 1); P.rim('#ffffff', .12, -1, -1);
-    if (it.t >= 4) { P.set(0, 0, lt); P.set(23, 0, lt); P.set(23, 23, lt); }
-    if (it.t >= 5) { P.set(1, 0, c); P.set(0, 1, c); P.set(22, 23, c); P.set(23, 22, c); }
+    if (it.t >= 4 && it.k !== 'chip') { P.set(0, 0, lt); P.set(23, 0, lt); P.set(23, 23, lt); }
+    if (it.t >= 5 && it.k !== 'chip') { P.set(1, 0, c); P.set(0, 1, c); P.set(22, 23, c); P.set(23, 22, c); }
     P.outline('#05040b');
     return iconCache[key] = P.canvas(false).toDataURL();
   }
@@ -3375,7 +3709,7 @@ function treeTip(n) {
   if (n.br < 0) return '<b style="color:var(--amber)">Núcleo do antivírus</b><div class="tl hint">O centro do sistema. Varredura (cima) · Quarentena (direita) · Firewall (baixo) · Kernel (esquerda).</div>';
   const lv = nodeLv(n.id), b = BRANCHES[n.br], open = nodeOpen(n), max = lv >= n.max;
   const eff = Object.entries(n.eff);
-  return `<div class="th"><img src="${treeIcon(n.k)}" width="24" height="24" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
+  return `<div class="th"><img src="${treeIcon(tIconKey(n))}" width="${n.key || n.br < 0 ? 24 : 32}" height="${n.key || n.br < 0 ? 24 : 32}" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
     ${n.desc ? `<div class="tl">${n.desc}</div>` : `<div class="tl">${n.max > 1 ? 'Cada nível: ' : ''}${eff.map(([k, v]) => tfmt(k, v)).join(' · ')}</div>`}
     ${lv && n.max > 1 ? `<div class="tl">Agora: ${eff.map(([k, v]) => tfmt(k, v * lv)).join(' · ')}</div>` : ''}
     <div class="tv">${max ? 'Nível máximo' : !open ? 'Bloqueado: instale o nó ligado a este primeiro' : `Clique pra instalar · ${fmtN(nodeCost(n))} definições${S.def < nodeCost(n) ? ' (faltam ' + fmtN(nodeCost(n) - S.def) + ')' : ''}`}</div>`;
@@ -3385,42 +3719,13 @@ function treeDetail() {
   if (!n) return '';
   if (n.br < 0) return `<b style="color:var(--amber)">Núcleo do antivírus</b><div class="hint">O centro do sistema. Os 4 braços saem daqui: Varredura (cima), Quarentena (direita), Firewall (baixo) e Kernel (esquerda).</div>`;
   const lv = nodeLv(n.id), open = nodeOpen(n), b = BRANCHES[n.br], k = Object.keys(n.eff)[0];
-  return `<div class="dh"><img src="${treeIcon(n.k)}" width="24" height="24" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
+  return `<div class="dh"><img src="${treeIcon(tIconKey(n))}" width="${n.key || n.br < 0 ? 24 : 32}" height="${n.key || n.br < 0 ? 24 : 32}" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
     <div>${n.desc || (n.max > 1 ? 'Por nível: ' : '') + tfmt(k, n.eff[k])}${lv && n.max > 1 ? ` · atual: ${tfmt(k, n.eff[k] * lv)}` : ''}</div>
     ${lv >= n.max ? '<div class="hint">Nível máximo.</div>' : open
       ? `<div class="row"><button type="button" data-node="${n.id}" ${S.def >= nodeCost(n) ? '' : 'disabled'}>Instalar · <b>${fmtN(nodeCost(n))} DEF</b></button></div>`
       : '<div class="hint">Bloqueado: instale o nó anterior primeiro.</div>'}`;
 }
 // Ícones 12px dos nós da árvore.
-const TICON = {};
-function treeIcon(k) {
-  if (TICON[k]) return TICON[k];
-  const P = Painter(12, 12), W_ = '#ffffff';
-  const col = {dmg:'#ff8a3a', crit:'#ffb454', aoe:'#ff8a3a', boss:'#ff3d7f', hp:'#ff5a6a', red:'#5ca8ff', regen:'#6ee7a8', vac:'#5ce1e6',
-    gold:'#ffb454', drop:'#6ee7a8', chip:'#5ca8ff', wdrop:'#c9cfe0', def:'#5ce1e6', spd:'#ffe066', inv:'#c38cff', off:'#8f89b8', core:'#ffb454'}[k] || W_;
-  const c = col, d = mix(c, '#000000', .45);
-  switch (k) {
-    case 'dmg': P.line(2, 10, 9, 3, c, 2); P.line(1, 8, 4, 11, d); break;
-    case 'crit': P.ell(6, 6, 4, 4, d); P.ell(6, 6, 2, 2, c); P.set(6, 6, W_); break;
-    case 'aoe': for (let a = 0; a < 8; a++) P.line(6, 6, 6 + Math.round(Math.cos(a * .785) * 5), 6 + Math.round(Math.sin(a * .785) * 5), a % 2 ? d : c); break;
-    case 'boss': P.rect(2, 4, 8, 6, c); P.line(4, 2, 4, 4, c); P.line(8, 2, 8, 4, c); P.set(6, 7, W_); break;
-    case 'hp': P.ell(4, 4, 2, 2, c); P.ell(8, 4, 2, 2, c); P.poly([[1, 5], [11, 5], [6, 11]], c); break;
-    case 'red': P.poly([[2, 1], [10, 1], [10, 6], [6, 11], [2, 6]], c); P.line(6, 3, 6, 8, W_); break;
-    case 'regen': P.rect(5, 1, 3, 10, c); P.rect(1, 5, 10, 3, c); break;
-    case 'vac': P.line(2, 10, 8, 4, '#dfe4ee', 3); P.line(3, 9, 6, 6, c); P.line(9, 3, 11, 1, W_); break;
-    case 'gold': P.ell(6, 6, 5, 5, d); P.ell(6, 6, 3, 3, c); P.ell(6, 6, 1, 1, d); break;
-    case 'drop': P.rect(2, 4, 8, 7, d); P.rect(2, 3, 8, 2, c); P.line(6, 3, 6, 10, c); break;
-    case 'chip': P.poly([[1, 3], [6, 1], [11, 3], [11, 9], [6, 11], [1, 9]], d); P.line(6, 4, 6, 10, c); P.line(1, 3, 6, 5, c); P.line(11, 3, 6, 5, c); break;
-    case 'wdrop': P.rect(1, 4, 9, 3, c); P.rect(3, 7, 2, 3, c); P.set(11, 5, W_); break;
-    case 'def': for (let y = 1; y < 11; y += 3) P.line(2, y, 9, y, c); P.set(10, 1, W_); break;
-    case 'spd': P.poly([[7, 0], [2, 7], [6, 7], [4, 11], [10, 4], [6, 4]], c); break;
-    case 'inv': P.rect(1, 1, 4, 4, c); P.rect(7, 1, 4, 4, c); P.rect(1, 7, 4, 4, c); P.rect(7, 7, 4, 4, d); break;
-    case 'off': P.ell(6, 6, 5, 5, c); P.ell(8, 4, 4, 4, '#0b0a16'); break;
-    case 'core': P.poly([[6, 0], [11, 3], [11, 8], [6, 11], [1, 8], [1, 3]], d); P.poly([[6, 2], [9, 4], [9, 7], [6, 9], [3, 7], [3, 4]], c); P.set(6, 5, W_); break;
-  }
-  P.outline('#05040b');
-  return TICON[k] = P.canvas(false).toDataURL();
-}
 function buyNode(id) {
   const n = TREE.find(x => x.id === id);
   if (!n || !nodeOpen(n) || nodeLv(id) >= n.max) return;
@@ -4492,32 +4797,6 @@ document.addEventListener('mouseover', ev => {
 document.addEventListener('mousemove', ev => { if (!tipEl.hidden) placeTip(ev); });
 document.addEventListener('mouseleave', () => { tipEl.hidden = true; });
 
-// Ícones pixel da navegação.
-const UIICON = {};
-function uiIcon(k) {
-  if (UIICON[k]) return UIICON[k];
-  const P = Painter(16, 16), A = '#ffb454', C = '#5ce1e6', M = '#9aa1bd', D = '#3a3f5c';
-  if (k === 'cfg') { P.ell(8, 8, 6, 6, M); for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4; P.rect(Math.round(8 + Math.cos(an) * 6.5) - 1, Math.round(8 + Math.sin(an) * 6.5) - 1, 2, 2, M); } P.ell(8, 8, 2, 2, '#0b0a16'); }
-  else if (k === 'readme') { P.poly([[3, 1], [11, 1], [13, 3], [13, 15], [3, 15]], '#dfe4ee'); for (let y = 5; y < 14; y += 2) P.line(5, y, 11, y, D); }
-  else if (k === 'agent') { P.ell(8, 5, 3, 3, M); P.rect(6, 4, 5, 2, C); P.poly([[2, 15], [4, 10], [8, 9], [12, 10], [14, 15]], D); P.line(6, 11, 10, 11, A); }
-  else if (k === 'col') { P.rect(1, 5, 7, 10, D); P.rect(4, 3, 7, 10, M); P.rect(8, 1, 7, 10, '#c38cff'); P.rect(10, 4, 3, 3, '#ffffff'); }
-  else if (k === 'comp') { P.poly([[8, 1], [15, 5], [8, 9], [1, 5]], A); P.poly([[1, 5], [8, 9], [8, 15], [1, 11]], mix(A, '#000000', .35)); P.poly([[15, 5], [8, 9], [8, 15], [15, 11]], mix(A, '#000000', .55)); }
-  else if (k === 'gacha') { P.rect(6, 1, 4, 7, C); P.poly([[2, 7], [14, 7], [8, 13]], C); P.rect(1, 14, 14, 2, M); }
-  else if (k === 'tree') { P.poly([[2, 1], [14, 1], [14, 8], [8, 15], [2, 8]], '#5ca8ff'); P.line(5, 7, 7, 10, '#ffffff'); P.line(7, 10, 11, 4, '#ffffff'); }
-  else if (k === 'stages') { P.line(4, 1, 4, 15, M); P.poly([[5, 1], [14, 4], [5, 8]], '#ff3d7f'); P.rect(1, 14, 7, 2, D); }
-  else if (k === 'coin') { P.ell(8, 8, 6, 6, '#b8741a'); P.ell(8, 8, 5, 5, '#ffb454'); P.rect(7, 4, 2, 8, '#b8741a'); P.line(5, 6, 10, 6, '#b8741a'); P.line(5, 10, 10, 10, '#b8741a'); }
-  else if (k === 'defs') { P.rect(3, 1, 10, 14, '#1f5a60'); for (let y = 3; y < 14; y += 3) P.line(5, y, 11, y, '#5ce1e6'); P.set(11, 3, '#ffffff'); }
-  else if (k === 'upload') { P.ell(8, 9, 6, 4, '#2a6f8f'); P.ell(5, 8, 3, 3, '#2a6f8f'); P.ell(10, 6, 4, 4, '#2a6f8f'); P.rect(7, 5, 2, 8, '#5ce1e6'); P.poly([[4, 8], [12, 8], [8, 3]], '#5ce1e6'); }
-  else if (k === 'quest') { P.rect(3, 1, 10, 14, '#dfe4ee'); P.rect(6, 0, 4, 3, '#9aa1bd'); for (let y = 5; y < 13; y += 3) { P.rect(5, y, 2, 2, '#6ee7a8'); P.line(8, y, 11, y, D); } }
-  else if (k === 'codex') { P.rect(2, 2, 12, 12, '#5a3a8a'); P.rect(3, 3, 10, 10, '#c38cff'); P.line(8, 3, 8, 12, '#5a3a8a'); P.ell(5, 7, 1, 1, '#ff3d7f'); P.ell(11, 7, 1, 1, '#6ee7a8'); }
-  else if (k === 'pow') { P.poly([[9, 0], [3, 9], [7, 9], [5, 15], [13, 6], [9, 6], [11, 0]], '#5ce1e6'); P.line(9, 1, 6, 7, '#d6fbff'); }
-  else if (k === 'raid') { P.ell(8, 7, 6, 5, '#ff3d7f'); P.rect(4, 11, 8, 3, '#ff3d7f'); P.rect(5, 6, 2, 3, '#05040b'); P.rect(9, 6, 2, 3, '#05040b'); P.set(7, 12, '#05040b'); P.set(9, 12, '#05040b'); P.line(1, 2, 3, 4, '#ffb454'); P.line(15, 2, 13, 4, '#ffb454'); }
-  else if (k === 'rank') { P.rect(4, 2, 8, 6, A); P.ell(8, 7, 4, 3, A); P.rect(7, 10, 2, 3, mix(A, '#000000', .3)); P.rect(4, 13, 8, 2, M); P.line(1, 3, 3, 6, A); P.line(14, 3, 12, 6, A); P.set(7, 4, '#ffffff'); }
-  else if (k === 'odds') { P.rect(2, 2, 12, 12, D); P.rect(3, 3, 10, 10, '#e9ecf5'); [[5, 5], [10, 5], [8, 8], [5, 11], [10, 11]].forEach(([x, y]) => P.rect(x - 1, y - 1, 2, 2, '#131a28')); }
-  else if (k === 'log') { P.rect(2, 1, 12, 14, M); for (let y = 4; y < 13; y += 3) P.line(4, y, 11, y, D); }
-  P.outline('#05040b');
-  return UIICON[k] = P.canvas(false).toDataURL();
-}
 // versão na carta da Coleção: barra de progresso até o próximo passo e marcos v1.5 / v2.0
 function verCard(T) {
   const V = verOf(T.id), need = V.v < 10 ? VCOST[T.stars][V.v] : 0;
@@ -4648,7 +4927,7 @@ const RENDER = {
       const lv = nodeLv(n.id), open = nodeOpen(n), c = n.br < 0 ? '#ffb454' : BRANCHES[n.br].c;
       const cls = `tn${n.key ? ' key' : ''}${n.br < 0 ? ' core' : ''}${lv ? ' has' : open ? ' open' : ' locked'}${lv >= n.max ? ' max' : ''}${tSel === n.id ? ' sel' : ''}`;
       return `<button type="button" class="${cls}" data-tn="${n.id}" data-tip="tn:${n.id}" style="left:${px(n)}px; top:${py(n)}px; --bc:${c}">
-        <img src="${treeIcon(n.br < 0 ? 'core' : n.k)}" width="${n.key || n.br < 0 ? 24 : 16}" height="${n.key || n.br < 0 ? 24 : 16}" alt="">${n.br >= 0 && n.max > 1 ? `<small>${lv}/${n.max}</small>` : ''}</button>`;
+        <img src="${treeIcon(tIconKey(n))}" width="${n.key || n.br < 0 ? 24 : 16}" height="${n.key || n.br < 0 ? 24 : 16}" alt="">${n.br >= 0 && n.max > 1 ? `<small>${lv}/${n.max}</small>` : ''}</button>`;
     }).join('');
     const totals = {};
     TREE.forEach(n => { for (const k in n.eff) totals[k] = (totals[k] || 0) + n.eff[k] * nodeLv(n.id); });
@@ -4811,7 +5090,7 @@ const fitPanel = () => document.documentElement.style.setProperty('--dockH', doc
 addEventListener('resize', fitPanel); fitPanel();
 document.querySelectorAll('.taskbar [data-open]').forEach(b => b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(b.dataset.open)}" width="12" height="12" alt="">`));
 $('#icCoin').src = uiIcon('coin'); $('#icPow').src = uiIcon('pow'); $('#icDef').src = uiIcon('defs');
-document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });
+document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="20" height="20" alt="">`); });
 let wipeArmed = 0;
 $('#pBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
