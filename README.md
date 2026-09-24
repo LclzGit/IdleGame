@@ -23,6 +23,19 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.13: arsenal
+
+- Armas agora têm modelos próprios por classe, cada um com nome e desenho (24×24, com sombreamento):
+  - **Tanque (corpo a corpo pesado):** Lâmina de plasma, Martelo de impacto, Machado-disjuntor, Lança de pulso, Punho hidráulico.
+  - **Ataque · Varredor (área):** Lança-granadas, Canhão de plasma, Varredura em cone (escopeta), Metralhadora de pacotes.
+  - **Ataque · Rastreador (precisão):** Mira de precisão (sniper), Regex Afiada (pistola), Sonda DPI (arco), Fuzil de varredura.
+  - **Ataque · Caça-chefes:** Exploit de kernel (railgun), Marcador de alvo (besta), Lança-exploits (lança-foguetes), Munição perfurante (antimaterial).
+  - **Suporte (foco):** Cajado de nanobots, Orbe de restauração, Grimório de patches, Varinha de depuração, Drone médico.
+- O tier pinta a energia da arma na cor da raridade; a partir do T3 aparecem detalhes extras e o T5/T6 ganha brilho nos cantos.
+- Itens antigos reconhecem o modelo pelo nome; os sem correspondência usam o primeiro modelo da classe.
+- Ícones maiores no inventário (26 px) e tier no canto da célula.
+- Nomes de armas e peças traduzidos para EN/ES.
+
 ## v1.12: configurações, som e idiomas
 
 - Barra de tarefas: **leia-me.txt** e **configurações** viraram abas na barra. Saíram o ícone da área de trabalho e a aba "Reunião 14h".

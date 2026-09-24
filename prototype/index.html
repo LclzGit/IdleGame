@@ -420,7 +420,9 @@
   .inv{grid-template-columns:repeat(10, 40px); gap:3px; justify-content:start}
   .ivh{font-size:11px; margin-right:10px} .ivh small{color:var(--mute); font-weight:400}
   .sets:empty{display:none}
-  .inv .cell img{width:20px; height:20px} .inv .cell b{font-size:8px; line-height:1} .inv .cell .ct{font-size:7px}
+  .inv .cell{align-content:center; gap:0} .inv .cell img{width:26px; height:26px; image-rendering:pixelated; margin:0 auto}
+  .inv .cell b{position:absolute; left:2px; top:1px; font-size:8px; line-height:1} .inv .cell .ct{font-size:7px; line-height:1}
+  .inv .setd{left:auto; right:3px; top:auto; bottom:5px; width:4px; height:4px}
   .packs{padding:3px 5px; margin:0 0 4px}
   .invft{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-top:6px}
   .invft .setlist{margin:0; flex:1; min-width:0} .invft > button{font-size:10px; white-space:nowrap}
@@ -435,7 +437,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.12</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13</p>
 </main>
 
 <footer class="dock">
@@ -1747,6 +1749,43 @@ const I18N = new Map();
 // pt | en | es  (prefixo = no pt: só frase inteira, nunca trecho)
 `
 Agentes|Agents|Agentes
+Lâmina de plasma|Plasma blade|Hoja de plasma
+Martelo de impacto|Impact hammer|Martillo de impacto
+Machado-disjuntor|Breaker axe|Hacha disyuntor
+Lança de pulso|Pulse spear|Lanza de pulso
+Punho hidráulico|Hydraulic fist|Puño hidráulico
+Lança-granadas|Grenade launcher|Lanzagranadas
+Canhão de plasma|Plasma cannon|Cañón de plasma
+Varredura em cone|Cone sweep|Barrido en cono
+Metralhadora de pacotes|Packet minigun|Ametralladora de paquetes
+Mira de precisão|Precision scope|Mira de precisión
+Regex Afiada|Sharp Regex|Regex Afilada
+Sonda DPI|DPI Probe|Sonda DPI
+Fuzil de varredura|Scan rifle|Fusil de escaneo
+Exploit de kernel|Kernel exploit|Exploit de kernel
+Marcador de alvo|Target marker|Marcador de objetivo
+Lança-exploits|Exploit launcher|Lanzaexploits
+Munição perfurante|Piercing rounds|Munición perforante
+Cajado de nanobots|Nanobot staff|Bastón de nanobots
+Orbe de restauração|Restore orb|Orbe de restauración
+Grimório de patches|Patch grimoire|Grimorio de parches
+Varinha de depuração|Debug wand|Varita de depuración
+Drone médico|Medic drone|Dron médico
+Couraça|Cuirass|Coraza
+Grevas|Greaves|Grebas
+Escudo hexagonal|Hex shield|Escudo hexagonal
+Driver de chipset|Chipset driver|Driver de chipset
+Token de hardware|Hardware token|Token de hardware
+Capacete tático|Tactical helmet|Casco táctico
+Colete balístico|Ballistic vest|Chaleco balístico
+Botas de salto|Jump boots|Botas de salto
+Driver de GPU|GPU driver|Driver de GPU
+Token de sessão|Session token|Token de sesión
+Tiara-visor|Visor tiara|Tiara visor
+Manto de nanofibra|Nanofiber mantle|Manto de nanofibra
+Sandálias antigravidade|Antigravity sandals|Sandalias antigravedad
+Driver de rede|Network driver|Driver de red
+Token 2FA|2FA token|Token 2FA
 Coleção|Collection|Colección
 Compilador|Compiler|Compilador
 Download|Download|Descarga
@@ -2264,6 +2303,201 @@ function i18nStart() {
   }).observe(document.body, {childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTR});
 }
 
+// ---------- armas ----------
+// Cada classe tem os próprios modelos (tanque: corpo a corpo pesado; ataque: armas de fogo por subclasse; suporte: foco/cajado).
+// O modelo muda o desenho e o nome; o tier muda a cor da energia e acrescenta detalhes.
+const WMODELS = {
+  fw: [['sword', 'Lâmina de plasma'], ['hammer', 'Martelo de impacto'], ['axe', 'Machado-disjuntor'], ['spear', 'Lança de pulso'], ['fist', 'Punho hidráulico']],
+  area: [['launcher', 'Lança-granadas'], ['plasma', 'Canhão de plasma'], ['shotgun', 'Varredura em cone'], ['minigun', 'Metralhadora de pacotes']],
+  single: [['sniper', 'Mira de precisão'], ['pistol', 'Regex Afiada'], ['bow', 'Sonda DPI'], ['rifle', 'Fuzil de varredura']],
+  boss: [['railgun', 'Exploit de kernel'], ['crossbow', 'Marcador de alvo'], ['rocket', 'Lança-exploits'], ['amr', 'Munição perfurante']],
+  pt: [['staff', 'Cajado de nanobots'], ['orb', 'Orbe de restauração'], ['tome', 'Grimório de patches'], ['wand', 'Varinha de depuração'], ['drone', 'Drone médico']],
+};
+const wList = (cls, wt) => cls === 'sc' ? WMODELS[wt || 'single'] : WMODELS[cls];
+// itens antigos não guardam o modelo: descobre pelo nome
+function wModel(it) {
+  if (it.m) return it.m;
+  const L_ = wList(it.cls, it.wt), f = L_.find(([, n]) => it.name && it.name.startsWith(n));
+  return (f || L_[0])[0];
+}
+function drawWeapon(P, m, c, t) {
+  const dk = mix(c, '#000000', .5), lt = mix(c, '#ffffff', .55), W = '#ffffff';
+  const S1 = '#7a82a3', S2 = '#aab2cc', D = '#3a3f5c', DD = '#23263a', G = '#5a3e2c', G2 = '#7a5a40', AU = '#d6a24a';
+  const hi = t >= 2, top = t >= 3;
+  switch (m) {
+    case 'sword':
+      P.line(8, 15, 21, 2, dk, 3); P.line(8, 15, 21, 2, c, 2); P.line(9, 14, 20, 3, lt);
+      P.set(21, 2, W); P.set(20, 3, W);
+      P.line(4, 12, 11, 19, S1, 2); P.line(4, 12, 11, 19, S2); P.set(7, 15, c);
+      P.line(6, 17, 2, 21, G, 2); P.set(3, 20, G2); P.rect(0, 22, 2, 2, top ? c : S1);
+      if (hi) { P.set(15, 9, W); P.set(12, 12, W); }
+      break;
+    case 'hammer':
+      P.line(4, 22, 13, 9, G, 2); P.line(4, 21, 12, 9, G2); P.rect(3, 21, 2, 2, S1);
+      P.poly([[8, 4], [19, 1], [22, 9], [11, 12]], D); P.poly([[9, 5], [18, 2], [19, 5], [10, 8]], S1); P.line(9, 5, 18, 2, S2);
+      P.line(19, 1, 22, 9, c, 2); P.set(20, 4, lt); P.set(21, 7, lt);
+      P.ell(15, 7, 2, 2, dk); P.set(15, 7, hi ? lt : c);
+      if (top) { P.line(8, 4, 11, 12, c); }
+      break;
+    case 'axe':
+      P.line(4, 22, 15, 3, G, 2); P.line(4, 21, 14, 3, G2); P.set(4, 22, S1);
+      P.poly([[12, 4], [20, 2], [23, 8], [21, 14], [15, 10]], D); P.poly([[13, 5], [19, 3], [21, 7], [16, 8]], S1);
+      P.line(20, 2, 23, 8, c); P.line(23, 8, 21, 14, c); P.line(22, 5, 22, 11, lt);
+      P.poly([[12, 6], [8, 5], [10, 9]], S2);
+      if (hi) { P.line(14, 7, 18, 9, c); }
+      if (top) P.set(17, 6, W);
+      break;
+    case 'spear':
+      P.line(2, 22, 16, 8, D, 3); P.line(2, 21, 16, 7, S1);
+      P.poly([[13, 8], [19, 1], [23, 0], [22, 5], [16, 11]], S2); P.poly([[15, 8], [20, 2], [22, 1], [21, 4], [16, 9]], c); P.line(16, 8, 21, 2, lt); P.set(22, 1, W);
+      [[6, 18], [10, 14], [14, 10]].forEach(([x, y], i) => { if (i < 1 + t / 2) { P.line(x - 1, y - 1, x + 1, y + 1, c); P.set(x, y, lt); } });
+      P.poly([[15, 9], [13, 7], [14, 11]], AU);
+      break;
+    case 'fist':
+      P.rect(3, 13, 7, 7, D); P.rect(3, 13, 7, 2, S1);
+      P.ell(14, 11, 7, 6, S1); P.ell(14, 12, 7, 5, D); P.ell(14, 10, 6, 4, S1);
+      for (let i = 0; i < 4; i++) { P.rect(9 + i * 3, 5, 2, 3, S2); P.set(9 + i * 3, 5, W); }
+      P.ell(15, 12, 2, 2, dk); P.ell(15, 12, 1, 1, c); P.set(15, 12, lt);
+      P.line(4, 16, 8, 16, c); if (hi) P.line(4, 18, 8, 18, c);
+      P.rect(1, 14, 2, 5, DD);
+      if (top) { P.set(20, 9, lt); P.set(21, 13, lt); }
+      break;
+    case 'launcher':
+      P.rect(2, 8, 17, 7, D); P.rect(2, 8, 17, 2, S1); P.rect(17, 7, 6, 9, DD); P.ell(21, 11, 2, 3, '#05040b'); P.set(20, 9, S2);
+      P.ell(9, 15, 4, 3, S1); P.ell(9, 15, 2, 1, dk); [6, 9, 12].forEach(x => P.set(x, 15, c));
+      P.rect(12, 15, 3, 6, G); P.rect(0, 9, 3, 5, G2);
+      P.line(4, 11, 15, 11, c); if (hi) P.set(15, 11, lt);
+      if (top) { P.rect(9, 5, 5, 3, D); P.set(12, 6, c); }
+      break;
+    case 'plasma':
+      P.rect(1, 8, 16, 8, D); P.rect(1, 8, 16, 2, S1); P.rect(1, 14, 16, 2, DD);
+      [6, 9, 12, 15].forEach((x, i) => { P.line(x, 7, x, 16, i < 2 + t / 2 ? c : S2); });
+      P.ell(19, 12, 3, 4, dk); P.ell(19, 12, 2, 3, c); P.ell(20, 12, 1, 2, lt); P.set(20, 11, W);
+      P.rect(5, 16, 3, 5, G); P.rect(3, 5, 8, 3, S1); P.set(9, 6, c);
+      break;
+    case 'shotgun':
+      P.rect(7, 8, 16, 2, S2); P.rect(7, 10, 16, 2, S1); P.set(22, 8, '#05040b'); P.set(22, 10, '#05040b');
+      P.rect(12, 12, 7, 2, G); P.line(12, 12, 18, 12, G2);
+      P.rect(3, 8, 5, 5, D); P.poly([[0, 9], [4, 9], [6, 14], [2, 17], [0, 15]], G); P.line(1, 10, 4, 10, G2);
+      P.line(7, 12, 9, 15, D); P.rect(4, 12, 2, 1, c);
+      if (hi) P.line(8, 9, 20, 9, c);
+      if (top) P.set(20, 9, lt);
+      break;
+    case 'minigun':
+      for (let k = 0; k < 3; k++) P.rect(11, 8 + k * 2, 12, 1, k === 1 ? S2 : S1);
+      P.rect(19, 7, 2, 7, D); P.rect(12, 7, 2, 7, D);
+      P.rect(2, 6, 10, 10, D); P.rect(2, 6, 10, 2, S1); P.ell(7, 11, 2, 2, dk); P.set(7, 11, c);
+      P.rect(4, 16, 7, 5, DD); P.rect(5, 17, 5, 3, dk); P.line(5, 18, 9, 18, c);
+      P.rect(5, 3, 4, 3, S1);
+      if (hi) { P.set(23, 9, lt); P.set(23, 11, lt); }
+      if (top) P.line(3, 9, 10, 9, c);
+      break;
+    case 'sniper':
+      P.rect(10, 11, 14, 1, S2); P.rect(21, 10, 3, 3, D);
+      P.rect(4, 10, 11, 3, D); P.rect(4, 10, 11, 1, S1);
+      P.rect(8, 6, 9, 3, DD); P.rect(8, 6, 9, 1, S1); P.rect(16, 5, 2, 5, D); P.set(17, 7, c); P.set(7, 7, dk);
+      P.poly([[0, 10], [5, 10], [5, 14], [1, 16], [0, 15]], G); P.line(1, 11, 4, 11, G2);
+      P.rect(9, 13, 2, 4, D); P.line(14, 13, 12, 18, S1); P.line(15, 13, 17, 18, S1);
+      if (hi) P.line(5, 11, 13, 11, c);
+      if (top) P.set(18, 6, lt);
+      break;
+    case 'pistol':
+      P.rect(6, 6, 15, 5, S1); P.rect(6, 6, 15, 1, S2); P.rect(18, 7, 3, 3, D); P.set(21, 8, '#05040b');
+      for (let x = 8; x < 12; x += 2) P.line(x, 7, x, 9, D);
+      P.poly([[7, 11], [12, 11], [10, 20], [5, 20]], DD); P.line(8, 12, 7, 18, G2);
+      P.line(12, 11, 14, 14, D); P.line(14, 14, 11, 14, D);
+      P.line(13, 8, 19, 8, c); P.set(6, 8, c);
+      if (hi) P.rect(8, 15, 2, 2, c);
+      if (top) { P.set(19, 8, lt); P.rect(13, 4, 3, 2, S2); }
+      break;
+    case 'bow':
+      for (let a = -1.25; a <= 1.25; a += .05) P.set(Math.round(8 + Math.cos(a) * 8), Math.round(12 + Math.sin(a) * 10), S2);
+      for (let a = -1.2; a <= 1.2; a += .05) P.set(Math.round(9 + Math.cos(a) * 8), Math.round(12 + Math.sin(a) * 10), D);
+      P.rect(15, 10, 2, 5, G); P.set(15, 11, AU);
+      P.line(11, 3, 11, 21, dk); P.line(11, 3, 5, 12, lt); P.line(5, 12, 11, 21, lt);
+      P.line(4, 12, 21, 12, S1); P.poly([[20, 10], [23, 12], [20, 14]], c); P.set(21, 12, lt);
+      P.line(4, 11, 6, 12, c); P.line(4, 13, 6, 12, c);
+      if (top) { P.set(9, 1, c); P.set(9, 23, c); }
+      break;
+    case 'rifle':
+      P.rect(3, 9, 16, 4, D); P.rect(3, 9, 16, 1, S1); P.rect(18, 10, 5, 2, S2);
+      P.poly([[9, 13], [12, 13], [13, 19], [10, 19]], DD); P.line(10, 14, 11, 18, S1);
+      P.rect(15, 13, 2, 4, G); P.poly([[0, 9], [3, 9], [3, 14], [0, 15]], D);
+      P.rect(8, 6, 6, 3, DD); P.rect(9, 7, 4, 1, c);
+      if (hi) P.line(4, 11, 16, 11, c);
+      if (top) P.set(12, 7, lt);
+      break;
+    case 'railgun':
+      P.rect(7, 7, 17, 2, S2); P.rect(7, 15, 17, 2, S1); P.line(9, 11, 23, 11, c); P.line(9, 12, 23, 12, dk); P.set(23, 11, W);
+      [10, 14, 18].forEach(x => { P.rect(x, 9, 2, 6, D); P.set(x, 11, lt); });
+      P.rect(1, 8, 8, 9, D); P.rect(1, 8, 8, 2, S1); P.ell(5, 12, 2, 2, dk); P.set(5, 12, c);
+      P.rect(4, 17, 3, 5, G);
+      if (top) { P.set(21, 10, lt); P.set(16, 13, lt); }
+      break;
+    case 'crossbow':
+      P.rect(1, 11, 16, 3, G); P.line(1, 11, 16, 11, G2); P.rect(6, 14, 3, 5, G);
+      for (let a = -1.1; a <= 1.1; a += .05) P.set(Math.round(14 + Math.cos(a) * 5), Math.round(12 + Math.sin(a) * 10), S2);
+      P.rect(16, 10, 3, 5, D);
+      P.line(15, 3, 9, 12, dk); P.line(9, 12, 15, 21, dk);
+      P.line(8, 12, 21, 12, S2); P.poly([[20, 10], [23, 12], [20, 14]], c); P.set(21, 12, lt);
+      P.rect(9, 8, 4, 3, DD); P.set(11, 9, c);
+      if (hi) { P.set(19, 3, c); P.set(19, 21, c); }
+      break;
+    case 'rocket':
+      P.rect(2, 7, 18, 7, S1); P.rect(2, 7, 18, 2, S2); P.rect(2, 12, 18, 2, D);
+      P.rect(0, 6, 3, 9, D); P.rect(19, 6, 2, 9, D);
+      P.poly([[21, 8], [24, 10], [21, 12]], c); P.set(22, 10, lt);
+      P.rect(8, 3, 5, 4, DD); P.set(11, 4, c);
+      P.rect(7, 14, 3, 6, G); P.rect(13, 14, 2, 4, G);
+      for (let x = 5; x < 18; x += 4) P.set(x, 10, c);
+      if (top) P.line(4, 10, 17, 10, dk);
+      break;
+    case 'amr':
+      P.rect(12, 10, 10, 2, S2); P.rect(20, 8, 4, 6, D); for (let y = 9; y < 13; y += 2) P.set(22, y, '#05040b');
+      P.rect(3, 9, 12, 4, D); P.rect(3, 9, 12, 1, S1); P.poly([[0, 9], [4, 9], [4, 15], [0, 14]], D);
+      P.rect(6, 5, 7, 3, DD); P.set(12, 6, c);
+      P.rect(7, 13, 3, 6, DD);
+      P.rect(15, 17, 7, 3, AU); P.poly([[22, 17], [24, 18], [22, 20]], c); P.line(15, 17, 20, 17, '#f0d08a');
+      if (hi) P.line(4, 11, 13, 11, c);
+      break;
+    case 'staff':
+      P.line(3, 23, 14, 9, G, 2); P.line(3, 22, 13, 9, G2);
+      for (let a = 0; a < 6.3; a += .12) P.set(Math.round(17 + Math.cos(a) * 5), Math.round(6 + Math.sin(a) * 5), a > 2 && a < 3.2 ? null : AU);
+      P.ell(17, 6, 3, 3, dk); P.ell(17, 6, 2, 2, c); P.set(16, 5, W);
+      [[22, 1], [11, 2], [23, 11], [20, 14]].forEach(([x, y], i) => { if (i < 2 + t / 2) P.set(x, y, lt); });
+      P.line(9, 14, 11, 16, AU);
+      break;
+    case 'orb':
+      P.poly([[6, 22], [18, 22], [16, 18], [8, 18]], AU); P.line(8, 18, 16, 18, '#f0d08a');
+      P.line(7, 17, 5, 12, AU); P.line(17, 17, 19, 12, AU);
+      P.ell(12, 10, 7, 7, dk); P.ell(12, 10, 6, 6, c); P.ell(11, 9, 3, 3, lt); P.set(9, 7, W); P.set(10, 7, W);
+      if (hi) { P.line(8, 13, 16, 7, lt); }
+      if (top) { P.set(2, 4, c); P.set(21, 3, c); P.set(22, 16, c); }
+      break;
+    case 'tome':
+      P.poly([[3, 5], [17, 2], [21, 18], [7, 22]], dk); P.poly([[4, 6], [16, 3], [19, 16], [7, 20]], c);
+      P.line(7, 21, 21, 18, '#dfe4ee'); P.line(7, 22, 21, 19, S2);
+      P.line(3, 5, 7, 22, DD);
+      P.ell(12, 11, 3, 3, lt); P.ell(12, 11, 2, 2, dk); P.line(12, 9, 12, 13, lt); P.line(10, 11, 14, 11, lt);
+      P.rect(15, 3, 2, 4, AU);
+      if (top) { P.set(6, 7, W); P.set(17, 15, W); }
+      break;
+    case 'wand':
+      P.line(3, 21, 14, 10, '#dfe4ee', 2); P.line(3, 20, 13, 10, S2); P.rect(3, 19, 3, 3, AU);
+      P.poly([[14, 6], [18, 3], [20, 7], [17, 11], [13, 10]], c); P.poly([[15, 6], [18, 4], [18, 7]], lt); P.set(17, 5, W);
+      P.line(12, 11, 15, 13, AU);
+      [[21, 2], [22, 9], [10, 5], [19, 13]].forEach(([x, y], i) => { if (i < 2 + t / 2) { P.set(x, y, lt); if (top) { P.set(x - 1, y, c); P.set(x + 1, y, c); } } });
+      break;
+    case 'drone':
+      P.line(4, 6, 20, 18, D); P.line(20, 6, 4, 18, D);
+      [[4, 6], [20, 6], [4, 18], [20, 18]].forEach(([x, y]) => { P.line(x - 3, y, x + 3, y, S2); P.set(x, y, S1); });
+      P.ell(12, 12, 5, 4, '#dfe4ee'); P.ell(12, 13, 5, 3, S2); P.ell(12, 11, 4, 2, W);
+      P.rect(11, 9, 2, 6, c); P.rect(9, 11, 6, 2, c);
+      P.rect(10, 16, 4, 2, DD); P.set(11, 16, hi ? lt : c);
+      break;
+  }
+}
+
 // ---------- data ----------
 const SECTORS = [
   {name:'C:\\TEMP', tint:'#5ce1e6'}, {name:'CACHE L2', tint:'#7aa2ff'},
@@ -2453,11 +2687,7 @@ const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', 
 GUNNERS.forEach(g => g.sub = SUBOF[g.id]);
 TANKS.slice(1).forEach(x => x.art.kind = 'mech');
 charOf('tankm1').art.kind = 'veh';
-const GEARW = {
-  area:['Lança-granadas', 'Canhão de plasma', 'Varredura em cone'],
-  single:['Mira de precisão', 'Regex Afiada', 'Sonda DPI'],
-  boss:['Munição perfurante', 'Exploit de kernel', 'Marcador de alvo'],
-};
+const GEARW = {area: WMODELS.area.map(x => x[1]), single: WMODELS.single.map(x => x[1]), boss: WMODELS.boss.map(x => x[1])};
 
 // Tipos de fase. A última fase de cada setor é sempre Chefão.
 const STYPES = {
@@ -2888,8 +3118,17 @@ const wtTag = it => it && it.wt ? ` <span style="color:${SUBS[it.wt].c}">${SUBS[
 // Ícones 16x16 pintados por código, um desenho por tipo (e por classe, no caso da arma).
 const iconCache = {};
 function itemIcon(it) {
-  const key = [it.k, it.type, it.cls, it.wt, it.t, it.r, it.ai].join('|');
+  const key = [it.k, it.type, it.cls, it.wt, it.t, it.r, it.ai, it.type === 'weapon' ? wModel(it) : ''].join('|');
   if (iconCache[key]) return iconCache[key];
+  if (it.k === 'gear' && it.type === 'weapon') {   // armas: desenho próprio em 24×24
+    const P = Painter(24, 24), c = RAR[it.t].c, lt = mix(c, '#ffffff', .5);
+    drawWeapon(P, wModel(it), c, it.t);
+    P.rim('#000000', .3, 1, 1); P.rim('#ffffff', .12, -1, -1);
+    if (it.t >= 4) { P.set(0, 0, lt); P.set(23, 0, lt); P.set(23, 23, lt); }
+    if (it.t >= 5) { P.set(1, 0, c); P.set(0, 1, c); P.set(22, 23, c); P.set(23, 22, c); }
+    P.outline('#05040b');
+    return iconCache[key] = P.canvas(false).toDataURL();
+  }
   const P = Painter(16, 16), c = it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c;
   const dk = mix(c, '#000000', .55), lt = mix(c, '#ffffff', .5), M = '#5d6384', M2 = '#9aa1bd';
   if (it.k === 'chip') {
@@ -2978,16 +3217,17 @@ function makeItem(boss, forceType) {
 function buildItem(cls, type, wt, t, lv, set) {
   const vs = type === 'vaccine' ? pick(Object.keys(VIR)) : undefined;
   const ai = type === 'ai' ? pick(Object.keys(AIS)) : undefined;
-  const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : type === 'ai' ? AIS[ai].n : wt ? pick(GEARW[wt]) : INAMES[cls][type];
+  const wm = type === 'weapon' ? pick(wList(cls, wt)) : null, m = wm ? wm[0] : undefined;
+  const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : type === 'ai' ? AIS[ai].n : wm ? wm[1] : INAMES[cls][type];
   const keys = Object.keys(AFFIX), af = [];
   // Root: passivas em branco, o jogador escolhe (ver configRoot)
   const nm = x => type === 'ai' ? `${base} ${x === 'Root' ? 'Root ' : ''}v${lv}` : `${base} ${x} Mk${lv}`;   // IA leva número de versão
-  if (t === 5) return {k:'gear', cls, type, wt, vs, ai, t, lv, set, af, pick:AFFIX_N[5], q:1.15, name:nm('Root')};
+  if (t === 5) return {k:'gear', cls, type, wt, m, vs, ai, t, lv, set, af, pick:AFFIX_N[5], q:1.15, name:nm('Root')};
   for (let i = 0; i < AFFIX_N[t]; i++) {
     const k = pick(keys.filter(x => !af.some(a => a.k === x))), A = AFFIX[k];
     af.push({k, v: +((A.lo + Math.random() * (A.hi - A.lo)) * RAR[t].m).toFixed(1)});
   }
-  return {k:'gear', cls, type, wt, vs, ai, t, lv, set, af, q:.85 + Math.random() * .3, name:nm(SETS[set].n)};
+  return {k:'gear', cls, type, wt, m, vs, ai, t, lv, set, af, q:.85 + Math.random() * .3, name:nm(SETS[set].n)};
 }
 // Root: o jogador escolhe as passivas uma vez, com o valor máximo da faixa. Depois fica fixo.
 function configRoot(it, keys) {
@@ -4575,7 +4815,7 @@ $('#pBody').addEventListener('click', e => {
     wipeArmed = 0;
     if (configRoot(it, rootSel)) { rootSel = []; renderPanel(); save(); }
   }
-  else if (d.freeroot !== undefined) { const it = buildItem(pick(['fw', 'sc', 'pt']), 'weapon', undefined, 5, S.maxStage + 1, pick(Object.keys(SETS))); if (it.cls === 'sc') { it.wt = dpsSub(); it.name = `${pick(GEARW[it.wt])} Root Mk${it.lv}`; } S.inv.push(it); showBanner('ROOT T6!', RAR[5].c); renderPanel(); save(); }
+  else if (d.freeroot !== undefined) { const c_ = pick(['fw', 'sc', 'pt']), it = buildItem(c_, 'weapon', c_ === 'sc' ? dpsSub() : undefined, 5, S.maxStage + 1, pick(Object.keys(SETS))); S.inv.push(it); showBanner('ROOT T6!', RAR[5].c); renderPanel(); save(); }
   else if (d.invtab) { invTab = d.invtab; renderPanel(); }
   else if (d.csel !== undefined) { const i = +d.csel; cSel = cSel.includes(i) ? cSel.filter(x => x !== i) : cSel.length < COMP_N ? [...cSel, i] : cSel; renderPanel(); }
   else if (d.cauto !== undefined) { const sel = autoPick(compAll); if (sel) cSel = sel; else say('Não há 5 itens do mesmo tier pra compilar.'); renderPanel(); }
