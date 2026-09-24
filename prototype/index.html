@@ -1339,7 +1339,7 @@ function featView() {
   if (gBanner !== 'L' || !L) return L ? `<p class="hint">Agente novo disponível: <b class="k">${L.T.name}</b> no Download de lançamento, até ${dm(L.until)}.</p>` : '';
   const C = CLASSES[banCls('L')], st = L.T.stars;
   return `<div class="feat"><div><b>Lançamento: ${L.T.name}</b> <span class="st${st}">${stars(st)}</span> <span class="tag new">NOVO</span> <small>até ${dm(L.until)}</small></div>
-    <div class="fl">${pct(FEAT_P)} dos resultados ${stars(st)} saem pra ${L.T.name}; o resto é sorteado entre ${C.label.toLowerCase()}. Garantias deste Download são separadas dos padrão.</div>
+    <div class="fl">${L.T.name} tem chance bem maior neste Download; o resto é sorteado entre ${C.label.toLowerCase()}. Garantias separadas dos Downloads padrão. Números no menu Chances.</div>
     <div class="fl hint">Depois de ${dm(L.until)} ele entra nos Downloads padrão, e em ${dm(relMs(L.T) + REL_SHOP)} na loja de fragmentos.${up.length ? ` Próximo lançamento: ${dm(relMs(up[0]))}.` : ''}</div></div>`;
 }
 // Loja de fragmentos
@@ -2717,22 +2717,11 @@ function invItems() {
         <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
     } else if (it) {
       const C = CHIPS[it.r];
-      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br><span class="hint">★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}</span><br>${tradeTag(it)}</div></div>
+      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br>${tradeTag(it)}</div></div>
         <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar ataque</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
-      <table class="rates"><tr><td>Tier do item</td><td>fase comum</td><td>fase de chefe</td></tr>${RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td>${TIER_W.n[i]}%</td><td>${TIER_W.b[i]}%</td></tr>`).join('')}</table>
-      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai dos Chefões</b> (CODE RED em diante) e não sai do Compilador.</p>
-      <details class="setlist"><summary>Chances atuais (base → com seus bônus)</summary>
-        <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
-        <table class="rates">${[
-          ['Item (fase comum)', GEAR_N, gearChance(false)],
-          ['Item (fase de chefe)', GEAR_B, gearChance(true)],
-          ['Arma (fase atual)', gearChance() / (1 + tv('drop') + glob('idrop')) * W_SHARE, weaponChance()],
-          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase comum)`, c.drop, chipChance(r, false)]),
-          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase de chefe)`, c.boss, chipChance(r, true)]),
-        ].map(([n, b, e]) => `<tr><td>${n}</td><td>${pct2(b)}</td><td>→</td><td class="${e > b ? 'k' : ''}">${pct2(e)}</td></tr>`).join('')}</table>
-      </details>
+      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Chances de drop e de tier no menu Chances. Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai dos Chefões</b> (CODE RED em diante) e não sai do Compilador.</p>
       <details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
       <div class="opts"><button type="button" data-sellworse>Reciclar itens piores que os equipados</button></div>`;
   }
@@ -2752,12 +2741,12 @@ function compView() {
       <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}"></span>` : ''}`}</button>`;
   }).join('');
   const info = P
-    ? `${tierTxt(P.t)} → <span style="color:${RAR[P.t + 1].c}">${tierTxt(P.t + 1)} ${RAR[P.t + 1].n}</span> com <b class="k">${pct(P.rate)}</b> de chance (se falhar, sai um ${tierTxt(P.t)} novo) · resultado Nv${P.lv}
+    ? `${tierTxt(P.t)} → <span style="color:${RAR[P.t + 1].c}">${tierTxt(P.t + 1)} ${RAR[P.t + 1].n}</span> (se falhar, sai um ${tierTxt(P.t)} novo) · resultado Nv${P.lv}
        · ${P.sameType ? `tipo garantido: ${ITYPES[P.items[0].type].n} de ${SLOTTAG[P.items[0].cls]}` : 'tipo: um dos itens usados'}
        · ${P.set ? `conjunto garantido: <span style="color:${SETS[P.set].c}">${SETS[P.set].n}</span>` : 'conjunto: um dos itens usados (3 iguais garantem)'}`
     : `Escolha ${COMP_N} itens do mesmo tier (T1 a T4). Selecionados: ${cSel.length}/${COMP_N}.`;
   const res = lastComp ? `<div class="det"><div class="dh"><img src="${itemIcon(lastComp.it)}" width="40" height="40" alt=""><div>${lastComp.ok ? 'Sucesso!' : 'Falhou, mas gerou:'} ${gearTag(lastComp.it)}<br><span class="hint">${statTxt(lastComp.it)}${lastComp.it.af.length ? ' · ' + afTxt(lastComp.it) : ''}</span></div></div></div>` : '';
-  return `<p class="hint">Junte ${COMP_N} itens do mesmo tier pra tentar um tier acima. Chances: ${COMP_RATE.map((r, i) => `${tierTxt(i)}→${tierTxt(i + 1)} ${pct(r)}`).join(' · ')}.</p>
+  return `<p class="hint">Junte ${COMP_N} itens do mesmo tier pra tentar um tier acima. Chances de sucesso no menu Chances.</p>
     <div class="inv comp">${slots}</div>
     <p class="cinfo">${info}</p>
     <div class="row"><button type="button" data-cauto>Preenchimento automático</button><button type="button" data-cgo ${P ? '' : 'disabled'}>Compilar</button><button type="button" data-cclear>Limpar</button></div>
@@ -2893,6 +2882,15 @@ function oddsView() {
     <p class="sub">Itens <small>chance por vírus: ${pct2(GEAR_N)} em fase comum, ${pct2(GEAR_B)} em fase de chefe</small></p>
     <table class="rates"><tr><td>Tier</td><td>fase comum</td><td>fase de chefe</td><td>agora (${DIFFS[d].n}, sorte +${pct(luck())})</td></tr>${tiers}</table>
     <p class="hint">T3 ou melhor: +25% por dificuldade acima de Normal e + sua sorte (máximo +50%). O chefe dá no mínimo T2. <b style="color:${RAR[5].c}">T6 Root</b> nunca cai das fases: só dos Chefões (tabela abaixo). Não sai do Compilador. Itens não têm garantia.</p>
+      <p class="sub">Com os seus bônus <small>base → agora</small></p>
+        <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
+        <table class="rates">${[
+          ['Item (fase comum)', GEAR_N, gearChance(false)],
+          ['Item (fase de chefe)', GEAR_B, gearChance(true)],
+          ['Arma (fase atual)', gearChance() / (1 + tv('drop') + glob('idrop')) * W_SHARE, weaponChance()],
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase comum)`, c.drop, chipChance(r, false)]),
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase de chefe)`, c.boss, chipChance(r, true)]),
+        ].map(([n, b, e]) => `<tr><td>${n}</td><td>${pct2(b)}</td><td>→</td><td class="${e > b ? 'k' : ''}">${pct2(e)}</td></tr>`).join('')}</table>
     <p class="sub">Compilador <small>5 itens do mesmo tier</small></p><p>${comp} · T5 e T6 não compilam. Se falhar, sai um item novo do mesmo tier.</p>
     <p class="sub">Passivas dos itens <small>quantidade: ${AFFIX_N.map((n, t) => `${tierTxt(t)} ${n}`).join(' · ')}</small></p>
     <div class="tbl"><table class="rates"><tr><td>Passiva</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${aff}</table></div>
@@ -2911,7 +2909,7 @@ function itemTip(it, where) {
   if (it.k === 'chip') {
     const C = CHIPS[it.r];
     return `<b style="color:${C.c}">Pacote de download ${C.n}</b> ×${it.n}<div class="hint">Baixa um agente no menu Download.</div>
-      <div>★5 ${pct2(C.p5)} · ★4 ${pct2(C.p4)}${C.min ? ' · nunca ★3' : ''}</div><div class="tl">${tradeTag(it)}</div><div class="tv">vale ${fmt(chipVal(it.r))} cada</div>`;
+      ${C.min ? '<div>nunca ★3</div>' : ''}<div class="tl">${tradeTag(it)}</div><div class="tv">vale ${fmt(chipVal(it.r))} cada</div>`;
   }
   const cur = gearOf(it.cls)[it.type], cmp = where === 'inv' && cur && cur !== it;
   const diff = cmp ? Math.round(itemScore(it) - itemScore(cur)) : 0;
@@ -3052,7 +3050,7 @@ const RENDER = {
         ${launch() ? `<button type="button" class="banL" data-ban="L" aria-pressed="${gBanner === 'L'}">Lançamento · ${launch().T.name}</button>` : ''}
       </div>${featView()}
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
-        <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}${chipCount(r, true) ? ` <small>(${chipCount(r, true)} vinculados)</small>` : ''}</span><small>★5 ${pct2(c.p5)} · ★4 ${pct2(c.p4)}${c.min ? ' · nunca ★3' : ''}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
+        <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}${chipCount(r, true) ? ` <small>(${chipCount(r, true)} vinculados)</small>` : ''}</span><small>${c.min ? 'nunca ★3' : '&nbsp;'}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
         <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Baixar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
       <p class="pity">Repetido atualiza o agente (v1.0 → v2.0). Depois da v2.0 vira fragmentos (★3 ${FRAG[3]} · ★4 ${FRAG[4]} · ★5 ${FRAG[5]}).
         · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-demorel>${S.demoRel ? 'protótipo: encerrar lançamento' : 'protótipo: simular lançamento'}</button> <button type="button" data-gocol>ver coleção</button></p>

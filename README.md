@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.7.2: chances só no menu Chances
+
+- As porcentagens saíram do Download, do inventário, do Compilador e das tooltips de pacote. Essas telas mostram só as garantias ("★5 garantido em 500", "nunca ★3").
+- O menu **Chances** concentra tudo, incluindo a tabela "com os seus bônus" (antes ficava no inventário).
+- Os cards dos Chefões continuam mostrando os drops de cada chefão.
+
 ## v1.7.1: Download de lançamento separado
 
 - O agente novo tem um **Download próprio** nas 2 primeiras semanas, na aba "Lançamento · NOME". O jogador escolhe onde gastar os pacotes: no agente novo ou nos Downloads padrão.
