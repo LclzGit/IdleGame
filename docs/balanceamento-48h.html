@@ -1,0 +1,181 @@
+<title>Balanço do Daemon Bar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=Silkscreen&display=swap">
+<style>
+  :root{
+    --bg:#f3f5f8; --surface:#ffffff; --ink:#131a28; --ink2:#3d4658; --muted:#667085; --line:#d9dee7;
+    --accent:#0e7480; --accent-soft:#e2f2f3; --crit:#b4233a; --crit-soft:#fbe9ec; --warn:#9a5a06; --warn-soft:#fdf1df; --ok:#1d7446; --ok-soft:#e5f4ea;
+    --grid:#e6e9ef;
+    --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; --pix:"Silkscreen",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){color-scheme:dark;
+      --bg:#0e0d1c; --surface:#16142a; --ink:#ebe8ff; --ink2:#c3bfe3; --muted:#9591bd; --line:#2e2a52;
+      --accent:#5ce1e6; --accent-soft:#11303a; --crit:#ff6b81; --crit-soft:#3a1522; --warn:#ffb454; --warn-soft:#3a2a12; --ok:#6ee7a8; --ok-soft:#123224; --grid:#25224a;}
+  }
+  :root[data-theme="dark"]{color-scheme:dark;
+    --bg:#0e0d1c; --surface:#16142a; --ink:#ebe8ff; --ink2:#c3bfe3; --muted:#9591bd; --line:#2e2a52;
+    --accent:#5ce1e6; --accent-soft:#11303a; --crit:#ff6b81; --crit-soft:#3a1522; --warn:#ffb454; --warn-soft:#3a2a12; --ok:#6ee7a8; --ok-soft:#123224; --grid:#25224a;}
+  body{background:var(--bg); color:var(--ink); font:15px/1.6 var(--sans)}
+  .wrap{max-width:780px; margin:0 auto; padding-inline:16px; padding-block:40px 64px}
+  .eyebrow{font:400 12px var(--pix); letter-spacing:.08em; color:var(--accent)}
+  h1{font-size:clamp(26px, 5vw, 36px); line-height:1.15; margin:8px 0 12px; text-wrap:balance; letter-spacing:-.01em}
+  h2{font-size:20px; margin:44px 0 10px; text-wrap:balance}
+  h3{font-size:15px; margin:0 0 4px}
+  p{margin:0 0 12px; max-width:68ch; color:var(--ink2)}
+  .lede{font-size:17px; color:var(--ink)}
+  .verdict{display:flex; gap:12px; align-items:flex-start; padding:14px 16px; margin:20px 0; background:var(--crit-soft); border-left:4px solid var(--crit)}
+  .verdict b{color:var(--crit)}
+  .verdict p{margin:0; color:var(--ink)}
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin:16px 0}
+  .tile{background:var(--surface); border:1px solid var(--line); padding:12px 14px}
+  .tile .n{font:600 26px var(--mono); color:var(--ink); font-variant-numeric:tabular-nums}
+  .tile .l{font-size:13px; color:var(--muted)}
+  figure{margin:16px 0; background:var(--surface); border:1px solid var(--line); padding:14px 14px 8px}
+  figcaption{font-size:13px; color:var(--muted); margin-top:4px}
+  .chart{position:relative}
+  .chart svg{display:block; width:100%; height:auto; overflow:visible}
+  .tipbox{position:absolute; pointer-events:none; background:var(--ink); color:var(--bg); font:12px/1.4 var(--mono); padding:6px 8px; white-space:nowrap; transform:translate(-50%, -110%)}
+  .tbl{overflow-x:auto; margin:12px 0}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:var(--surface); border:1px solid var(--line)}
+  th,td{padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+  th{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  td.num{font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .find{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; padding:14px 0; border-top:1px solid var(--line)}
+  .pill{font:600 11px var(--mono); letter-spacing:.04em; padding:2px 8px; align-self:start; white-space:nowrap}
+  .crit{background:var(--crit-soft); color:var(--crit)} .warn{background:var(--warn-soft); color:var(--warn)} .ok{background:var(--ok-soft); color:var(--ok)}
+  .find p{margin:4px 0 0}
+  .fix{margin-top:6px; padding:8px 12px; background:var(--accent-soft); font-size:14px; color:var(--ink)}
+  .fix b{color:var(--accent)}
+  ol.q{padding-left:20px} ol.q li{margin:8px 0; color:var(--ink2)} ol.q b{color:var(--ink)}
+  code{font:13px var(--mono); background:var(--surface); border:1px solid var(--line); padding:1px 5px}
+  .small{font-size:13px; color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">DAEMON//BAR · BALANCEAMENTO</div>
+  <h1>O jogo ainda não está pronto pra itens negociáveis na Steam</h1>
+  <p class="lede">Rodei o código real do protótipo por 48 horas de jogo simuladas, com um jogador idle automático que baixa agentes, equipa os melhores e compra a árvore. Os números abaixo são medições, não estimativas.</p>
+
+  <div class="verdict"><p><b>Diagnóstico:</b> a economia depende de "vírus derrotados", e isso cresce com o poder e a velocidade do jogador. Um mercado real vai inflacionar rápido. Além disso, drops negociáveis não podem ser sorteados no computador do jogador. Esses dois pontos precisam mudar antes do resto do ajuste fino.</p></div>
+
+  <div class="tiles">
+    <div class="tile"><div class="n">13 h</div><div class="l">pra completar a árvore inteira (80/80 nós)</div></div>
+    <div class="tile"><div class="n">23 h</div><div class="l">pra ter 14 de 15 agentes</div></div>
+    <div class="tile"><div class="n">0,67/h</div><div class="l">agentes ★5 baixados por hora (24–48 h)</div></div>
+    <div class="tile"><div class="n">~41 h</div><div class="l">até travar na fase 9-1</div></div>
+  </div>
+
+  <h2>Progresso por hora de jogo</h2>
+  <figure>
+    <div class="chart" id="chart"></div>
+    <figcaption>Fase mais alta liberada em cada hora de jogo simulada (1-1 = fase 1, 9-1 = fase 41). Depois de ~23 h, o jogador passa mais tempo morrendo e recuando do que avançando: 22 mortes por hora no fim.</figcaption>
+  </figure>
+
+  <h2>O que um jogador ganha por hora</h2>
+  <p>Média entre 24 h e 48 h, com os bônus que o jogador já tinha comprado (árvore completa, passivas e conjuntos).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>O que cai</th><th>Por hora</th><th>Por dia (24 h)</th><th>Leitura</th></tr></thead>
+    <tbody>
+      <tr><td>Vírus derrotados</td><td class="num">305</td><td class="num">7.330</td><td>base de todos os drops por abate</td></tr>
+      <tr><td>Itens T1 · T2 · T3</td><td class="num">40 · 25 · 5,3</td><td class="num">967 · 611 · 128</td><td>volume alto, bom pra reciclar e compilar</td></tr>
+      <tr><td>Itens T4 · T5</td><td class="num">1,4 · 0,17</td><td class="num">33 · 4</td><td>T5 em 4 por dia é muito pra um item de mercado</td></tr>
+      <tr><td>Pacotes Comum · Raro · Lendário</td><td class="num">47 · 9,7 · 4,4</td><td class="num">1.138 · 233 · 105</td><td>bônus multiplicam as taxas-base por ~3</td></tr>
+      <tr><td>Agentes ★4 · ★5</td><td class="num">5,4 · 0,67</td><td class="num">130 · 16</td><td>a coleção inteira some no primeiro dia</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>O que está errado e como corrigir</h2>
+
+  <div class="find"><span class="pill crit">CRÍTICO</span><div>
+    <h3>Drops negociáveis não podem ser sorteados no computador do jogador</h3>
+    <p>O jogo roda local e offline. Qualquer drop decidido no cliente pode ser forjado: edição de memória, acelerador de tempo, vários computadores rodando o mesmo jogo. Hoje o próprio protótipo tem um botão de 10×. Em item sem valor, isso não importa. No mercado da Steam, vira fábrica de dinheiro.</p>
+    <div class="fix"><b>Correção:</b> separar dois tipos de item. Os <b>equipamentos e agentes do jogo ficam vinculados à conta</b> (não negociáveis) e continuam como hoje. Os <b>itens negociáveis</b> (por exemplo, visuais de agente ou uma "cápsula" que se abre em visual) são entregues pelo <b>Steam Inventory Service</b>, com gerador por tempo de jogo: a Valve controla o intervalo e o limite por semana, e o jogo só pede o drop. Vale confirmar os campos exatos na documentação do Steamworks antes de implementar.</div>
+  </div></div>
+
+  <div class="find"><span class="pill crit">CRÍTICO</span><div>
+    <h3>Taxas "por vírus derrotado" crescem com o poder do jogador</h3>
+    <p>Com as taxas que você definiu (Lendário 0,5% por vírus em fase comum e 1% em fase de chefe), um jogador faz ~305 abates por hora. Só pela taxa-base, isso dá ~1,5 Lendário por hora. Com os bônus da árvore (Honeypot), das passivas e do conjunto Minerador, a simulação chegou a 4,4 por hora. Quem mata mais rápido ganha mais, e isso não tem teto.</p>
+    <div class="fix"><b>Correção:</b> pacotes caem <b>ao concluir uma fase</b> ou <b>por tempo jogado</b>, não por abate. As suas porcentagens continuam valendo, mas por fase concluída: numa fase de chefe, 1% de Lendário por conclusão. E <b>bônus nunca afetam drops negociáveis</b>. Passivas de "chance de pacote" podem afetar só o que é vinculado à conta.</div>
+  </div></div>
+
+  <div class="find"><span class="pill crit">CRÍTICO</span><div>
+    <h3>Gacha com item de valor real tem risco legal</h3>
+    <p>Se os agentes ou os pacotes puderem ser vendidos por dinheiro no mercado, o sistema de download passa a funcionar como loot box com valor real. Isso é regulado ou proibido em alguns países (Bélgica, Holanda) e exige mostrar as chances. As chances já estão visíveis no jogo, o que ajuda.</p>
+    <div class="fix"><b>Correção:</b> manter <b>agentes e pacotes de download como não negociáveis</b> e não vendidos por dinheiro. O que vai pro mercado deve ser visual e ganho jogando.</div>
+  </div></div>
+
+  <div class="find"><span class="pill warn">ALTO</span><div>
+    <h3>A árvore termina em 13 horas</h3>
+    <p>Os 80 nós ficam completos no primeiro dia. A árvore deixa de ser um objetivo de longo prazo.</p>
+    <div class="fix"><b>Correção:</b> subir o custo com a distância do núcleo (hoje ×1,3 por passo) e o custo por nível (×1,55), e ligar os nós-chave a marcos de fase (por exemplo, nó-chave de Varredura só depois da fase 5-5). A meta depende de quanto tempo você quer que dure (pergunta 2 abaixo).</div>
+  </div></div>
+
+  <div class="find"><span class="pill warn">ALTO</span><div>
+    <h3>Os números explodem e depois o jogador trava</h3>
+    <p>O "poder" chega a 7×10¹⁴ em 48 h, porque inimigos, recompensas, upgrades e itens crescem exponencialmente com bases diferentes. Mesmo assim, o jogador trava na 9-1 com 22 mortes por hora. O poder recomendado também deixa de refletir a dificuldade real nas fases altas.</p>
+    <div class="fix"><b>Correção:</b> redesenhar as curvas pra crescer mais devagar e de forma coerente entre si (inimigos, créditos, upgrades e itens). Depois disso, recalibrar o poder recomendado com a simulação, fase por fase.</div>
+  </div></div>
+
+  <div class="find"><span class="pill warn">ALTO</span><div>
+    <h3>A coleção de agentes acaba em um dia</h3>
+    <p>16 agentes ★5 por dia, e só existem 4 ★5 diferentes. As garantias (180 e 500 downloads) quase nunca entram em ação, porque o volume de pacotes é alto demais.</p>
+    <div class="fix"><b>Correção:</b> com pacotes por fase e sem bônus, o volume cai pra algo como 1 Lendário a cada 1–2 dias. Aí as garantias passam a importar. Mais agentes no elenco também ajudam.</div>
+  </div></div>
+
+  <div class="find"><span class="pill ok">JÁ CORRIGIDO</span><div>
+    <h3>Compilador, garantias de item e árvore</h3>
+    <p>Compilar agora sobe de tier com 100% (até T3), 50% (T4) e 5% (T5). Os itens não têm mais garantia; só os pacotes de download têm. Na árvore, os nós não se mexem mais no clique, cada clique instala, passar o mouse mostra o efeito, e os nós-chave ganharam mecânicas: respingo do DPS, execução abaixo de 15% de vida e bloqueio de 1 em 5 ataques.</p>
+  </div></div>
+
+  <h2>Decisões que dependem de você</h2>
+  <ol class="q">
+    <li><b>O que vai pro mercado da Steam?</b> Recomendo só visuais (skins de agente e de arma). Equipamento com atributo e agentes ficam vinculados à conta.</li>
+    <li><b>Quanto tempo o jogo deve durar?</b> Por exemplo: árvore completa em 4 a 6 semanas de jogo, primeiro ★5 em 3 a 5 dias, fase 10-5 em 1 mês. Com essas metas eu ajusto as curvas e confirmo tudo na simulação.</li>
+    <li><b>Pacotes por fase concluída ou por tempo jogado?</b> Por fase recompensa quem progride; por tempo é mais previsível e mais difícil de explorar.</li>
+  </ol>
+
+  <h2>Como a simulação funciona</h2>
+  <p>Os arquivos estão em <code>tools/</code> no repositório. <code>make-sim.cjs</code> pega o protótipo e acrescenta contadores e um jogador idle automático. <code>balance-sim.cjs 48</code> roda 48 horas de jogo em cerca de 1 minuto e imprime, hora a hora, fase, poder, drops por tier, pacotes e agentes. A mesma ferramenta confirma cada mudança de balanceamento antes de ela entrar no jogo.</p>
+  <p class="small">Limitações: o jogador simulado não joga de forma ótima (não troca itens manualmente nem escolhe a fase ideal) e não conta tempo offline. Um jogador humano atento tende a progredir um pouco mais rápido.</p>
+</div>
+
+<script>
+(() => {
+  // [hora, fase (1-based), rótulo, nós da árvore, ★5 acumulados]
+  const D = [[1,7,"2-2",24,0],[2,9,"2-4",33,0],[3,12,"3-2",49,1],[4,13,"3-3",53,1],[5,15,"3-5",60,1],[6,15,"3-5",63,1],[7,17,"4-2",68,2],[8,18,"4-3",68,2],[9,22,"5-2",68,2],[10,23,"5-3",72,2],[11,24,"5-4",72,2],[12,24,"5-4",76,3],[13,27,"6-2",80,4],[14,27,"6-2",80,4],[15,28,"6-3",80,4],[16,30,"6-5",80,4],[17,32,"7-2",80,4],[18,32,"7-2",80,4],[19,32,"7-2",80,5],[20,32,"7-2",80,7],[21,33,"7-3",80,7],[22,33,"7-3",80,9],[23,36,"8-1",80,9],[24,36,"8-1",80,10],[25,36,"8-1",80,11],[26,36,"8-1",80,11],[27,36,"8-1",80,11],[28,36,"8-1",80,12],[29,36,"8-1",80,12],[30,36,"8-1",80,13],[31,36,"8-1",80,14],[32,36,"8-1",80,16],[33,37,"8-2",80,18],[34,37,"8-2",80,19],[35,37,"8-2",80,19],[36,37,"8-2",80,20],[37,37,"8-2",80,22],[38,37,"8-2",80,23],[39,38,"8-3",80,24],[40,38,"8-3",80,25],[41,40,"8-5",80,26],[42,41,"9-1",80,26],[43,41,"9-1",80,26],[44,41,"9-1",80,26],[45,41,"9-1",80,26],[46,41,"9-1",80,26],[47,41,"9-1",80,26],[48,41,"9-1",80,26]];
+  const el = document.getElementById('chart');
+  const Wd = 720, Ht = 280, m = {l:44, r:16, t:16, b:34};
+  const x = h => m.l + (h - 1) / 47 * (Wd - m.l - m.r), y = v => Ht - m.b - v / 45 * (Ht - m.t - m.b);
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  let g = '';
+  for (let v = 0; v <= 45; v += 15) g += `<line x1="${m.l}" x2="${Wd - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${v}</text>`;
+  for (const h of [1, 12, 24, 36, 48]) g += `<text x="${x(h)}" y="${Ht - m.b + 18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${h} h</text>`;
+  const path = D.map((d, i) => `${i ? 'L' : 'M'}${x(d[0]).toFixed(1)},${y(d[1]).toFixed(1)}`).join('');
+  const area = path + `L${x(48)},${y(0)}L${x(1)},${y(0)}Z`;
+  const notes = [[13, 'árvore completa'], [23, '14 de 15 agentes']].map(([h, t]) => {
+    const d = D[h - 1];
+    return `<line x1="${x(h)}" x2="${x(h)}" y1="${y(d[1]) - 8}" y2="${y(d[1]) - 38}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/><text x="${x(h)}" y="${y(d[1]) - 44}" text-anchor="middle" font-size="12" fill="var(--ink2)" font-family="IBM Plex Sans, sans-serif">${t}</text>`;
+  }).join('');
+  el.innerHTML = `<svg viewBox="0 0 ${Wd} ${Ht}" role="img" aria-label="Fase mais alta por hora de jogo: sobe até a fase 36 em 23 horas e trava na 41 a partir de 42 horas">
+    ${g}<path d="${area}" fill="var(--accent)" opacity=".10"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    ${notes}
+    <circle cx="${x(48)}" cy="${y(41)}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${x(48) - 8}" y="${y(41) + 20}" text-anchor="end" font-size="12" fill="var(--ink)" font-family="IBM Plex Mono, monospace">9-1</text>
+    <line id="xh" y1="${m.t}" y2="${Ht - m.b}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+    <circle id="xd" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
+    <rect x="${m.l}" y="${m.t}" width="${Wd - m.l - m.r}" height="${Ht - m.t - m.b}" fill="transparent" id="hit"/>
+  </svg><div class="tipbox" hidden></div>`;
+  const svg = el.querySelector('svg'), tip = el.querySelector('.tipbox'), xh = el.querySelector('#xh'), xd = el.querySelector('#xd');
+  el.querySelector('#hit').addEventListener('pointermove', ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * Wd;
+    const h = Math.max(1, Math.min(48, Math.round((px - m.l) / (Wd - m.l - m.r) * 47 + 1))), d = D[h - 1];
+    xh.setAttribute('x1', x(h)); xh.setAttribute('x2', x(h)); xh.setAttribute('opacity', 1);
+    xd.setAttribute('cx', x(h)); xd.setAttribute('cy', y(d[1])); xd.setAttribute('opacity', 1);
+    tip.hidden = false; tip.innerHTML = `${h} h · fase ${d[2]}<br>árvore ${d[3]}/80 · ★5 ${d[4]}`;
+    tip.style.left = (x(h) / Wd * r.width) + 'px'; tip.style.top = (y(d[1]) / Ht * r.height) + 'px';
+  });
+  el.querySelector('#hit').addEventListener('pointerleave', () => { tip.hidden = true; xh.setAttribute('opacity', 0); xd.setAttribute('opacity', 0); });
+})();
+</script>
