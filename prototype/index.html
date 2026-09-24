@@ -120,7 +120,7 @@
   .proc .mini i{display:block; height:100%; background:var(--green)}
   .proc.on{border-color:var(--cyan); background:#0e2629}
   .dx{display:grid; grid-template-columns:176px 1fr; gap:12px}
-  .scan{display:grid; justify-items:center; gap:3px; text-align:center}
+  .scan{display:grid; justify-items:center; align-content:start; gap:3px; text-align:center}
   .chamber{position:relative; width:168px; height:168px; display:grid; place-items:center; overflow:hidden;
     background:linear-gradient(rgba(92,225,230,.12) 1px, transparent 1px) 0 0/100% 8px, radial-gradient(circle, #123338, #070612 70%);
     border:1px solid #1f5a60}
@@ -314,7 +314,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.3</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.4</p>
 </main>
 
 <footer class="dock">
@@ -627,19 +627,19 @@ const STAR = {3:{hp:130, atk:5, c:'#5ca8ff'}, 4:{hp:175, atk:7, c:'#c38cff'}, 5:
 const TANKS = [
   {id:'firewall', name:'FIREWALL', stars:3, role:'lâmina e escudo hexagonal',
     passive:{dmgRed:.1}, ptxt:'Escudo hexagonal: recebe 10% menos dano.'},
-  {id:'aura2', name:'AURA VANGUARD Mk.II', stars:3, role:'rifle e drone de reconhecimento',
+  {id:'aura2', name:'SANDBOX-II', stars:3, role:'rifle e drone de reconhecimento',
     passive:{teamAtk:.1}, ptxt:'Drone de reconhecimento: esquadrão causa +10% de dano.',
     art:{w:30, base:'#4fd6c8', line:'#0d1512', cloth:2, draw:mech({A:'#2f4a3e', A2:'#1f3029', B:'#8c9a96', C:'#c08050', visor:'slit', shield:'bubble', weapon:'rifle', drone:'#3a4a44', metal:'#2a2f2e'})}},
-  {id:'sentinel', name:'SENTINEL BULWARK', stars:4, role:'garra hidráulica e escudo-torre',
+  {id:'sentinel', name:'QUARENTENA', stars:4, role:'garra hidráulica e escudo-torre',
     passive:{dmgRed:.2}, ptxt:'Escudo-torre: recebe 20% menos dano.',
     art:{w:30, base:'#5ce1e6', line:'#0b0e16', cloth:1, draw:mech({A:'#3a4458', A2:'#262c3a', B:'#4f5a76', C:'#8a8f9c', visor:'dots', shield:'tower', shieldCol:'#4a5568', gold:'#c89b3c', weapon:'claw', metal:'#2c2f36'})}},
-  {id:'valkyrie', name:'VALKYRIE-9', stars:4, role:'canhão de garra e echo-drone',
+  {id:'valkyrie', name:'RESTORE-9', stars:4, role:'canhão de garra e echo-drone',
     passive:{regen:.02}, ptxt:'Echo-drone: regenera 2% do HP por segundo em combate.',
     art:{w:30, base:'#5ce1e6', line:'#1a2238', cloth:2, draw:mech({A:'#e6e9f2', A2:'#9aa3b8', B:'#ffffff', C:'#c8913c', visor:'slit', shield:'tower', shieldCol:'#dfe4ee', gold:'#c8913c', weapon:'claw', orb:true, drone:'#e6e9f2', metal:'#8d96ad'})}},
-  {id:'bulwark7', name:'BULWARK-7', stars:5, role:'lâmina-canhão e escudo de engrenagem',
+  {id:'bulwark7', name:'KILLSWITCH-7', stars:5, role:'lâmina-canhão e escudo de engrenagem',
     passive:{reflect:.3}, ptxt:'Núcleo de fusão: devolve 30% do dano recebido.',
     art:{w:30, base:'#ff6a2a', line:'#000000', cloth:1, draw:mech({A:'#2a2624', A2:'#1a1716', B:'#8a5a3a', C:'#c08050', coat:'#241f1d', visor:'eyes', shield:'gear', weapon:'gunblade', blade:'#b8321e', metal:'#2e2a28'})}},
-  {id:'x1', name:'SENTINEL BULWARK-X1', stars:5, role:'escudo colossal e drone Aegis',
+  {id:'x1', name:'KERNELGUARD-X1', stars:5, role:'escudo colossal e drone Aegis',
     passive:{dmgRed:.25, teamHp:.15}, ptxt:'Aegis: recebe 25% menos dano e o esquadrão ganha +15% de HP.',
     art:{w:30, base:'#5ce1e6', line:'#0c1410', cloth:2, draw:mech({A:'#34503f', A2:'#22352a', B:'#7a5a3e', C:'#a9b0a8', visor:'dots', shield:'tower', shieldCol:'#56625c', gold:'#b07a4a', weapon:'rifle', drone:'#4a5a50', metal:'#2a302c'})}},
 ];
@@ -735,31 +735,31 @@ const GSTAR = {3:{hp:55, atk:10}, 4:{hp:65, atk:13}, 5:{hp:75, atk:17}};
 const GUNNERS = [
   {id:'scanner', name:'SCANNER', stars:3, role:'railgun e cachecol',
     passive:{selfAtk:.1}, ptxt:'Railgun: causa +10% de dano.'},
-  {id:'pulse', name:'PULSE-R', stars:3, role:'rifle de precisão',
+  {id:'pulse', name:'TRACEROUTE', stars:3, role:'rifle de precisão',
     passive:{crit:.2}, ptxt:'Tiro de precisão: 20% de chance de crítico (dano ×2).',
     art:{w:30, base:'#ff8a3a', line:'#0e0f12', cloth:1, draw:soldier({A:'#3a3d44', A2:'#24262c', B:'#55585f', acc:'#ff8a3a', weapon:'sniper', pack:'#2e3036', metal:'#23252a'})}},
-  {id:'blade', name:'BLADE', stars:3, role:'rifle com baioneta',
+  {id:'blade', name:'SHREDDER', stars:3, role:'rifle com baioneta',
     passive:{haste:.2}, ptxt:'Escaramuça: atira 20% mais rápido.',
     art:{w:30, base:'#6ee7a8', line:'#0c140f', cloth:1, draw:soldier({A:'#3e5a44', A2:'#27392b', B:'#7c9a82', weapon:'rifle', bayonet:'#d8e2dc', metal:'#26302a'})}},
-  {id:'infiltrator', name:'INFILTRATOR', stars:4, role:'rifle com mira e gancho',
+  {id:'infiltrator', name:'PENTEST', stars:4, role:'rifle com mira e gancho',
     passive:{teamAtk:.12}, ptxt:'Gancho e marcação: esquadrão causa +12% de dano.',
     art:{w:30, base:'#5ce1e6', line:'#101214', cloth:1, draw:soldier({A:'#2b2f33', A2:'#1c1f22', B:'#e3dcc4', acc:'#3fae6a', weapon:'rifle', scope:true, pack:'#3a4a3a', boot:'#cfc8b0', metal:'#30353a'})}},
-  {id:'ghost', name:'GHOST', stars:4, role:'sniper e pistola',
+  {id:'ghost', name:'SPECTRE', stars:4, role:'sniper e pistola',
     passive:{crit:.3, critX:2.5}, ptxt:'Operação fantasma: 30% de chance de crítico (dano ×2,5).',
     art:{w:30, base:'#5ce1e6', line:'#0b0d14', cloth:1, draw:soldier({A:'#262c3e', A2:'#181c28', B:'#3a4258', acc:'#ff8a3a', crest:'#e8e8f0', weapon:'sniper', metal:'#1f2330'})}},
-  {id:'nighthawk', name:'NIGHTHAWK', stars:4, role:'besta de energia',
+  {id:'nighthawk', name:'SNIFFER', stars:4, role:'besta de energia',
     passive:{pierce:.6}, ptxt:'Virote perfurante: atravessa e acerta o próximo inimigo com 60% do dano.',
     shot:{c:'#b77dff'},
     art:{w:30, base:'#b77dff', line:'#0d0809', cloth:1, draw:soldier({A:'#2a1e24', A2:'#1a1216', B:'#3e2830', acc:'#e0304a', weapon:'crossbow', metal:'#231a1e'})}},
-  {id:'archer', name:'SENTINEL ARCHER', stars:5, role:'arco tático e aljava',
+  {id:'archer', name:'CHECKSUM', stars:5, role:'arco tático e aljava',
     passive:{multishot:2, haste:.1}, ptxt:'Chuva de flechas: dispara 3 flechas (as extras com 50% do dano) e atira 10% mais rápido.',
     shot:{style:'arrow'},
     art:{w:30, base:'#ffb454', line:'#121420', cloth:2, draw:soldier({A:'#2b3048', A2:'#1c2033', B:'#dfe3ec', acc:'#e0a040', hair:'#e8e8f0', mask:'#2a2a30', scarf:'#d8323a', quiver:'#5a4030', weapon:'bow', metal:'#3a3f5c'})}},
-  {id:'lasert', name:'LASER-T', stars:5, role:'canhão laser e esteiras',
+  {id:'lasert', name:'DEFRAG', stars:5, role:'canhão laser e esteiras',
     passive:{pierce:1}, ptxt:'Canhão laser: o feixe atravessa a fila e acerta todos os inimigos (70% do dano nos de trás).',
     shot:{c:'#ff3a3a', style:'laser'},
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:soldier({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', weapon:'laser', lens:'#ff3a3a', treads:true, metal:'#2e3320'})}},
-  {id:'tankm1', name:'SENTINEL TANK-M-1', stars:5, role:'modo tanque · artilharia',
+  {id:'tankm1', name:'FORMAT-C', stars:5, role:'modo tanque · artilharia',
     passive:{splash:.5, obs:5}, ptxt:'Artilharia: cada projétil explode e acerta todos os inimigos com 50% do dano. A cada 5 disparos chama um ataque orbital (×3 em todos).',
     shot:{style:'shell', c:'#ffb454', x:31, y:19},
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:tankMode({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', rack:'#ff3a3a', metal:'#2e3320'})}},
@@ -1081,6 +1081,9 @@ const CHIPS = [
 ];
 const UPBASE = {3:20, 4:30, 5:45}, UP_G = 1.06, UP_COST = 1.3;
 const ITEM_G = 1.06;   // crescimento dos itens por nível (usado já no carregamento, pela vida dos agentes)
+// Espaços de equipamento por classe: 4-5 peças + 4 acessórios (Vacina, IA, Driver e Token).
+const ACC = ['vaccine', 'ai', 'driver', 'token'];
+const CLS_SLOTS = {fw:['helmet', 'armor', 'boots', 'weapon', 'shield', ...ACC], sc:['helmet', 'armor', 'boots', 'weapon', ...ACC], pt:['helmet', 'armor', 'boots', 'weapon', ...ACC]};
 
 // Subclasses de DPS. Armas de DPS têm o mesmo tipo e dão ×1,5 de bônus quando combinam.
 // As três classes de ataque. Cada uma tem as próprias armas (arma da classe certa dá ×1,5 de ATK).
@@ -1195,12 +1198,14 @@ const SETS = {
   overclock: {n:'Overclock', c:'#c38cff', b:[[2, {spd:6}], [4, {atk:10}]]},
 };
 const BN = {hp:'HP', atk:'ATK', red:'redução de dano', aoe:'dano em área', boss:'dano contra chefes', crit:'chance de crítico',
-  gold:'créditos ganhos', pkg:'sorte (itens T3+)', spd:'vel. de ataque', def:'DEF ganho', idrop:'chance de drop de itens', wdrop:'chance de drop de armas'};
-const WEAR = new Set(['hp', 'atk', 'spd', 'red']);
+  gold:'créditos ganhos', pkg:'sorte (itens T3+)', spd:'vel. de ataque', def:'DEF ganho', idrop:'chance de drop de itens', wdrop:'chance de drop de armas',
+  dbl:'chance de ataque duplo', upc:'desconto nos aprimoramentos', off:'ganho offline'};
+const WEAR = new Set(['hp', 'atk', 'spd', 'red', 'dbl']);
+const aiVal = it => +(AIS[it.ai].v * RAR[it.t].m).toFixed(1);
 // Chances de drop. Bônus de drop são relativos: +10% sobre 0,1% vira 0,11%.
 const GEAR_N = .08, GEAR_B = .15;
 const GEAR_BASE = GEAR_N;
-const W_SHARE = (1 / 5 + 1 / 4 + 1 / 4) / 3;   // fração dos itens que são armas
+const W_SHARE = ['fw', 'sc', 'pt'].reduce((a, c) => a + 1 / CLS_SLOTS[c].length, 0) / 3;   // fração dos itens que são armas
 const gearChance = (boss = bossStage()) => (boss ? GEAR_B : GEAR_N) * (1 + tv('drop') + glob('idrop'));
 const weaponChance = () => gearChance() * W_SHARE * (1 + glob('wdrop') + tv('wdrop'));
 const bossStage = (s = S.stage) => stageType(s) === 'boss';
@@ -1219,7 +1224,10 @@ function bonuses() {
   const B = {w:{fw:{}, sc:{}, pt:{}}, g:{}};
   const add = (cls, k, v) => { const o = WEAR.has(k) ? B.w[cls] : B.g; o[k] = (o[k] || 0) + v; };
   for (const cls of ['fw', 'sc', 'pt']) {
-    for (const it of Object.values(gearOf(cls))) if (it) (it.af || []).forEach(a => add(cls, a.k, a.v));
+    for (const it of Object.values(gearOf(cls))) if (it) {
+      (it.af || []).forEach(a => add(cls, a.k, a.v));
+      if (it.ai && AIS[it.ai]) add(cls, AIS[it.ai].k, aiVal(it));
+    }
     const c = setCounts(cls);
     for (const k in c) SETS[k].b.forEach(([n, eff]) => { if (c[k] >= n) for (const e in eff) add(cls, e, eff[e]); });
   }
@@ -1258,7 +1266,7 @@ const equipped = cls => charOf(S[CLASSES[cls].key]) || CLASSES[cls].list[0];
 const pT = () => equipped('fw').passive, pG = () => equipped('sc').passive;
 const lvOf = aid => S.lv[aid] || (S.lv[aid] = {a:0, h:0});
 const starsOf = aid => (charOf(aid) || {stars:3}).stars;
-const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * UP_COST ** lvOf(aid)[k]);
+const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * UP_COST ** lvOf(aid)[k] * (1 - Math.min(.5, glob('upc'))));
 function applySlots() {
   for (const cls in CLASSES) {
     const C = CLASSES[cls], T = equipped(cls), d = HERO_DEF[C.idx];
@@ -1378,6 +1386,23 @@ function kill(e) {
 const ITYPES = {
   helmet:{n:'Capacete', ab:'CAP'}, armor:{n:'Armadura', ab:'ARM'}, boots:{n:'Botas', ab:'BOT'},
   weapon:{n:'Arma', ab:'ARMA'}, shield:{n:'Escudo', ab:'ESC'}, vaccine:{n:'Vacina', ab:'VAC'},
+  ai:{n:'IA', ab:'IA'}, driver:{n:'Driver', ab:'DRV'}, token:{n:'Token', ab:'TKN'},
+};
+// Acessórios: Vacina, IA, Driver e Token. A IA é uma assistente com um efeito único (sátiras das IAs
+// de verdade e algumas do próprio universo do antivírus). Valor do efeito = v × multiplicador do tier.
+const AIS = {
+  gepeto:    {n:'GEPETO', c:'#10a37f', k:'gold', v:3, d:'Escreve relatórios convincentes sobre créditos que você ainda não ganhou. Às vezes ganha.'},
+  claudio:   {n:'CLAUDIO', c:'#d97757', k:'red', v:1.2, d:'Pede confirmação antes de cada golpe. Quem usa recebe menos dano.'},
+  geminios:  {n:'GEMINIOS', c:'#4f8cff', k:'dbl', v:1.5, d:'São dois. Chance de quem usa atacar duas vezes seguidas.'},
+  gruk:      {n:'GRUK', c:'#e8e8f0', k:'crit', v:1, d:'Responde tudo com confiança total e zero filtro. Mais críticos do agente de ataque.'},
+  copiloto:  {n:'COPILOTO', c:'#7a5cff', k:'spd', v:1.5, d:'Completa o seu ataque antes de você terminar de mirar. Quem usa ataca mais rápido.'},
+  lhama:     {n:'LHAMA', c:'#ffb454', k:'idrop', v:2, d:'Código aberto: todo mundo contribui. Mais drops de itens.'},
+  dipsique:  {n:'DIPSIQUE', c:'#5ca8ff', k:'upc', v:1.2, d:'Faz a mesma coisa por uma fração do preço. Aprimoramentos mais baratos.'},
+  mistrau:   {n:'MISTRAU', c:'#ff8a3a', k:'aoe', v:2, d:'Um vento francês que espalha tudo. Mais dano em área.'},
+  perplexo:  {n:'PERPLEXO', c:'#6ee7a8', k:'pkg', v:1, d:'Cita fonte até pra sorte. Mais itens T3 ou melhores.'},
+  siriguela: {n:'SIRIGUELA', c:'#c38cff', k:'off', v:5, d:'Não entendeu o comando, mas segue trabalhando quando você sai. Mais ganho offline.'},
+  clipe:     {n:'CLIPE', c:'#c9cfe0', k:'boss', v:2, d:'"Parece que você está enfrentando um chefe. Quer ajuda?" Mais dano contra chefes.'},
+  daemonzinho:{n:'DAEMONZINHO', c:'#ff3d7f', k:'def', v:2, d:'Um processo em segundo plano que ninguém lembra de ter instalado. Mais definições.'},
 };
 // Vacina: acessório de todas as classes. Cada uma é contra um tipo de vírus e aumenta o dano
 // do esquadrão inteiro contra ele (o sistema fica imunizado).
@@ -1387,11 +1412,10 @@ function vaccine(tn) {
   for (const cls of ['fw', 'sc', 'pt']) { const it = gearOf(cls).vaccine; if (it && it.vs === tn) v += itemStats(it).vdmg / 100; }
   return v * (1 + tv('vac'));
 }
-const CLS_SLOTS = {fw:['helmet', 'armor', 'boots', 'weapon', 'shield', 'vaccine'], sc:['helmet', 'armor', 'boots', 'weapon', 'vaccine'], pt:['helmet', 'armor', 'boots', 'weapon', 'vaccine']};
 const INAMES = {
-  fw:{helmet:'Elmo', armor:'Couraça', boots:'Grevas', weapon:'Lâmina de plasma', shield:'Escudo hexagonal'},
-  sc:{helmet:'Capacete tático', armor:'Colete balístico', boots:'Botas de salto'},
-  pt:{helmet:'Tiara-visor', armor:'Manto de nanofibra', boots:'Sandálias antigravidade', weapon:'Cajado de nanobots'},
+  fw:{helmet:'Elmo', armor:'Couraça', boots:'Grevas', weapon:'Lâmina de plasma', shield:'Escudo hexagonal', driver:'Driver de chipset', token:'Token de hardware'},
+  sc:{helmet:'Capacete tático', armor:'Colete balístico', boots:'Botas de salto', driver:'Driver de GPU', token:'Token de sessão'},
+  pt:{helmet:'Tiara-visor', armor:'Manto de nanofibra', boots:'Sandálias antigravidade', weapon:'Cajado de nanobots', driver:'Driver de rede', token:'Token 2FA'},
 };
 // Chance de tier por item: fase comum × fase de chefe. Garantias: T4+ a cada 150 itens sem T4+, T5 a cada 1000.
 const TIER_W = {n:[72, 22, 5.45, .5, .05, 0], b:[55, 32, 10.72, 2, .25, .03]};
@@ -1408,6 +1432,9 @@ function itemStats(it) {
     case 'boots':  return {hp: 15 * m * g, spd: 2 * m};
     case 'shield': return {hp: 30 * m * g, red: Math.min(25, 1.5 * m)};
     case 'vaccine': return {vdmg: 8 * m, hp: 10 * m * g};
+    case 'ai':     return {hp: 5 * m * g};
+    case 'driver': return {atk: 1.2 * m * g, spd: .6 * m};
+    case 'token':  return {hp: 10 * m * g, red: Math.min(8, .5 * m)};
   }
   return {};
 }
@@ -1421,13 +1448,14 @@ function gearStat(cls, key) {
   }
   return v;
 }
-const itemScore = it => { const st = itemStats(it), g = ITEM_G ** (it.lv - 1); return (st.atk || 0) * 3 * (it.cls === 'sc' && synergy(it) ? 1.5 : 1) + (st.hp || 0) * .6 + ((st.spd || 0) + (st.red || 0) * 1.5 + (st.vdmg || 0) * .5) * g * 3 + (it.af || []).reduce((a, x) => a + x.v, 0) * g * 2; };
+const itemScore = it => { const st = itemStats(it), g = ITEM_G ** (it.lv - 1); return (st.atk || 0) * 3 * (it.cls === 'sc' && synergy(it) ? 1.5 : 1) + (st.hp || 0) * .6 + ((st.spd || 0) + (st.red || 0) * 1.5 + (st.vdmg || 0) * .5) * g * 3 + ((it.af || []).reduce((a, x) => a + x.v, 0) + (it.ai ? aiVal(it) * 1.5 : 0)) * g * 2; };
 const STATN = {atk:'ATK', hp:'HP', spd:'vel. de ataque', red:'redução de dano'};
 function setTxt(cls, set) {
   const n = setCounts(cls)[set] || 0, S_ = SETS[set];
   return `<span style="color:${S_.c}">${S_.n}</span> ×${n}: ` + S_.b.map(([k, eff]) =>
     `<span class="${n >= k ? 'on' : 'off'}">${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}${n >= k ? ' ✓' : ''}</span>`).join(' · ');
 }
+const aiTxt = it => it.ai ? `<span style="color:${AIS[it.ai].c}">${AIS[it.ai].n}</span>: ${bonusTxt(AIS[it.ai].k, aiVal(it))}${WEAR.has(AIS[it.ai].k) ? ' (quem usa)' : ''}<br><i class="hint">${AIS[it.ai].d}</i>` : '';
 const afTxt = it => (it.af || []).map(a => `<span class="af">${bonusTxt(a.k, a.v)}</span>`).join(' · ');
 const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => k === 'atk' || k === 'hp' ? `+${fmtNum(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))} ${k === 'atk' ? 'ATK' : 'vida'}` : `+${+v.toFixed(1)}% ${k === 'vdmg' ? 'dano contra ' + VIR[it.vs] + ' (esquadrão)' : STATN[k]}`).join(' · ');
 const gearVal = it => rewardAt(it.lv - 1) * 6 * RAR[it.t].m;
@@ -1440,7 +1468,7 @@ const wtTag = it => it && it.wt ? ` <span style="color:${SUBS[it.wt].c}">${SUBS[
 // Ícones 16x16 pintados por código, um desenho por tipo (e por classe, no caso da arma).
 const iconCache = {};
 function itemIcon(it) {
-  const key = [it.k, it.type, it.cls, it.wt, it.t, it.r].join('|');
+  const key = [it.k, it.type, it.cls, it.wt, it.t, it.r, it.ai].join('|');
   if (iconCache[key]) return iconCache[key];
   const P = Painter(16, 16), c = it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c;
   const dk = mix(c, '#000000', .55), lt = mix(c, '#ffffff', .5), M = '#5d6384', M2 = '#9aa1bd';
@@ -1463,6 +1491,18 @@ function itemIcon(it) {
     P.line(3, 13, 10, 6, '#dfe4ee', 3); P.line(4, 12, 8, 8, c, 1);
     P.line(11, 5, 14, 2, '#ffffff'); P.line(1, 13, 3, 15, M, 2); P.line(2, 10, 6, 14, M);
     P.set(13, 13, c); P.set(14, 12, lt);
+  } else if (it.type === 'ai') {
+    const ac = AIS[it.ai] ? AIS[it.ai].c : c;
+    P.rect(2, 2, 12, 12, '#1d1d2e'); P.rect(3, 3, 10, 10, mix(ac, '#000000', .45));
+    for (let i = 4; i < 13; i += 3) { P.set(i, 0, M2); P.set(i, 1, M); P.set(i, 15, M2); P.set(i, 14, M); P.set(0, i, M2); P.set(1, i, M); P.set(15, i, M2); P.set(14, i, M); }
+    P.rect(5, 6, 2, 2, ac); P.rect(9, 6, 2, 2, ac); P.line(6, 10, 9, 10, ac); P.set(5, 6, '#ffffff'); P.set(9, 6, '#ffffff');
+    P.line(3, 13, 12, 13, c);
+  } else if (it.type === 'driver') {
+    P.rect(1, 4, 14, 8, M); P.line(1, 4, 14, 4, M2); P.ell(5, 8, 2, 2, '#1d1d2e'); P.ell(10, 8, 2, 2, '#1d1d2e'); P.set(5, 8, c); P.set(10, 8, c);
+    for (let x = 2; x < 14; x += 2) P.set(x, 12, '#ffb454'); P.line(1, 13, 14, 13, c);
+  } else if (it.type === 'token') {
+    P.rect(5, 1, 6, 9, M); P.line(5, 1, 10, 1, M2); P.rect(6, 3, 4, 3, '#1d1d2e'); P.rect(7, 4, 2, 1, c);
+    P.rect(6, 10, 4, 5, M2); P.line(7, 11, 7, 13, '#ffb454'); P.line(8, 11, 8, 13, '#ffb454'); P.set(8, 7, c);
   } else if (it.type === 'shield') {
     const hex = [[8, 1], [14, 4], [14, 11], [8, 15], [2, 11], [2, 4]];
     P.poly(hex, dk); hex.forEach((q, i) => { const n = hex[(i + 1) % 6]; P.line(q[0], q[1], n[0], n[1], c); });
@@ -1508,15 +1548,17 @@ function makeItem(boss, forceType) {
 }
 function buildItem(cls, type, wt, t, lv, set) {
   const vs = type === 'vaccine' ? pick(Object.keys(VIR)) : undefined;
-  const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : wt ? pick(GEARW[wt]) : INAMES[cls][type];
+  const ai = type === 'ai' ? pick(Object.keys(AIS)) : undefined;
+  const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : type === 'ai' ? AIS[ai].n : wt ? pick(GEARW[wt]) : INAMES[cls][type];
   const keys = Object.keys(AFFIX), af = [];
   // Root: passivas em branco, o jogador escolhe (ver configRoot)
-  if (t === 5) return {k:'gear', cls, type, wt, vs, t, lv, set, af, pick:AFFIX_N[5], q:1.15, name:`${base} Root Mk${lv}`};
+  const nm = x => type === 'ai' ? `${base} ${x === 'Root' ? 'Root ' : ''}v${lv}` : `${base} ${x} Mk${lv}`;   // IA leva número de versão
+  if (t === 5) return {k:'gear', cls, type, wt, vs, ai, t, lv, set, af, pick:AFFIX_N[5], q:1.15, name:nm('Root')};
   for (let i = 0; i < AFFIX_N[t]; i++) {
     const k = pick(keys.filter(x => !af.some(a => a.k === x))), A = AFFIX[k];
     af.push({k, v: +((A.lo + Math.random() * (A.hi - A.lo)) * RAR[t].m).toFixed(1)});
   }
-  return {k:'gear', cls, type, wt, vs, t, lv, set, af, q:.85 + Math.random() * .3, name:`${base} ${SETS[set].n} Mk${lv}`};
+  return {k:'gear', cls, type, wt, vs, ai, t, lv, set, af, q:.85 + Math.random() * .3, name:nm(SETS[set].n)};
 }
 // Root: o jogador escolhe as passivas uma vez, com o valor máximo da faixa. Depois fica fixo.
 function configRoot(it, keys) {
@@ -1780,7 +1822,7 @@ function update(dt) {
     const e = enemies[0];
     if (!e || e.x > W - 6) continue;
     if (e.x - (h.def.x + h.def.w) > h.def.range) continue;
-    h.t = cdOf(h); h.lunge = 1;
+    h.t = Math.random() < wear(h.def.id, 'dbl') ? cdOf(h) * .12 : cdOf(h); h.lunge = 1;   // GEMINIOS: ataque duplo
     if (h.def.id === 'fw') { deal(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
     else if (h.def.id === 'sc') {
       const G = pG(), sh = equipped('sc').shot || {};
@@ -2057,6 +2099,7 @@ function invItems() {
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div>${gearTag(it)} · ${RAR[it.t].n}<br>
         <span class="hint">${ITYPES[it.type].n} de <b>${heroOf(it.cls).def.name}</b> (${SLOTTAG[it.cls]}) · Nv${it.lv}</span>${wtTag(it)}</div></div>
         <div>${statTxt(it)}</div>
+        ${it.ai ? `<div>${aiTxt(it)}</div>` : ''}
         ${it.pick ? rootPicker(it) : it.af && it.af.length ? `<div>Passivas: ${afTxt(it)}</div>` : '<div class="hint">Sem passivas (T2 ou mais têm passivas).</div>'}
         ${it.set ? `<div class="sets">Conjunto ${setTxt(it.cls, it.set)} <span class="hint">(em ${heroOf(it.cls).def.name})</span></div>` : ''}
         <div class="hint">Equipado: ${cur ? `${cur.name} ${tierTxt(cur.t)} (${statTxt(cur)})` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? 'melhor' : 'pior'}</span></div>
@@ -2118,6 +2161,7 @@ function compView() {
 // Tela de agente no estilo da tela HERO do TBH: equipamentos à esquerda, retrato no centro, atributos à direita.
 // Tela de agente como um diagnóstico do sistema: processos no topo, câmara de varredura,
 // soquetes de equipamento em lista e leitura de atributos em terminal.
+const SOCK_ORDER = ['weapon', 'shield', 'helmet', 'armor', 'boots', 'vaccine', 'ai', 'driver', 'token'];
 const PID = {fw:'0421', sc:'0733', pt:'1180'};
 function agentTop() {
   const k = agSel, h = heroOf(k), G = gearOf(k);
@@ -2127,14 +2171,14 @@ function agentTop() {
       <img src="${portrait(s_)}" width="24" height="24" alt=""><span><b>${hh.def.name.toLowerCase()}.sys</b><small>PID ${PID[s_]} · ${lab}</small></span>
       <i class="mini"><i style="width:${p.toFixed(0)}%"></i></i></button>`;
   }).join('');
-  const socks = CLS_SLOTS[k].slice().sort((a, b) => ['weapon', 'shield', 'helmet', 'armor', 'boots', 'vaccine'].indexOf(a) - ['weapon', 'shield', 'helmet', 'armor', 'boots', 'vaccine'].indexOf(b)).map(ty => {
+  const socks = CLS_SLOTS[k].slice().sort((a, b) => SOCK_ORDER.indexOf(a) - SOCK_ORDER.indexOf(b)).map(ty => {
     const it = G[ty];
     return it
       ? `<button type="button" class="sock" data-uneq="${k}:${ty}" data-tip="eq:${k}:${ty}" style="--rc:${RAR[it.t].c}">
           <img src="${itemIcon(it)}" width="24" height="24" alt=""><span class="sn">${ITYPES[ty].n}</span><span class="si">${it.name}</span>
           ${it.set ? `<span class="setd" style="background:${SETS[it.set].c}"></span>` : ''}<b>${tierTxt(it.t)}</b></button>`
       : `<div class="sock empty"><span class="ph">${ITYPES[ty].ab}</span><span class="sn">${ITYPES[ty].n}</span><span class="si">soquete vazio</span></div>`;
-  }).join('');
+  }).map((h, i, arr) => SOCK_ORDER.includes('vaccine') && CLS_SLOTS[k].slice().sort((a, b) => SOCK_ORDER.indexOf(a) - SOCK_ORDER.indexOf(b))[i] === 'vaccine' ? '<p class="lbl">acessórios</p>' + h : h).join('');
   const setsOn = Object.keys(setCounts(k)).filter(x => setCounts(k)[x] >= 2);
   const role = k === 'sc' ? `<span style="color:${SUBS[dpsSub()].c}">${SUBS[dpsSub()].n} · ataque de ${SUBS[dpsSub()].k}</span>` : SLOTS.find(x => x[0] === k)[1];
   return `<div class="procs">${procs}</div>
@@ -2238,6 +2282,8 @@ function oddsView() {
     <p class="sub">Compilador <small>5 itens do mesmo tier</small></p><p>${comp} · T5 e T6 não compilam. Se falhar, sai um item novo do mesmo tier.</p>
     <p class="sub">Passivas dos itens <small>quantidade: ${AFFIX_N.map((n, t) => `${tierTxt(t)} ${n}`).join(' · ')}</small></p>
     <div class="tbl"><table class="rates"><tr><td>Passiva</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${aff}</table></div>
+    <p class="sub">IAs <small>acessório com efeito único; valor = base × multiplicador do tier (T1 ×1 … T6 ×${RAR[5].m}); todas têm a mesma chance</small></p>
+    <div class="tbl"><table class="rates"><tr><td>IA</td><td>efeito</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${Object.values(AIS).map(A => `<tr><td style="color:${A.c}">${A.n}</td><td>${BN[A.k]}</td>${RAR.map(r => `<td class="num">${+(A.v * r.m).toFixed(1)}%</td>`).join('')}</tr>`).join('')}</table></div>
     <p class="hint">T2–T5 sorteiam passivas diferentes, com valor uniforme na faixa. Root: você escolhe as ${AFFIX_N[5]} e elas vêm no valor máximo.</p>`;
 }
 
@@ -2254,6 +2300,7 @@ function itemTip(it, where) {
       <span class="hint">${tierTxt(it.t)} ${RAR[it.t].n} · ${ITYPES[it.type].n} · ${heroOf(it.cls).def.name} · Nv${it.lv}</span></div></div>
     <div class="tl">${statTxt(it)}</div>
     ${it.wt ? `<div class="tl">Tipo de arma: ${wtTag(it)}</div>` : ''}
+    ${it.ai ? `<div class="tl">${aiTxt(it)}</div>` : ''}
     ${it.pick ? `<div class="tl" style="color:${RAR[5].c}">${it.pick} passivas em branco: você escolhe uma vez, no valor máximo</div>` : it.af && it.af.length ? `<div class="tl">${afTxt(it)}${it.t === 5 ? ' <span class="hint">(gravadas)</span>' : ''}</div>` : '<div class="tl hint">sem passivas</div>'}
     ${it.set ? `<div class="tl sets">${setTxt(it.cls, it.set)}</div>` : ''}
     ${cmp ? `<div class="tl">vs. equipado (${cur.name}): <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? 'melhor' : 'pior'}</span></div>` : where === 'inv' && !cur ? '<div class="tl" style="color:var(--green)">soquete vazio: equipar é ganho certo</div>' : ''}
@@ -2451,7 +2498,7 @@ const RENDER = {
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
     <p>Um esquadrão de agentes digitais (tanque, ataque e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
     <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra Varredor), Blindados (poucos e resistentes, bom pra Rastreador) e Chefão (bom pra Caça-chefes).</p>
-    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) com tiers T1 a T6 (Root, só de chefe), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) e 4 acessórios (Vacina, IA, Driver e Token) com tiers T1 a T6 (Root, só de chefe), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
     <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
 };
 function renderPanel() {
@@ -2603,7 +2650,7 @@ function clock() { const d = new Date(); $('#clock').textContent = d.toLocaleTim
 function offline(ms) {
   const sec_ = Math.min(ms / 1000, 8 * 3600);
   if (sec_ < 30) return;
-  const gain = sec_ * rewardAt(S.stage) * .04 * (1 + tv('off'));   // ~50% do ritmo online
+  const gain = sec_ * rewardAt(S.stage) * .04 * (1 + tv('off') + glob('off'));   // ~50% do ritmo online
   S.data += gain;
   let chips = 0;
   for (let c = 0; c < Math.floor(sec_ / 120); c++)

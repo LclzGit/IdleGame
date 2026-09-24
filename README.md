@@ -23,6 +23,56 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.4: nomes novos, 4 acessórios e IAs
+
+**Agentes renomeados** pra termos de antivírus e segurança. Os ids internos não mudaram, então os saves continuam valendo.
+
+| Antes | Agora | Classe |
+|---|---|---|
+| AURA VANGUARD Mk.II | SANDBOX-II | Tanque |
+| SENTINEL BULWARK | QUARENTENA | Tanque |
+| VALKYRIE-9 | RESTORE-9 | Tanque |
+| BULWARK-7 | KILLSWITCH-7 | Tanque |
+| SENTINEL BULWARK-X1 | KERNELGUARD-X1 | Tanque |
+| PULSE-R | TRACEROUTE | Rastreador |
+| SENTINEL ARCHER | CHECKSUM | Rastreador |
+| NIGHTHAWK | SNIFFER | Varredor |
+| LASER-T | DEFRAG | Varredor |
+| SENTINEL TANK-M-1 | FORMAT-C | Varredor |
+| GHOST | SPECTRE | Caça-chefes |
+| INFILTRATOR | PENTEST | Caça-chefes |
+| BLADE | SHREDDER | Caça-chefes |
+
+FIREWALL, SCANNER e PATCHER continuam com o mesmo nome.
+
+**Acessórios:** cada agente tem 4 espaços de acessório, somados às peças normais:
+
+- **Vacina:** dano extra contra um tipo de vírus.
+- **IA:** uma assistente com efeito único.
+- **Driver:** ATK e velocidade de ataque.
+- **Token:** vida e redução de dano.
+
+**IAs** (valor = base × multiplicador do tier):
+
+| IA | Efeito | T1 → T6 |
+|---|---|---|
+| GEPETO | créditos | 3% → 33% |
+| CLAUDIO | redução de dano (quem usa) | 1,2% → 13,2% |
+| GEMINIOS | ataque duplo (quem usa) | 1,5% → 16,5% |
+| GRUK | crítico | 1% → 11% |
+| COPILOTO | velocidade de ataque (quem usa) | 1,5% → 16,5% |
+| LHAMA | drop de itens | 2% → 22% |
+| DIPSIQUE | desconto nos aprimoramentos (máx. 50%) | 1,2% → 13,2% |
+| MISTRAU | dano em área | 2% → 22% |
+| PERPLEXO | sorte (T3+) | 1% → 11% |
+| SIRIGUELA | ganho offline | 5% → 55% |
+| CLIPE | dano contra chefes | 2% → 22% |
+| DAEMONZINHO | definições | 2% → 22% |
+
+IA vem com número de versão no nome (ex.: `GEPETO v42`) e tem tabela própria no painel Chances.
+
+**Balanceamento:** simulei 168 h de novo. O Driver e o Token ficaram mais fracos que as outras peças pra não acelerar a campanha: o Kernel Panic chega em ~108 h (antes, ~120 h). Como os itens agora se dividem entre mais espaços, cada peça específica cai menos.
+
 ## v1.3.1: retratos das fichas e aba de Suportes
 
 - **Retratos:** os agentes que têm ficha de personagem mostram o recorte da arte da ficha na tela de diagnóstico e na Coleção. São eles BULWARK-7, SENTINEL BULWARK, VALKYRIE-9, AURA VANGUARD, BULWARK-X1, INFILTRATOR, GHOST, ARCHER, PULSE-R, BLADE, NIGHTHAWK, LASER-T e TANK-M-1. Os recortes ficam em `art/retratos/`. FIREWALL, SCANNER e PATCHER continuam com o busto pintado por código até ganharem ficha própria.
