@@ -23,6 +23,28 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.8: arte nova em batalha e menu Chances enxuto
+
+- **Personagens em batalha:** os 13 agentes que têm ficha usam os sprites recortados das próprias fichas (fundo removido automaticamente), em 2 poses: andando e atacando. O tier do equipamento aparece como aura colorida em volta do agente.
+  - A faixa de batalha agora é desenhada em resolução dobrada.
+  - O esquadrão inicial passou a ser SANDBOX-II + TRACEROUTE + PATCHER, pra primeira impressão já usar a arte das fichas. Os saves existentes não mudam.
+  - Continuam com o desenho antigo, por falta de ficha: FIREWALL, SCANNER e PATCHER.
+  - `tools/extract-sprites.cjs` guarda as coordenadas das poses e o recorte, pra repetir com fichas novas.
+- **Inimigos redesenhados:** com 4× mais detalhe e 2 quadros de animação, todos encarando os agentes:
+  - bug: besouro de glitch magenta com patas e antenas;
+  - worm: verme de dados segmentado;
+  - trojan: cavalo de Troia de placa de circuito com um olho escondido no peito;
+  - ransomware: monstro-cadeado com fechadura brilhando e correntes.
+- **Cenários por setor:** cada setor tem duas camadas em movimento, em velocidades diferentes, e chão de placa de circuito:
+  - C:\TEMP: pastas, papéis e lixeiras;
+  - CACHE L2: blocos de memória;
+  - RAM: pentes e chips;
+  - KERNEL: anéis do núcleo e canos;
+  - REDE LOCAL: constelação e roteadores;
+  - DEEP WEB: camadas de cebola, glitches e olhos vermelhos;
+  - Kernel Panic: tons de alerta.
+- **Menu Chances:** textos curtos, sem a coluna de garantias e sem as tabelas "base → agora".
+
 ## v1.7.2: chances só no menu Chances
 
 - As porcentagens saíram do Download, do inventário, do Compilador e das tooltips de pacote. Essas telas mostram só as garantias ("★5 garantido em 500", "nunca ★3").
