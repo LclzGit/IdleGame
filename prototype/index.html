@@ -106,6 +106,9 @@
   .sets{font-size:11px; margin-top:3px; color:var(--mute)}
   .sets .on{color:var(--text)} .sets .off{opacity:.6}
   .setlist{margin-top:6px; font-size:11px; color:var(--mute)}
+  .rates{border-collapse:collapse; font-variant-numeric:tabular-nums}
+  .rates td{padding:1px 8px 1px 0}
+  .rates td:nth-child(n+2){text-align:right}
   .setlist summary{cursor:pointer; color:var(--text)}
   .cell.sel{border-color:var(--amber); outline:1px solid var(--amber)}
   .det{margin-top:10px; padding:8px 10px; border:1px solid var(--line); background:#0b0a16; min-height:58px}
@@ -814,6 +817,12 @@ const SETS = {
 const BN = {hp:'HP', atk:'ATK', red:'redução de dano', aoe:'dano em área', boss:'dano contra chefes', crit:'chance de crítico',
   gold:'dados ganhos', pkg:'chance de pacote de download', spd:'vel. de ataque', def:'DEF ganho', idrop:'chance de drop de itens', wdrop:'chance de drop de armas'};
 const WEAR = new Set(['hp', 'atk', 'spd', 'red']);
+// Chances de drop. Bônus de drop são relativos: +10% sobre 0,1% vira 0,11%.
+const GEAR_BASE = .08;
+const W_SHARE = (1 / 5 + 1 / 4 + 1 / 4) / 3;   // fração dos itens que são armas
+const gearChance = () => GEAR_BASE * (1 + tv('drop') + glob('idrop'));
+const weaponChance = () => gearChance() * W_SHARE * (1 + glob('wdrop'));
+const chipChance = (r, boss) => (boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + tv('chip') + glob('pkg'));
 const bonusTxt = (k, v) => `${k === 'red' ? '-' : '+'}${+v.toFixed(1)}% ${BN[k]}`;
 function setCounts(cls) {
   const c = {};
@@ -946,8 +955,9 @@ function kill(e) {
   S.def += Math.round((e.boss ? 15 * (1 + S.stage / 3) : 1 + Math.floor(S.stage / 3)) * (1 + glob('def')));
   burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
-  if (e.boss || Math.random() < .08 * (1 + tv('drop') + glob('idrop'))) dropGear(e.boss);
-  if (glob('wdrop') && Math.random() < .08 * glob('wdrop')) dropGear(false, 'weapon');
+  if (e.boss || Math.random() < gearChance()) dropGear(e.boss);
+  // o bônus de armas soma só a parte extra: chance de arma × bônus
+  if (glob('wdrop') && Math.random() < gearChance() * W_SHARE * glob('wdrop')) dropGear(false, 'weapon');
   dropChip(e);
   if (e.boss) stageClear(); else S.kills++;
 }
@@ -1080,7 +1090,7 @@ function dropGear(boss, forceType) {
 }
 function dropChip(e) {
   for (let r = CHIPS.length - 1; r >= 0; r--) {
-    if (Math.random() >= (e.boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + tv('chip') + glob('pkg'))) continue;
+    if (Math.random() >= chipChance(r, e.boss)) continue;
     const C = CHIPS[r];
     if (addItem({k:'chip', r, n:1})) {
       float(e.x + e.w / 2, GROUND - e.h - 26, 'PACOTE ' + C.n.toUpperCase(), C.c);
@@ -1456,6 +1466,7 @@ function equip(id) {
 // ---------- painéis ----------
 let openP = null, selInv = -1, sqTab = 'team', colCls = 'fw';
 const PANELS = {squad:'Esquadrão', tree:'Antivírus · árvore de atualizações', inv:'Inventário', gacha:'Download de agentes', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
+const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
 const RENDER = {
   squad: () => {
@@ -1532,6 +1543,15 @@ const RENDER = {
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <p class="hint drops">Chance de tier por item: ${RAR.map((r, i) => `<span style="color:${r.c}">${tierTxt(i)} ${r.n} ${TIER_W[i]}%</span>`).join(' · ')}. Chefes dão no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
+      <details class="setlist" open><summary>Chances atuais por vírus (base → com seus bônus)</summary>
+        <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
+        <table class="rates">${[
+          ['Item (qualquer)', GEAR_BASE, gearChance()],
+          ['Arma', GEAR_BASE * W_SHARE, weaponChance()],
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span>`, c.drop, chipChance(r, false)]),
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (chefe)`, c.boss, chipChance(r, true)]),
+        ].map(([n, b, e]) => `<tr><td>${n}</td><td>${pct2(b)}</td><td>→</td><td class="${e > b ? 'k' : ''}">${pct2(e)}</td></tr>`).join('')}</table>
+      </details>
       <details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
       <div class="opts"><button type="button" data-sellworse>Reciclar itens piores que os equipados</button></div>`;
   },
