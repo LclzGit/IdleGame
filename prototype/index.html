@@ -46,7 +46,7 @@
   .readme b{color:var(--amber); font-weight:600}
   .readme .k{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; color:var(--cyan)}
   #squad{display:grid; gap:12px}
-  .d{display:grid; gap:4px 12px; grid-template-columns:56px 1fr}
+  .d{display:grid; gap:4px 12px; grid-template-columns:72px 1fr}
   .d > :not(.por){grid-column:2}
   .por{grid-row:1 / span 4; align-self:center; justify-self:center; image-rendering:pixelated; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--gl) 45%, transparent))}
   .prev{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute)}
@@ -159,7 +159,7 @@
 <script>
 (() => {
 const $ = s => document.querySelector(s);
-const SCALE = 3, H = 48, GROUND = 40, KEY = 'daemonbar.v1';
+const SCALE = 2, H = 72, GROUND = 64, KEY = 'daemonbar.v1';
 const cv = $('#strip'), ctx = cv.getContext('2d');
 let W = 320;
 
@@ -190,83 +190,192 @@ const ART = {
     'abbbccbbba','abbbccbbba','abbbbcbbba','abbbbbbbba','aaaaaaaaaa'],
     {a:'#3d0a1f',b:'#ff3d7f',c:'#ffb454'}],
 };
-// Agentes humanoides (12x16, virados pra direita): tronco + 2 quadros de pernas.
-const LEGS_HEAVY = [
-  ['...oa..ao...','...oa..ao...','...od..do...','..ood..doo..','..ooo..ooo..'],
-  ['...oa..ao...','..oa....ao..','..od....do..','.ood....doo.','.ooo....ooo.'],
-];
-const LEGS_SLIM = [
-  ['....oa.ao...','....oa.ao...','....od.do...','...ood.doo..','...ooo.ooo..'],
-  ['....oa.ao...','...oa...ao..','...od...do..','..ood...doo.','..ooo...ooo.'],
-];
-const LEGS_FW = [
-  ['ge..oa..ao..','ge..oa..ao..','g...od..do..','...ood..doo.','...ooo..ooo.'],
-  ['ge..oa..ao..','g..oa....ao.','...od....do.','..ood....doo','..ooo....ooo'],
-];
-// Letras em `glow` recebem a cor da raridade do módulo equipado.
-// `grow(rows, tier)` acrescenta peças conforme a raridade (0 Comum … 4 Quântico).
-const HUMAN = {
-  // FIREWALL: armadura preta com linhas de energia, cabelo cobre espetado, sobretudo,
-  // lâmina pesada apontada pro chão e escudo hexagonal de energia na frente
-  fw: {w:16, base:'#5ce1e6', glow:['g'], top:[
-    '....h.hh.h......','...hhhhhhhh.....','...ohhhhhhho....','...ohhsssso.....','..cobsssoboc.g..',
-    '.obaaagaaaboggg.','ob.agggaa.bbgWg.','geboaagaao..gWg.','ge.okaaaako.ggg.','ge.kkoaaaokk.g..','ge.kk.oaao.kk...'],
-    legs:LEGS_FW,
-    pal:{o:'#000000',h:'#e0613f',s:'#e8b896',a:'#2a2a3a',b:'#4a4a62',c:'#aab0c4',k:'#1d1d28',e:'#3a3a4c',W:'#ffffff',d:'#aab0c4'},
-    grow(r, t) {
-      if (t >= 2) for (const y of [5, 6, 7, 8]) setc(r, y, 15, 'g');
-      if (t >= 3) { setc(r, 3, 2, 'c'); setc(r, 3, 11, 'c'); }
-      if (t >= 4) { setc(r, 0, 3, 'g'); setc(r, 0, 10, 'g'); }
-    }},
-  // SCANNER: atiradora de cabelo prateado, óculos de visor, armadura branca e marinho,
-  // cachecol magenta esvoaçante e railgun comprida (2 variações de cachecol)
-  sc: {w:16, base:'#5ce1e6', glow:['g','m'], tops:[[
-    '.....ooooo......','....ohhhhhho....','...ohhhhhhhho...','...oHhgggggo....','...oHhsssso.....',
-    '..rr.ossso......','.rrrroooooo.....','rr..oaaddao.....','r...oadddaakkkkm','....oaddaaKKK...','....oaaaao......'],[
-    '.....ooooo......','....ohhhhhho....','...ohhhhhhhho...','...oHhgggggo....','...oHhsssso.....',
-    '..r..ossso......','rrrrroooooo.....','.r..oaaddao.....','....oadddaakkkkm','....oaddaaKKK...','....oaaaao......']],
-    legs:LEGS_SLIM,
-    pal:{o:'#141a2e',h:'#d4d8ee',H:'#8a90b0',s:'#f1c7a8',r:'#ff3d7f',a:'#e9ecf5',d:'#2a3561',k:'#3a3f5c',K:'#6b7194'},
-    grow(r, t) {
-      if (t >= 1) r[8] = r[8].replace('kkkkm', 'k'.repeat(4 + t) + 'm');
-      if (t >= 3) { setc(r, 7, 12, 'K'); setc(r, 7, 13, 'g'); }
-    }},
-  // PATCHER: médica de cabelo branco longo, faixa-visor, armadura branco-lavanda,
-  // capa pastel iridescente (2 variações) e cajado emissor de nanobots
-  pt: {w:16, base:'#c9b8ff', glow:['v','g'], tops:[[
-    '......hhh.......','.....hhhhh...g..','....hhhhhho.ggg.','...Hhvvvvho..g..','...Hhhssso....t.',
-    '..HqqoAgAo....t.','.qqpqoaaaoaasst.','.qpqpoaaaao...t.','qqpqpoaAaao...t.','qpqp.oaaao....t.','pq...oAAAo....t.'],[
-    '......hhh.......','.....hhhhh...g..','....hhhhhho.ggg.','...Hhvvvvho..g..','...Hhhssso....t.',
-    '..HqqoAgAo....t.','qqpqpoaaaoaasst.','qpqp.oaaaao...t.','pqp..oaAaao...t.','qp...oaaao....t.','p....oAAAo....t.']],
-    legs:[
-      ['p....oa.ao....t.','.....oa.ao....t.','.....oA.Ao......','....ooA.Aoo.....','....ooo.ooo.....'],
-      ['p....oa.ao....t.','....oa...ao...t.','....oA...Ao.....','...ooA...Aoo....','...ooo...ooo....'],
-    ],
-    pal:{o:'#2a2640',h:'#f2f0ff',H:'#b9b3de',s:'#7a4a33',a:'#dcd8f0',A:'#8b86ad',p:'#e8c8f5',q:'#bfe3ff',t:'#8b86ad'},
-    grow(r, t) {
-      if (t >= 2) { setc(r, 11, 1, 'q'); setc(r, 12, 0, 'q'); setc(r, 13, 0, 'p'); }
-      if (t >= 3) { setc(r, 2, 11, 'g'); setc(r, 2, 15, 'g'); setc(r, 0, 13, 'g'); }
-    }},
-};
-function setc(rows, y, x, ch) {
-  const row = rows[y].padEnd(x + 1, '.');
-  rows[y] = row.slice(0, x) + ch + row.slice(x + 1);
+// ---------- agentes 32x32, pintados por camadas ----------
+// Cada agente é desenhado de trás pra frente num grid 32x32 e recebe contorno automático.
+// f = quadro das pernas (0/1), v = variação de pano (capa/cachecol), t = raridade (-1…4), glow = cor das luzes.
+function Painter(w, h) {
+  const g = new Array(w * h).fill(null);
+  const P = {
+    set(x, y, c) {
+      x = Math.round(x); y = Math.round(y);
+      if (c && x >= 0 && y >= 0 && x < w && y < h) g[y * w + x] = typeof c === 'function' ? c(x, y) : c;
+    },
+    rect(x, y, rw, rh, c) { for (let j = 0; j < rh; j++) for (let i = 0; i < rw; i++) P.set(x + i, y + j, c); },
+    line(x0, y0, x1, y1, c, th = 1) {
+      x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+      const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+      let err = dx + dy, o = th >> 1;
+      for (;;) {
+        P.rect(x0 - o, y0 - o, th, th, c);
+        if (x0 === x1 && y0 === y1) break;
+        const e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+      }
+    },
+    poly(pts, c) {
+      const ys = pts.map(p => p[1]);
+      for (let y = Math.floor(Math.min(...ys)); y <= Math.ceil(Math.max(...ys)); y++) {
+        const yc = y + .5, xs = [];
+        pts.forEach((a, i) => {
+          const b = pts[(i + 1) % pts.length];
+          if ((a[1] <= yc && b[1] > yc) || (b[1] <= yc && a[1] > yc)) xs.push(a[0] + (yc - a[1]) / (b[1] - a[1]) * (b[0] - a[0]));
+        });
+        xs.sort((m, n) => m - n);
+        for (let i = 0; i + 1 < xs.length; i += 2)
+          for (let x = Math.round(xs[i]); x <= Math.round(xs[i + 1]) - 1; x++) P.set(x, y, c);
+      }
+    },
+    ell(cx, cy, rx, ry, c) {
+      for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++)
+        if ((x * x) / (rx * rx + .5) + (y * y) / (ry * ry + .5) <= 1) P.set(cx + x, cy + y, c);
+    },
+    outline(c) {
+      const src = g.slice();
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        if (src[y * w + x]) continue;
+        const n = (x > 0 && src[y * w + x - 1]) || (x < w - 1 && src[y * w + x + 1]) || (y > 0 && src[(y - 1) * w + x]) || (y < h - 1 && src[(y + 1) * w + x]);
+        if (n) g[y * w + x] = c;
+      }
+    },
+    canvas(white) {
+      const cnv = document.createElement('canvas'); cnv.width = w; cnv.height = h;
+      const cx = cnv.getContext('2d');
+      g.forEach((c, i) => { if (c) { cx.fillStyle = white ? '#ffffff' : c; cx.fillRect(i % w, i / w | 0, 1, 1); } });
+      return cnv;
+    },
+  };
+  return P;
 }
+function mix(a, b, k) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = sh => Math.round(((pa >> sh) & 255) * (1 - k) + ((pb >> sh) & 255) * k);
+  return '#' + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1);
+}
+// Perna com joelho levemente à frente; o pé fica em y=30.
+function leg(P, hx, hy, fx, thigh, shin, boot, th) {
+  const kx = (hx + fx) / 2 + 1, ky = (hy + 30) / 2;
+  P.line(hx, hy, kx, ky, thigh, th);
+  P.line(kx, ky, fx, 28, shin, th);
+  P.rect(fx - 1, 29, th + 2, 2, boot);
+}
+const stride = f => f ? [2, -2] : [-3, 3];   // deslocamento do pé [de trás, da frente]
+
+const HERO_ART = {
+  // FIREWALL: sobretudo, armadura preta com linhas de energia, cabelo cobre espetado,
+  // lâmina pesada apontada pro chão e escudo hexagonal de energia na frente.
+  fw: {w:30, base:'#5ce1e6', line:'#000000', cloth:1, draw(P, f, v, t, gl) {
+    const A = '#2a2a3a', A2 = '#1f1f2b', B = '#4a4a62', C = '#aab0c4', K = '#1d1d28', K2 = '#30303f',
+          S = '#e8b896', Hc = '#e0613f', H2 = '#a8432a', E = '#3a3a4c', dim = mix(gl, '#000000', .6);
+    P.poly([[10, 11], [19, 11], [23, 29], [6, 29]], (x) => x < 9 || x > 20 ? K2 : K);
+    if (t >= 3) P.line(6, 28, 23, 28, gl);
+    const [bf, ff] = stride(f);
+    leg(P, 12, 21, 12 + bf, A2, A2, '#565a74', 3);
+    P.poly([[5, 16], [9, 16], [6, 31], [2, 31]], E);
+    P.line(5, 17, 2, 30, gl);
+    if (t >= 4) P.line(9, 17, 6, 30, gl);
+    P.line(11, 12, 8, 16, A2, 3);
+    P.rect(5, 15, 6, 2, C);
+    leg(P, 16, 21, 16 + ff, A, B, C, 3);
+    P.poly([[10, 10], [20, 10], [18, 22], [11, 22]], A);
+    P.line(12, 13, 14, 16, gl); P.line(14, 16, 17, 13, gl);
+    P.line(12, 19, 17, 19, B); P.set(14, 20, gl); P.set(15, 20, gl);
+    P.ell(10, 12, 3, 2, B); P.ell(19, 12, 3, 2, B);
+    P.line(8, 10, 12, 10, C); P.line(17, 10, 21, 10, C);
+    if (t >= 3) { P.set(8, 9, C); P.set(7, 8, C); P.set(21, 9, C); P.set(22, 8, C); }
+    P.rect(12, 8, 7, 2, C);
+    P.rect(13, 3, 5, 6, S);
+    P.set(16, 5, '#1a1020'); P.set(17, 7, mix(S, '#000000', .3));
+    P.poly([[11, 6], [11, 2], [13, 3], [14, 0], [16, 2], [18, 0], [19, 3], [20, 2], [19, 5], [16, 4], [13, 5]], Hc);
+    P.line(12, 2, 9, 1, Hc); P.line(11, 4, 8, 4, H2); P.line(13, 4, 17, 3, H2);
+    P.set(13, 6, gl);
+    if (t >= 4) { P.set(14, 0, gl); P.set(18, 0, gl); P.set(9, 1, gl); }
+    P.line(19, 12, 22, 16, A, 3); P.rect(21, 15, 3, 3, B);
+    const r = t >= 2 ? 6 : 5, cx = 26, cy = 17;
+    const hex = [[cx, cy - r], [cx + r * .87, cy - r / 2], [cx + r * .87, cy + r / 2], [cx, cy + r], [cx - r * .87, cy + r / 2], [cx - r * .87, cy - r / 2]];
+    P.poly(hex, dim);
+    hex.forEach((p, i) => { const q = hex[(i + 1) % 6]; P.line(p[0], p[1], q[0], q[1], gl); });
+    P.line(cx, cy - 2, cx, cy + 2, '#ffffff'); P.line(cx - 1, cy, cx + 1, cy, '#ffffff');
+  }},
+  // SCANNER: cabelo prateado, óculos de visor, armadura branca e marinho,
+  // cachecol magenta esvoaçante e railgun que cresce com a raridade.
+  sc: {w:30, base:'#5ce1e6', line:'#141a2e', cloth:2, draw(P, f, v, t, gl) {
+    const W1 = '#e9ecf5', W2 = '#b9c0d6', N = '#2a3561', N2 = '#1d2547', S = '#f1c7a8',
+          Hh = '#d4d8ee', H2 = '#8a90b0', R = '#ff3d7f', R2 = '#b0204f', K = '#3a3f5c', K2 = '#6b7194';
+    for (let i = 0; i < 11; i++) {
+      const x = 12 - i, y = 9 + Math.round(Math.sin(i * .8 + v * 2.2) * 1.4) + (i >> 2);
+      P.rect(x, y, 1, 2, i % 4 === 3 ? R2 : R);
+    }
+    P.ell(13, 6, 4, 4, H2);
+    const [bf, ff] = stride(f);
+    leg(P, 13, 20, 13 + bf, N2, N2, N2, 2);
+    P.line(13, 11, 15, 16, N2, 2);
+    leg(P, 16, 20, 16 + ff, W1, N, N, 2);
+    P.set(17 + ff / 2, 24, W2);
+    P.poly([[12, 10], [19, 10], [18, 21], [12, 21]], N);
+    P.poly([[12, 11], [19, 11], [18, 16], [13, 16]], W1);
+    P.line(13, 16, 17, 16, W2);
+    P.line(12, 18, 18, 18, K2);
+    P.rect(11, 10, 2, 3, W2); P.rect(17, 10, 3, 3, W1);
+    P.rect(12, 8, 7, 2, R); P.line(12, 9, 18, 9, R2);
+    P.rect(13, 3, 5, 5, S);
+    P.ell(15, 2, 4, 2, Hh); P.rect(11, 2, 3, 7, Hh); P.line(11, 8, 10, 10, Hh);
+    P.line(14, 3, 18, 3, Hh); P.set(18, 4, Hh);
+    P.line(11, 5, 13, 5, H2);
+    P.rect(14, 5, 5, 2, gl); P.set(18, 5, '#ffffff');
+    P.set(16, 8, mix(S, '#000000', .25));
+    const L = 26 + Math.max(0, t);
+    P.rect(9, 14, 5, 3, K);
+    P.rect(13, 13, L - 13, 3, K); P.line(13, 13, L - 1, 13, K2);
+    for (let x = 16; x < L - 1; x += 3) P.set(x, 15, gl);
+    P.rect(L, 13, 1, 3, gl);
+    if (t >= 3) { P.rect(17, 11, 4, 2, K2); P.set(20, 11, gl); }
+    P.line(18, 11, 22, 15, W1, 2); P.set(22, 16, S); P.set(15, 17, S);
+  }},
+  // PATCHER: cabelo branco longo, faixa-visor, armadura branco-lavanda,
+  // capa pastel iridescente e cajado emissor de nanobots.
+  pt: {w:26, base:'#c9b8ff', line:'#2a2640', cloth:2, draw(P, f, v, t, gl) {
+    const A = '#dcd8f0', A2 = '#8b86ad', Hh = '#f2f0ff', H2 = '#b9b3de', S = '#7a4a33', S2 = '#5e3726', T = '#8b86ad';
+    const iri = (x, y) => ['#e8c8f5', '#bfe3ff', '#d9d2ff'][((x + y + v * 3) >> 1) % 3];
+    const bot = t >= 2 ? 31 : 29;
+    P.poly([[11, 10], [16, 10], [13 + v, bot], [1 + v - (t >= 2 ? 1 : 0), bot - 3]], iri);
+    P.poly([[11, 3], [16, 3], [14, 17], [9, 15]], H2);
+    const [bf, ff] = stride(f);
+    leg(P, 13, 20, 13 + bf, S2, A2, A2, 2);
+    leg(P, 16, 20, 16 + ff, S, A, A, 2);
+    P.set(17 + ff / 2, 24, A2);
+    P.poly([[12, 10], [18, 10], [17, 21], [13, 21]], A);
+    P.line(15, 16, 15, 20, A2);
+    P.rect(14, 12, 2, 2, gl);
+    P.ell(12, 11, 2, 1, A2); P.ell(18, 11, 2, 1, A2);
+    P.rect(13, 3, 5, 6, S);
+    P.rect(13, 5, 6, 2, A2); P.line(14, 5, 18, 5, gl);
+    P.set(17, 8, '#3a1c14');
+    P.ell(15, 2, 4, 2, Hh); P.rect(11, 2, 3, 6, Hh); P.line(12, 1, 9, 0, Hh); P.line(11, 8, 10, 13, Hh);
+    P.line(18, 11, 22, 15, A, 2); P.set(23, 15, S);
+    P.line(24, 6, 24, 30, T); P.line(23, 7, 25, 7, T);
+    const orb = t >= 3 ? 2 : 1;
+    P.ell(24, 3, orb + 1, orb + 1, mix(gl, '#000000', .45)); P.ell(24, 3, orb, orb, gl); P.set(24, 3, '#ffffff');
+    if (t >= 3) { P.set(20, 3, gl); P.set(28, 3, gl); P.set(24, 0, gl); }
+  }},
+};
 const heroCache = {};
-// Sprite de um agente na raridade visual `tier` (-1 = sem módulo): [pernas][cachecol].
+// Sprites de um agente na raridade visual `tier` (-1 = sem módulo): [pernas][pano].
 function heroSpr(k, tier) {
   const key = k + tier;
   if (heroCache[key]) return heroCache[key];
-  const H = HUMAN[k], tops = H.tops || [H.top];
-  const glow = tier <= 0 ? H.base : RAR[tier].c;
-  const pal = Object.assign({}, H.pal);
-  H.glow.forEach(ch => pal[ch] = glow);
-  const build = white => H.legs.map(l => tops.map(tp => {
-    const rows = tp.concat(l);
-    H.grow(rows, tier);
-    return mk(rows, pal, white);
-  }));
-  return heroCache[key] = {n: build(false), w: build(true), glow};
+  const art = HERO_ART[k], glow = tier <= 0 ? art.base : RAR[tier].c;
+  const n = [], w = [];
+  for (let f = 0; f < 2; f++) {
+    n.push([]); w.push([]);
+    for (let v = 0; v < art.cloth; v++) {
+      const P = Painter(32, 32);
+      art.draw(P, f, v, tier, glow);
+      P.outline(art.line);
+      n[f].push(P.canvas(false)); w[f].push(P.canvas(true));
+    }
+  }
+  return heroCache[key] = {n, w, glow};
 }
 const portraitCache = {};
 function portrait(k, tier) {
@@ -289,9 +398,9 @@ const sec = (i = S.sector) => {
   return {name: s.name + (loop ? ' ×' + (loop + 1) : ''), tint: s.tint};
 };
 const HERO_DEF = [
-  {id:'pt', name:'PATCHER',  role:'médica · cajado de nanobots', hp:70,  atk:3,  range:80,  cd:1.5, x:19, w:16},
-  {id:'sc', name:'SCANNER',  role:'atiradora · railgun', hp:55,  atk:10, range:110, cd:1.1, x:37, w:16},
-  {id:'fw', name:'FIREWALL', role:'tanque · lâmina e escudo', hp:130, atk:5,  range:6,   cd:0.9, x:60, w:16},
+  {id:'pt', name:'PATCHER',  role:'médica · cajado de nanobots', hp:70,  atk:3,  range:80,  cd:1.5, x:6, w:26},
+  {id:'sc', name:'SCANNER',  role:'atiradora · railgun', hp:55,  atk:10, range:110, cd:1.1, x:32, w:30},
+  {id:'fw', name:'FIREWALL', role:'tanque · lâmina e escudo', hp:130, atk:5,  range:6,   cd:0.9, x:62, w:30},
 ];
 const TYPES = {
   bug:{hp:1, atk:1, rw:1, cd:1.2}, worm:{hp:1.5, atk:.8, rw:1.2, cd:1.0},
@@ -358,7 +467,7 @@ function spawn(boss) {
   const L = S.sector * 10 + spawned;
   const pool = S.sector === 0 ? ['bug'] : S.sector === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
   const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
-  const T = TYPES[tn], s = boss ? 2 : 1;
+  const T = TYPES[tn], s = boss ? 4 : 2;
   const w = SPR[tn].width * s, h = SPR[tn].height * s;
   const last = enemies[enemies.length - 1];
   enemies.push({
@@ -465,8 +574,8 @@ function update(dt) {
       if (hurt) {
         const amt = atk(h) * 4;
         hurt.hp = Math.min(maxHp(hurt), hurt.hp + amt);
-        burst(hurt.def.x + 6, GROUND - 8, '#6ee7a8', 6);
-        float(hurt.def.x + 6, GROUND - 26, '+' + fmtN(amt), '#6ee7a8');
+        burst(hurt.def.x + 15, GROUND - 16, '#6ee7a8', 6);
+        float(hurt.def.x + 15, GROUND - 42, '+' + fmtN(amt), '#6ee7a8');
         h.t = cdOf(h); h.lunge = 1;
         continue;
       }
@@ -476,7 +585,7 @@ function update(dt) {
     if (e.x - (h.def.x + h.def.w) > h.def.range) continue;
     h.t = cdOf(h); h.lunge = 1;
     if (h.def.id === 'fw') { hit(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
-    else shots.push({x: h.def.x + h.def.w + (h.def.id === 'sc' ? Math.max(0, visTier('sc')) : 0), y: GROUND - 8, dmg: atk(h), c: h.def.id === 'sc' ? '#5ce1e6' : '#6ee7a8'});
+    else shots.push({x: h.def.id === 'sc' ? h.def.x + 27 + Math.max(0, visTier('sc')) : h.def.x + 25, y: GROUND - (h.def.id === 'sc' ? 16 : 28), dmg: atk(h), c: h.def.id === 'sc' ? '#5ce1e6' : '#6ee7a8'});
   }
 
   // shots
@@ -494,7 +603,7 @@ function update(dt) {
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
       front.hp -= e.atk; front.flash = .1;
-      burst(front.def.x + front.def.w - 2, GROUND - 8, '#ff3d7f', 3);
+      burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; say(`${front.def.name} caiu`); }
     }
   }
@@ -514,7 +623,7 @@ function update(dt) {
   for (const h of heroes) {
     const vt = visTier(h.def.id);
     if (h.dead || vt < 3 || Math.random() > dt * (vt === 4 ? 14 : 7)) continue;
-    parts.push({x: h.def.x + Math.random() * h.def.w, y: GROUND - Math.random() * 14, vx: 0, vy: -10 - Math.random() * 8, life: .7, c: RAR[vt].c, up: true});
+    parts.push({x: h.def.x + Math.random() * h.def.w, y: GROUND - Math.random() * 28, vx: 0, vy: -10 - Math.random() * 8, life: .7, c: RAR[vt].c, up: true});
   }
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
@@ -567,7 +676,7 @@ function draw() {
   for (let c = first; c < first + W / cw + 4; c++) {
     const r = hash(c + S.sector * 97);
     if (r < .25) continue;
-    const x = Math.round(c * cw - scroll * par), y = 5 + Math.floor(r * 24);
+    const x = Math.round(c * cw - scroll * par), y = 5 + Math.floor(r * (GROUND - 16));
     const len = 8 + Math.floor(hash(c * 7.3) * 34), dy = hash(c * 3.1) > .5 ? 6 : -6;
     ctx.fillStyle = rgba(tint, .25);
     ctx.fillRect(x, y, len, 1);
@@ -590,13 +699,13 @@ function draw() {
     const k = h.def.id;
     const walking = !enemies[0]?.atStop && !h.dead;
     const fr = walking ? Math.floor(t * 7 + h.def.x) % 2 : 0;
-    let x = h.def.x + Math.round(h.lunge * 2), y = GROUND - 16;
+    let x = h.def.x + Math.round(h.lunge * 2), y = GROUND - 31;
     if (walking && fr) y -= 1;
     if (h.dead) {
       ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
       ctx.drawImage(heroSpr(k, visTier(k)).n[0][0], x, y);
       ctx.globalAlpha = 1;
-      text(Math.ceil(h.respawn) + 's', x + h.def.w / 2, y - 10, '#8f89b8', true);
+      text(Math.ceil(h.respawn) + 's', x + 15, y - 10, '#8f89b8', true);
       continue;
     }
     const hs = heroSpr(k, visTier(k)), frames = (h.flash > 0 ? hs.w : hs.n)[fr];
@@ -606,13 +715,13 @@ function draw() {
       for (let i = 0; i < 3; i++) {
         const an = t * 2 + i * 2.09;
         ctx.globalAlpha = .5 + .5 * Math.sin(an);
-        ctx.fillRect(Math.round(x + 7 + Math.cos(an) * 4), Math.round(y - 6 + Math.sin(an)), 1, 1);
+        ctx.fillRect(Math.round(x + 15 + Math.cos(an) * 5), Math.round(y + Math.sin(an)), 1, 1);
       }
       ctx.globalAlpha = 1;
     }
-    const p = Math.max(0, h.hp / maxHp(h)), bx = x + (h.def.w - 12) / 2;
-    ctx.fillStyle = '#000'; ctx.fillRect(bx, y - 3, 12, 2);
-    ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(bx, y - 3, Math.ceil(12 * p), 1);
+    const p = Math.max(0, h.hp / maxHp(h)), bx = x + 7;
+    ctx.fillStyle = '#000'; ctx.fillRect(bx, y - 3, 16, 2);
+    ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(bx, y - 3, Math.ceil(16 * p), 1);
   }
 
   // enemies
@@ -695,7 +804,7 @@ function renderSquad() {
     const g = S.gear[h.def.id], p = h.dead ? 0 : h.hp / maxHp(h) * 100;
     const vt = visTier(h.def.id);
     return `<div class="d">
-      <img class="por" src="${portrait(h.def.id, vt)}" alt="" width="${h.def.w * 3}" height="48" style="--gl:${heroSpr(h.def.id, vt).glow}">
+      <img class="por" src="${portrait(h.def.id, vt)}" alt="" width="64" height="64" style="--gl:${heroSpr(h.def.id, vt).glow}">
       <div class="dh"><b>${h.def.name}</b><span>${h.def.role}</span></div>
       <div class="hp"><i style="width:${p.toFixed(1)}%;${p < 35 ? 'background:var(--pink)' : ''}"></i></div>
       <div class="st">ATK ${fmtN(atk(h))} · HP ${fmtN(h.hp)}/${fmtN(maxHp(h))}${h.dead ? ' · <em>reiniciando…</em>' : ''}</div>
