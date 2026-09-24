@@ -90,6 +90,9 @@
   .tmap.dragging{cursor:grabbing}
   .tcan{position:relative}
   .tcan svg{position:absolute; inset:0; pointer-events:none; z-index:0}
+  .tn:active:not(:disabled), .tn:hover{transform:translate(-50%, -50%)}
+  .tn.pop{animation:tpop .35s}
+  @keyframes tpop{50%{transform:translate(-50%, -50%) scale(1.3)}}
   .tn{position:absolute; z-index:1; transform:translate(-50%, -50%); display:grid; place-items:center; width:32px; height:32px; padding:0; background:#110f24; border:2px solid #2e2856; box-shadow:none}
   .tn img{image-rendering:pixelated}
   .tn small{position:absolute; bottom:-9px; font:8px var(--mono); color:var(--mute); background:#09081a; padding:0 2px}
@@ -279,7 +282,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.0</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.1</p>
 </main>
 
 <footer class="dock">
@@ -884,31 +887,33 @@ const TK = {   // efeito por nível, nível máximo e nome curto de cada tipo de
   hp:{v:.04, max:5, n:'HP'}, red:{v:.015, max:5, n:'Redução de dano'}, regen:{v:.004, max:3, n:'Regeneração'}, vac:{v:.06, max:5, n:'Eficácia de vacinas'},
   gold:{v:.05, max:5, n:'Créditos'}, drop:{v:.05, max:5, n:'Drop de itens'}, chip:{v:.05, max:5, n:'Drop de pacotes'}, wdrop:{v:.08, max:5, n:'Drop de armas'}, def:{v:.06, max:5, n:'DEF ganho'},
   spd:{v:.02, max:5, n:'Vel. de ataque'}, inv:{v:1, max:2, n:'Espaço de inventário'}, off:{v:.1, max:5, n:'Ganho offline'},
+  exec:{n:'Execução'}, splash:{n:'Respingo do DPS'}, dodge:{n:'Bloqueio de ataques'},
 };
-const KS = (k, v, name) => ({key:true, k, v, name});
+// Nó-chave: efeito grande, às vezes uma mecânica nova (execução, respingo, bloqueio).
+const KS = (name, eff, desc) => ({key:true, k:Object.keys(eff)[0], eff, name, desc});
 const ARMS = [
   {br:0, dx:0, dy:-1, main:['dmg', 'crit', 'dmg', 'aoe', 'dmg', 'boss', 'dmg', 'crit'], sides:[
-    ['aoe', 'aoe', KS('aoe', .25, 'Varredura total')],
-    ['boss', 'boss', 'crit', KS('boss', .3, 'Caçador de rootkits')],
-    ['dmg', 'spd', 'dmg', 'crit', KS('dmg', .25, 'Execução em tempo real')]]},
+    ['aoe', 'aoe', KS('Varredura total', {splash:.2, aoe:.25}, 'Todo tiro do DPS respinga 20% do dano em todos os vírus da tela. +25% de dano em área.')],
+    ['boss', 'boss', 'crit', KS('Caçador de rootkits', {boss:.5}, '+50% de dano contra chefes.')],
+    ['dmg', 'spd', 'dmg', 'crit', KS('Execução em tempo real', {exec:.15, dmg:.1}, 'Vírus comuns com menos de 15% de vida são apagados na hora. +10% de dano.')]]},
   {br:1, dx:1, dy:0, main:['gold', 'drop', 'gold', 'chip', 'gold', 'wdrop', 'def', 'gold'], sides:[
-    ['def', 'def', KS('def', .5, 'Banco de assinaturas')],
-    ['chip', 'chip', 'drop', KS('chip', .3, 'Honeypot')],
-    ['gold', 'gold', 'wdrop', 'drop', KS('gold', .4, 'Mineração profunda')]]},
+    ['def', 'def', KS('Banco de assinaturas', {def:1}, '+100% de definições ganhas.')],
+    ['chip', 'chip', 'drop', KS('Honeypot', {chip:.5}, '+50% de chance de pacotes de download.')],
+    ['gold', 'gold', 'wdrop', 'drop', KS('Mineração profunda', {gold:.6}, '+60% de créditos.')]]},
   {br:2, dx:0, dy:1, main:['hp', 'red', 'hp', 'regen', 'hp', 'red', 'hp', 'vac'], sides:[
-    ['hp', 'hp', KS('hp', .3, 'Firewall de borda')],
-    ['red', 'red', 'regen', KS('red', .1, 'Imunidade')],
-    ['vac', 'vac', 'hp', 'red', KS('vac', .3, 'Vacinação em massa')]]},
+    ['hp', 'hp', KS('Firewall de borda', {hp:.4}, '+40% de vida de todos os agentes.')],
+    ['red', 'red', 'regen', KS('Imunidade', {dodge:.2, red:.05}, 'O agente da frente bloqueia 1 em cada 5 ataques. -5% de dano recebido.')],
+    ['vac', 'vac', 'hp', 'red', KS('Vacinação em massa', {vac:.6}, '+60% de eficácia das vacinas.')]]},
   {br:3, dx:-1, dy:0, main:['spd', 'off', 'spd', 'inv', 'spd', 'off', 'spd', 'inv'], sides:[
-    ['off', 'off', KS('off', .5, 'Serviço persistente')],
-    ['inv', 'inv', 'spd', KS('inv', 4, 'Particionamento')],
-    ['spd', 'spd', 'off', 'spd', KS('spd', .15, 'Overclock extremo')]]},
+    ['off', 'off', KS('Serviço persistente', {off:1}, '+100% de ganho offline.')],
+    ['inv', 'inv', 'spd', KS('Particionamento', {inv:6}, '+6 espaços no inventário.')],
+    ['spd', 'spd', 'off', 'spd', KS('Overclock extremo', {spd:.2}, '+20% de velocidade de ataque.')]]},
 ];
 const TREE = [{id:'core', br:-1, x:0, y:0, name:'Núcleo do antivírus', eff:{}, max:1, base:0}];
 const mkNode = (spec, id, br, x, y, req) => {
   const sp = typeof spec === 'string' ? {k:spec, v:TK[spec].v, max:TK[spec].max, name:TK[spec].n} : {...spec, max:1};
   const dist = Math.abs(x) + Math.abs(y);
-  return {id, br, x, y, req, key:!!sp.key, name:sp.name, k:sp.k, eff:{[sp.k]:sp.v}, max:sp.max,
+  return {id, br, x, y, req, key:!!sp.key, name:sp.name, desc:sp.desc, k:sp.k, eff:sp.eff || {[sp.k]:sp.v}, max:sp.max,
     base:Math.round((sp.key ? 60 : 8) * 1.3 ** dist)};
 };
 ARMS.forEach(A => {
@@ -925,7 +930,7 @@ const nodeLv = id => id === 'core' ? 1 : S.tree[id] || 0;
 const nodeCost = n => Math.floor(n.base * 1.55 ** nodeLv(n.id));
 const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
 const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
-const tfmt = (k, v) => k === 'inv' ? `+${v} espaço${v > 1 ? 's' : ''} no inventário` : `${k === 'red' ? '-' : '+'}${+(v * 100).toFixed(1)}% ${k === 'red' ? 'de dano recebido' : TK[k].n.toLowerCase()}`;
+const tfmt = (k, v) => k === 'exec' ? `apaga vírus com menos de ${+(v * 100).toFixed(0)}% de vida` : k === 'dodge' ? `bloqueia ${+(v * 100).toFixed(0)}% dos ataques no agente da frente` : k === 'splash' ? `+${+(v * 100).toFixed(0)}% do dano do DPS em todos os vírus` : k === 'inv' ? `+${v} espaço${v > 1 ? 's' : ''} no inventário` : `${k === 'red' ? '-' : '+'}${+(v * 100).toFixed(1)}% ${k === 'red' ? 'de dano recebido' : TK[k].n.toLowerCase()}`;
 // saves da árvore antiga (13 nós): devolve o DEF gasto
 const OLD_TREE = {dmg:10, crit:40, aoe:90, bossd:90, hp:10, red:40, regen:120, gold:10, drop:40, chip:100, spd:20, inv:60, off:50};
 const invCap = () => 24 + tv('inv');
@@ -1080,6 +1085,7 @@ function float(x, y, txt, c) { floats.push({x, y: Math.max(2, y), txt, c, life: 
 function hit(e, d) {
   e.hp -= d; e.flash = .08;
   float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
+  if (e.hp > 0 && !e.boss && tv('exec') && e.hp / e.max < tv('exec')) { e.hp = 0; float(e.x + e.w / 2, GROUND - e.h - 18, 'DELETADO', '#ff8a3a'); }
   if (e.hp <= 0) kill(e);
 }
 // Todo dano dos agentes passa por aqui: área, chefes, blindados e subclasse do DPS.
@@ -1226,10 +1232,6 @@ function rollTier(boss) {
   let roll = Math.random() * 100, t = 0;
   for (; t < W.length - 1; t++) { roll -= W[t]; if (roll < 0) break; }
   if (boss) t = Math.max(t, 1);
-  const P = S.ipity; P.p4++; P.p5++;
-  if (P.p5 >= IPITY5) t = 4; else if (P.p4 >= IPITY4) t = Math.max(t, 3);
-  if (t >= 4) P.p5 = 0;
-  if (t >= 3) P.p4 = 0;
   return t;
 }
 const pick = a => a[Math.random() * a.length | 0];
@@ -1309,7 +1311,7 @@ function sellWorse() {
 // 5 itens do mesmo tier → 1 item: sobe um tier com a chance abaixo; se falhar, sai um novo do mesmo tier.
 // O resultado copia classe/tipo de um dos itens usados, fica com o maior nível e herda o conjunto
 // que aparecer em 3 ou mais deles.
-const COMP_N = 5, COMP_RATE = [1, .8, .5, .25];
+const COMP_N = 5, COMP_RATE = [1, 1, .5, .05];
 let cSel = [], lastComp = null, invTab = 'items', compAll = false;
 const isWorse = it => { const cur = gearOf(it.cls)[it.type]; return cur && itemScore(it) <= itemScore(cur); };
 function compPlan(sel) {
@@ -1359,13 +1361,22 @@ function buyUp(slot, k) {
 }
 
 let tSel = 'core', tScroll = null;
+function treeTip(n) {
+  if (n.br < 0) return '<b style="color:var(--amber)">Núcleo do antivírus</b><div class="tl hint">O centro do sistema. Varredura (cima) · Quarentena (direita) · Firewall (baixo) · Kernel (esquerda).</div>';
+  const lv = nodeLv(n.id), b = BRANCHES[n.br], open = nodeOpen(n), max = lv >= n.max;
+  const eff = Object.entries(n.eff);
+  return `<div class="th"><img src="${treeIcon(n.k)}" width="24" height="24" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
+    ${n.desc ? `<div class="tl">${n.desc}</div>` : `<div class="tl">${n.max > 1 ? 'Cada nível: ' : ''}${eff.map(([k, v]) => tfmt(k, v)).join(' · ')}</div>`}
+    ${lv && n.max > 1 ? `<div class="tl">Agora: ${eff.map(([k, v]) => tfmt(k, v * lv)).join(' · ')}</div>` : ''}
+    <div class="tv">${max ? 'Nível máximo' : !open ? 'Bloqueado: instale o nó ligado a este primeiro' : `Clique pra instalar · ${fmtN(nodeCost(n))} definições${S.def < nodeCost(n) ? ' (faltam ' + fmtN(nodeCost(n) - S.def) + ')' : ''}`}</div>`;
+}
 function treeDetail() {
   const n = TREE.find(x => x.id === tSel);
   if (!n) return '';
   if (n.br < 0) return `<b style="color:var(--amber)">Núcleo do antivírus</b><div class="hint">O centro do sistema. Os 4 braços saem daqui: Varredura (cima), Quarentena (direita), Firewall (baixo) e Kernel (esquerda).</div>`;
   const lv = nodeLv(n.id), open = nodeOpen(n), b = BRANCHES[n.br], k = Object.keys(n.eff)[0];
   return `<div class="dh"><img src="${treeIcon(n.k)}" width="24" height="24" alt=""><div><b style="color:${b.c}">${n.name}</b>${n.key ? ' <span class="tag new">NÓ-CHAVE</span>' : ''}<br><span class="hint">${b.n} · nível ${lv}/${n.max}</span></div></div>
-    <div>${n.max > 1 ? 'Por nível: ' : ''}${tfmt(k, n.eff[k])}${lv ? ` · atual: ${tfmt(k, n.eff[k] * lv)}` : ''}</div>
+    <div>${n.desc || (n.max > 1 ? 'Por nível: ' : '') + tfmt(k, n.eff[k])}${lv && n.max > 1 ? ` · atual: ${tfmt(k, n.eff[k] * lv)}` : ''}</div>
     ${lv >= n.max ? '<div class="hint">Nível máximo.</div>' : open
       ? `<div class="row"><button type="button" data-node="${n.id}" ${S.def >= nodeCost(n) ? '' : 'disabled'}>Instalar · <b>${fmtN(nodeCost(n))} DEF</b></button></div>`
       : '<div class="hint">Bloqueado: instale o nó anterior primeiro.</div>'}`;
@@ -1408,6 +1419,8 @@ function buyNode(id) {
   S.def -= c; S.tree[id] = nodeLv(id) + 1;
   say(`Antivírus atualizado: ${n.name} nv${S.tree[id]}`);
   tSel = id; renderPanel(); save();
+  const el = document.querySelector(`[data-tn="${id}"]`);
+  if (el) { el.classList.add('pop'); tipEl.innerHTML = treeTip(TREE.find(x => x.id === id)); }
 }
 
 // ---------- fases ----------
@@ -1508,6 +1521,7 @@ function update(dt) {
         burst(s.x, GROUND - 8, '#ffb454', 10);
         others.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * s.splash, true, s.dps); });
       }
+      if (s.dps && tv('splash') && others.length) others.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * tv('splash'), true, true); });
       if (s.dps && dpsSub() === 'area' && others.length) others.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * .3, true, true); });
       if (s.obs) {
         showBanner('ATAQUE ORBITAL', '#ff3a3a');
@@ -1524,8 +1538,10 @@ function update(dt) {
     e.t -= dt;
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
+      const dodged = tv('dodge') && Math.random() < tv('dodge');
+      if (dodged) float(front.def.x + 15, GROUND - 40, 'BLOQUEADO', '#5ca8ff');
       const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
-      front.hp -= dmg; front.flash = .1;
+      if (!dodged) { front.hp -= dmg; front.flash = .1; }
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; }
       if (isTank && pT().reflect) hit(e, dmg * pT().reflect);
@@ -1752,7 +1768,7 @@ function invItems() {
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <table class="rates"><tr><td>Tier do item</td><td>fase comum</td><td>fase de chefe</td></tr>${RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td>${TIER_W.n[i]}%</td><td>${TIER_W.b[i]}%</td></tr>`).join('')}</table>
-      <p class="hint drops">Garantias: um T4 ou melhor a cada ${IPITY4} itens sem T4 (faltam ${IPITY4 - S.ipity.p4}) e um T5 a cada ${IPITY5} (faltam ${IPITY5 - S.ipity.p5}). O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
+      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
       <details class="setlist"><summary>Chances atuais por vírus (base → com seus bônus)</summary>
         <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
         <table class="rates">${[
@@ -1873,6 +1889,7 @@ document.addEventListener('mouseover', ev => {
   const el = ev.target.closest('[data-tip]');
   if (!el) { tipEl.hidden = true; return; }
   const [kind, a, b] = el.dataset.tip.split(':');
+  if (kind === 'tn') { const n = TREE.find(x => x.id === a); if (n) { tipEl.innerHTML = treeTip(n); tipEl.hidden = false; placeTip(ev); } return; }
   const it = kind === 'inv' ? S.inv[+a] : gearOf(a)[b];
   if (!it) { tipEl.hidden = true; return; }
   tipEl.innerHTML = itemTip(it, kind); tipEl.hidden = false; placeTip(ev);
@@ -1975,14 +1992,14 @@ const RENDER = {
     const nodes = TREE.map(n => {
       const lv = nodeLv(n.id), open = nodeOpen(n), c = n.br < 0 ? '#ffb454' : BRANCHES[n.br].c;
       const cls = `tn${n.key ? ' key' : ''}${n.br < 0 ? ' core' : ''}${lv ? ' has' : open ? ' open' : ' locked'}${lv >= n.max ? ' max' : ''}${tSel === n.id ? ' sel' : ''}`;
-      return `<button type="button" class="${cls}" data-tn="${n.id}" style="left:${px(n)}px; top:${py(n)}px; --bc:${c}" title="${n.name}">
+      return `<button type="button" class="${cls}" data-tn="${n.id}" data-tip="tn:${n.id}" style="left:${px(n)}px; top:${py(n)}px; --bc:${c}">
         <img src="${treeIcon(n.br < 0 ? 'core' : n.k)}" width="${n.key || n.br < 0 ? 24 : 16}" height="${n.key || n.br < 0 ? 24 : 16}" alt="">${n.br >= 0 && n.max > 1 ? `<small>${lv}/${n.max}</small>` : ''}</button>`;
     }).join('');
     const totals = {};
     TREE.forEach(n => { for (const k in n.eff) totals[k] = (totals[k] || 0) + n.eff[k] * nodeLv(n.id); });
     const owned = TREE.filter(n => n.br >= 0 && nodeLv(n.id) > 0).length;
     const summary = BRANCHES.map((b, bi) => {
-      const keys = [...new Set(TREE.filter(n => n.br === bi).map(n => n.k))].filter(k => totals[k]);
+      const keys = [...new Set(TREE.filter(n => n.br === bi).flatMap(n => Object.keys(n.eff)))].filter(k => totals[k]);
       return `<div class="tsum"><b style="color:${b.c}">${b.n}</b> <small>${b.d}</small>${keys.length ? keys.map(k => `<div>· ${tfmt(k, totals[k])}</div>`).join('') : '<div class="hint">· nada ainda</div>'}</div>`;
     }).join('');
     return `<div class="tree2">
@@ -1991,7 +2008,7 @@ const RENDER = {
         <div class="tdef">DEF disponível <b class="k">${fmtN(S.def)}</b> <small>· ${owned}/${TREE.length - 1} nós</small></div>
         <div id="tdet" class="det">${treeDetail()}</div>
         <p class="sub">Bônus do sistema</p>${summary}
-        <p class="hint">Arraste o mapa pra navegar. DEF (definições de vírus) cai de todo inimigo.</p>
+        <p class="hint">Passe o mouse num nó pra ver o efeito; clique pra instalar. Arraste o mapa pra navegar.</p>
         <button type="button" data-freedef>protótipo: +500 DEF</button>
       </aside>
     </div>`;
@@ -2034,6 +2051,8 @@ function renderPanel() {
       const n = ev.target.closest('[data-tn]');
       if (!n || (drag && drag.moved)) return;
       tSel = n.dataset.tn;
+      const node = TREE.find(x => x.id === tSel);
+      if (node && node.br >= 0 && nodeOpen(node) && nodeLv(node.id) < node.max && S.def >= nodeCost(node)) { buyNode(node.id); return; }
       map.querySelectorAll('.tn.sel').forEach(x => x.classList.remove('sel')); n.classList.add('sel');
       $('#tdet').innerHTML = treeDetail();
     });
