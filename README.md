@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.11: defesa do núcleo
+
+- Os agentes ficam parados em posição de defesa e os vírus avançam até eles. Acabou a caminhada dos agentes.
+- Na ponta esquerda da barra fica o **núcleo do sistema**, que o esquadrão protege: um gabinete com LEDs piscando, ventoinha girando, símbolo do antivírus e um escudo holográfico que pulsa. Quando um agente cai, o núcleo fica vermelho e pisca "!".
+- O cenário só deriva devagar no fundo, pra continuar vivo sem parecer que o esquadrão está andando.
+
 ## v1.10: menus compactos, minichefões, bônus do bestiário e contratos recalibrados
 
 - **Menus compactos, no estilo do TBH:**
