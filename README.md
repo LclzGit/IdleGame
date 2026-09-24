@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.5.1: T6 só dos Chefões e aviso de erro
+
+- **T6 Root** agora cai **somente dos Chefões**, com estas chances por item: CODE RED 0,5%, MYDOOM 1%, CONFICKER 2%, STUXNET 3% e WANNACRY 5%. As fases de Chefão da campanha não dão mais T6. O sorteio também não cai mais num tier de peso zero por arredondamento.
+- **Aviso de erro na tela:** se o protótipo quebrar, aparece a mensagem do erro com os botões "Copiar erro", "Continuar" e "Apagar save e recomeçar".
+
 ## v1.5: Chefões (malwares reais)
 
 Menu **Chefões**, fora da campanha, com 10 malwares famosos da vida real. A tentativa é gasta ao entrar na luta, mesmo em caso de derrota, e a espera corre em tempo real. O esquadrão tem 90 s pra vencer.
@@ -34,7 +39,7 @@ Menu **Chefões**, fora da campanha, com 10 malwares famosos da vida real. A ten
 | MORRIS WORM | 1988 | 1 dia | fase 25 | 2 | T4 17% |
 | MELISSA | 1999 | 1 dia | fase 38 | 2 | T4 21% |
 | ILOVEYOU | 2000 | 2 dias | fase 51 | 2 | T3+, Lendário 0,2% |
-| CODE RED | 2001 | 3 dias | fase 65 | 3 | T6 0,5% |
+| CODE RED | 2001 | 3 dias | fase 65 | 3 | T6 0,5% (primeiro com Root) |
 | MYDOOM | 2004 | 1 semana | fase 79 | 3 | T5 11% |
 | CONFICKER | 2008 | 1 semana | fase 93 | 3 | T5 14%, T6 2% |
 | STUXNET | 2010 | 2 semanas | fase 108 | 4 | T4+, T6 3% |

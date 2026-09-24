@@ -326,7 +326,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.5</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.5.1</p>
 </main>
 
 <footer class="dock">
@@ -364,6 +364,33 @@
   </div>
 </footer>
 
+<script>
+// Aviso de erro na tela: se algo quebrar, mostra a mensagem pra copiar e oferece recomeçar o save.
+(() => {
+  let box = null;
+  const show = (msg, where) => {
+    if (!box) {
+      box = document.createElement('div');
+      box.style.cssText = 'position:fixed;left:12px;right:12px;top:12px;z-index:9999;max-width:640px;margin:auto;padding:12px 14px;background:#200d16;border:1px solid #ff3d7f;color:#ffe3ea;font:12px/1.5 ui-monospace,monospace;box-shadow:0 8px 24px rgba(0,0,0,.6)';
+      box.innerHTML = '<b style="color:#ff8098">O protótipo encontrou um erro.</b> Copie o texto abaixo e mande pro desenvolvimento.<pre id="errTxt" style="white-space:pre-wrap;max-height:160px;overflow:auto;background:#0b0a16;padding:6px;margin:8px 0"></pre>' +
+        '<button type="button" id="errCopy">Copiar erro</button> <button type="button" id="errHide">Continuar</button> <button type="button" id="errReset">Apagar save e recomeçar</button>';
+      document.body.appendChild(box);
+      box.querySelector('#errCopy').onclick = () => { try { navigator.clipboard.writeText(box.querySelector('#errTxt').textContent); } catch (e) {} };
+      box.querySelector('#errHide').onclick = () => { box.remove(); box = null; };
+      let armed = 0;
+      box.querySelector('#errReset').onclick = ev => {
+        if (Date.now() - armed > 3000) { armed = Date.now(); ev.target.textContent = 'Clique de novo pra confirmar'; return; }
+        try { localStorage.removeItem('daemonbar.v2'); } catch (e) {}
+        location.reload();
+      };
+    }
+    const pre = box.querySelector('#errTxt');
+    if (pre.textContent.length < 4000) pre.textContent += `${msg}\n${where || ''}\nversão: ${(document.querySelector('.wm') || {}).textContent || '?'} · ${navigator.userAgent}\n\n`;
+  };
+  addEventListener('error', e => show(e.message, e.error && e.error.stack ? e.error.stack.split('\n').slice(0, 4).join('\n') : `${e.filename}:${e.lineno}:${e.colno}`));
+  addEventListener('unhandledrejection', e => show('Promise: ' + (e.reason && e.reason.message || e.reason)));
+})();
+</script>
 <script>
 (() => {
 const $ = s => document.querySelector(s);
@@ -1147,7 +1174,7 @@ const RAR = [
   {n:'Comum', c:'#9aa0b5', m:1, w:60}, {n:'Otimizado', c:'#6ee7a8', m:1.6, w:25},
   {n:'Criptografado', c:'#5ca8ff', m:2.5, w:10}, {n:'Zero-Day', c:'#c38cff', m:4, w:4},
   {n:'Quântico', c:'#ffb454', m:7, w:1},
-  // T6 Root: acesso total ao sistema. Só cai em fase de Chefão, não sai do Compilador e o jogador
+  // T6 Root: acesso total ao sistema. Só cai dos Chefões (malwares reais), não sai do Compilador e o jogador
   // escolhe as 3 passivas uma única vez (depois disso o item fica assim pra sempre).
   {n:'Root', c:'#d0304c', m:11, w:0},
 ];
@@ -1537,7 +1564,7 @@ const INAMES = {
   pt:{helmet:'Tiara-visor', armor:'Manto de nanofibra', boots:'Sandálias antigravidade', weapon:'Cajado de nanobots', driver:'Driver de rede', token:'Token 2FA'},
 };
 // Chance de tier por item: fase comum × fase de chefe. Garantias: T4+ a cada 150 itens sem T4+, T5 a cada 1000.
-const TIER_W = {n:[72, 22, 5.45, .5, .05, 0], b:[55, 32, 10.72, 2, .25, .03]};
+const TIER_W = {n:[72, 22, 5.45, .5, .05, 0], b:[55, 32, 10.75, 2, .25, 0]};   // T6 nunca cai das fases: só dos Chefões
 const IPITY4 = 150, IPITY5 = 1000;
 const tierTxt = t => 'T' + (t + 1);
 function gearOf(cls) { return S.gear[cls] || (S.gear[cls] = {}); }
@@ -1656,6 +1683,7 @@ function rollTier(boss) {
   const W = tierWeights(), tot = W.reduce((a, b) => a + b, 0);
   let roll = Math.random() * tot, t = 0;
   for (; t < W.length - 1; t++) { roll -= W[t]; if (roll < 0) break; }
+  while (t > 0 && !W[t]) t--;   // arredondamento nunca cai num tier de peso zero (ex.: T6 fora dos Chefões)
   if (boss) t = Math.max(t, 1);
   return t;
 }
@@ -1923,8 +1951,10 @@ function raidEnd(win, why) {
     for (let i = 0; i < R.items; i++) {
       let roll = Math.random() * tot, tt = 0;
       for (; tt < R.w.length - 1; tt++) { roll -= R.w[tt]; if (roll < 0) break; }
+      while (tt > 0 && !R.w[tt]) tt--;
       const cls = pick(['fw', 'sc', 'pt']), type = pick(CLS_SLOTS[cls]), wt = cls === 'sc' && type === 'weapon' ? pick(['area', 'single', 'boss']) : undefined;
       const it = buildItem(cls, type, wt, tt, lv, pick(Object.keys(SETS)));
+      if (tt >= 5) showBanner('ROOT T6!', RAR[5].c);
       if (addItem(it) || tt >= 5 && S.inv.push(it)) out.push(gearTag(it)); else { S.data += gearVal(it); out.push(gearTag(it) + ' (reciclado)'); }
     }
     R.pk.forEach((p, r) => { if (Math.random() < p) { if (addItem({k:'chip', r, n:1})) out.push(`<span style="color:${CHIPS[r].c}">pacote ${CHIPS[r].n}</span>`); else S.data += chipVal(r); } });
@@ -2296,7 +2326,7 @@ function invItems() {
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <table class="rates"><tr><td>Tier do item</td><td>fase comum</td><td>fase de chefe</td></tr>${RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td>${TIER_W.n[i]}%</td><td>${TIER_W.b[i]}%</td></tr>`).join('')}</table>
-      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai em fase de Chefão</b> e não sai do Compilador.</p>
+      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai dos Chefões</b> (CODE RED em diante) e não sai do Compilador.</p>
       <details class="setlist"><summary>Chances atuais (base → com seus bônus)</summary>
         <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
         <table class="rates">${[
@@ -2463,7 +2493,7 @@ function oddsView() {
     <table class="rates"><tr><td>Pacote</td><td>fase comum</td><td>fase de chefe</td><td>★5</td><td>★4</td><td>garantias</td></tr>${packs}</table>
     <p class="sub">Itens <small>chance por vírus: ${pct2(GEAR_N)} em fase comum, ${pct2(GEAR_B)} em fase de chefe</small></p>
     <table class="rates"><tr><td>Tier</td><td>fase comum</td><td>fase de chefe</td><td>agora (${DIFFS[d].n}, sorte +${pct(luck())})</td></tr>${tiers}</table>
-    <p class="hint">T3 ou melhor: +25% por dificuldade acima de Normal e + sua sorte (máximo +50%). O chefe dá no mínimo T2. <b style="color:${RAR[5].c}">T6 Root</b> só cai em fase de Chefão e não sai do Compilador. Itens não têm garantia.</p>
+    <p class="hint">T3 ou melhor: +25% por dificuldade acima de Normal e + sua sorte (máximo +50%). O chefe dá no mínimo T2. <b style="color:${RAR[5].c}">T6 Root</b> nunca cai das fases: só dos Chefões (tabela abaixo). Não sai do Compilador. Itens não têm garantia.</p>
     <p class="sub">Compilador <small>5 itens do mesmo tier</small></p><p>${comp} · T5 e T6 não compilam. Se falhar, sai um item novo do mesmo tier.</p>
     <p class="sub">Passivas dos itens <small>quantidade: ${AFFIX_N.map((n, t) => `${tierTxt(t)} ${n}`).join(' · ')}</small></p>
     <div class="tbl"><table class="rates"><tr><td>Passiva</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${aff}</table></div>
@@ -2687,7 +2717,7 @@ const RENDER = {
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
     <p>Um esquadrão de agentes digitais (tanque, ataque e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
     <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra Varredor), Blindados (poucos e resistentes, bom pra Rastreador) e Chefão (bom pra Caça-chefes).</p>
-    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) e 4 acessórios (Vacina, IA, Driver e Token) com tiers T1 a T6 (Root, só de chefe), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) e 4 acessórios (Vacina, IA, Driver e Token) com tiers T1 a T6 (Root, só dos Chefões), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
     <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
 };
 function renderPanel() {
