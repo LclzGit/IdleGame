@@ -293,7 +293,7 @@
   .shop{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:5px}
   .sh{display:grid; gap:3px; padding:6px 8px; background:#0b0a16; border:1px solid var(--line); font-size:11px}
   .sh small{color:var(--mute); font-size:10px}
-  .sh select{font:11px var(--mono); background:#0b0a16; color:var(--text); border:1px solid var(--line)}
+  .sh{min-width:0} .sh select{width:100%; min-width:0; font:11px var(--mono); background:#0b0a16; color:var(--text); border:1px solid var(--line)}
   .raids{display:grid; gap:6px}
   .kcm{display:flex; gap:3px; margin-top:3px} .kcm i{font:9px var(--mono); font-style:normal; padding:0 4px; border:1px solid var(--line); color:var(--mute)} .kcm i.on{border-color:var(--cyan); color:var(--cyan)}
   .btabs .banL{border-color:var(--amber); color:var(--amber)} .btabs .banL[aria-pressed="true"]{background:#1d1608}
@@ -352,7 +352,9 @@
   .act{margin-bottom:6px}
   .sgrid{display:grid; grid-template-columns:repeat(10, minmax(0, 1fr)); gap:3px}
   .sc{display:grid; gap:1px; justify-items:center; padding:4px 1px; background:#0b0a16; border:1px solid #1f2a44; box-shadow:none; font-size:9px; line-height:1.2}
-  .sc b{font:400 10px var(--pix); color:var(--text)} .sc i{font-style:normal}
+  .sc b{font:400 10px var(--pix); color:var(--text)} .sc i{font-style:normal; white-space:nowrap}
+  .tside button{white-space:normal; max-width:100%; text-align:left}
+  .sc{min-width:0; overflow:hidden} .sc .rp{padding:0; font-size:9px}
   .sc.on{border-color:var(--amber); background:#1d1608}
   .sc.lock{opacity:.35}
   .sc:disabled{cursor:default}
@@ -394,7 +396,8 @@
   .sock{grid-template-columns:22px 58px 1fr auto; gap:4px; padding:1px 4px; font-size:10px} .sock img{width:20px; height:20px}
   .sock.empty .ph{width:20px; height:20px}
   .rd{margin-top:6px; padding:6px 8px; gap:3px 10px} .rd .st div{font-size:10px}
-  .cmds button{font-size:10px; padding:2px 6px}
+  .cmds button{font-size:10px; padding:2px 6px; display:grid; grid-template-columns:minmax(0, 1fr) auto 62px; gap:6px; white-space:nowrap; text-align:left}
+  .cmds button > *{overflow:hidden; text-overflow:ellipsis} .cmds button b{text-align:right}
   .inv{grid-template-columns:repeat(6, 44px); gap:3px}
   .cell img{width:22px; height:22px} .cell b{font-size:9px} .cell .ct{font-size:8px}
   .det{margin-top:6px; padding:6px 8px; min-height:0}
@@ -417,7 +420,8 @@
   .packs{display:flex; flex-wrap:wrap; align-items:center; gap:3px; margin:0 0 6px; padding:4px 6px; background:#0b0a16; border:1px solid #1f5a60}
   .packs .lbl{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#3f8f94; margin-right:4px}
   .cell.pk{width:32px; height:32px; aspect-ratio:auto} .cell.pk img{width:18px; height:18px}
-  .inv{grid-template-columns:repeat(10, 40px); gap:3px; justify-content:start}
+  .inv{grid-template-columns:repeat(8, 1fr); gap:3px}
+  .inv .cell{aspect-ratio:auto; height:44px; max-width:none}
   .ivh{font-size:11px; margin-right:10px} .ivh small{color:var(--mute); font-weight:400}
   .sets:empty{display:none}
   .inv .cell{align-content:center; gap:0} .inv .cell img{width:26px; height:26px; image-rendering:pixelated; margin:0 auto}
@@ -437,7 +441,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.13.1</p>
 </main>
 
 <footer class="dock">
@@ -1880,6 +1884,10 @@ Avançado|Advanced|Avanzado
 Crítico|Critical|Crítico
 Crítico 🔒|Critical 🔒|Crítico 🔒
 Horda|Horde|Horda
+Blind.|Armor|Blind.
+Chefe|Boss|Jefe
++dano|+damage|+daño
++vida|+HP|+vida
 Blindados|Armored|Blindados
 Chefão|Boss|Jefe
 chefe|boss|jefe
@@ -2691,11 +2699,11 @@ const GEARW = {area: WMODELS.area.map(x => x[1]), single: WMODELS.single.map(x =
 
 // Tipos de fase. A última fase de cada setor é sempre Chefão.
 const STYPES = {
-  horde: {n:'Horda', c:'#ff8a3a', count:18, hp:.45, rw:.6, max:6, gap:[.2, .45], sub:'area',
+  horde: {n:'Horda', ab:'Horda', c:'#ff8a3a', count:18, hp:.45, rw:.6, max:6, gap:[.2, .45], sub:'area',
     d:'Muitos vírus fracos chegando em bando.'},
-  armor: {n:'Blindados', c:'#c9cfe0', count:5, hp:3.2, rw:2.2, max:1, gap:[.4, .8], sub:'single', armored:true,
+  armor: {n:'Blindados', ab:'Blind.', c:'#c9cfe0', count:5, hp:3.2, rw:2.2, max:1, gap:[.4, .8], sub:'single', armored:true,
     d:'Poucos vírus, um de cada vez, com muita vida. Dano em área causa só metade.'},
-  boss:  {n:'Chefão', c:'#ff3d7f', count:4, hp:1, rw:1, max:2, gap:[1, 1.8], sub:'boss', bossHp:18, bossAtk:1.3,
+  boss:  {n:'Chefão', ab:'Chefe', c:'#ff3d7f', count:4, hp:1, rw:1, max:2, gap:[1, 1.8], sub:'boss', bossHp:18, bossAtk:1.3,
     d:'Poucos vírus e um chefe enorme no final. Fase de chefe: bem mais pacotes de download e itens de tier alto.'},
 };
 const stageType = s => { const p = stagePos(s); return p.st % PER === PER - 1 ? 'boss' : ['horde', 'armor'][(p.st + p.a) % 2]; };
@@ -4601,7 +4609,7 @@ const RENDER = {
       const rp = recPow(sIdx), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad', ty = STYPES[stageType(sIdx)], p = stagePos(sIdx);
       const lock = sIdx > S.maxStage, on = sIdx === S.stage, sc = stageSec(sIdx);
       return `<button type="button" class="sc${on ? ' on' : ''}${lock ? ' lock' : ''}" data-stage="${sIdx}" ${lock || on ? 'disabled' : ''} title="${stageLabel(sIdx)} · ${sc.name} · ${ty.n}: ${ty.d} Poder recomendado ${fmtN(rp)}.">
-        <b>${p.d === 4 ? p.n : `${p.a + 1}-${p.st + 1}`}</b><i style="color:${ty.c}">${ty.n}</i><span class="rp ${cls}">${fmtN(rp)}</span></button>`;
+        <b>${p.d === 4 ? p.n : `${p.a + 1}-${p.st + 1}`}</b><i style="color:${ty.c}">${ty.ab}</i><span class="rp ${cls}">${fmtN(rp)}</span></button>`;
     };
     let body = '';
     if (stDiff < 4) {
@@ -4774,7 +4782,8 @@ function livePanel() {
       .map(([a, v]) => `<div><span>&gt; ${a}</span><i></i><b>${v}</b></div>`).join('');
     for (const u of ['a', 'h']) {
       const b = $(`#u${u}-${k}`), c = upCost(aid, u);
-      b.innerHTML = `&gt; ${u === 'a' ? 'overclock <small>(+dano)</small>' : 'blindagem <small>(+vida)</small>'} nv${lv[u]} <b><img src="${uiIcon('coin')}" width="10" height="10" alt=""> ${fmtNum(c)}</b>`;
+      b.innerHTML = `<span>&gt; ${u === 'a' ? 'overclock' : 'blindagem'}</span><small>nv${lv[u]}</small><b><img src="${uiIcon('coin')}" width="10" height="10" alt=""> ${fmtNum(c)}</b>`;
+      b.title = u === 'a' ? '+dano' : '+vida';
       b.disabled = S.data < c;
     }
   }

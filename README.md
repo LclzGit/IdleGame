@@ -23,6 +23,14 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.13.1: nada vazando
+
+- Inventário volta a fechar certinho: 8 colunas, então 24 espaços viram 3 linhas cheias. As células ocupam a largura do painel.
+- Botões de aprimorar (overclock/blindagem) numa linha só: nome, nível e custo em colunas fixas; o "+dano/+vida" foi pra dica do botão.
+- Fases: o tipo da fase usa nome curto (Horda, Blind., Chefe) e o número de poder não estoura mais a célula. A classe `.rp` era usada em dois lugares e trazia padding dos botões de Chefões.
+- Loja do Download: o seletor de agente não sai mais do cartão.
+- Novo `tools/overflow-check.cjs`: abre todos os menus nos 3 idiomas e acusa qualquer texto que saia do botão, célula ou cartão (`node tools/overflow-check.cjs pt,en,es 1366x768`). Rodado em 1366×768 e 1024×700: nada vazando.
+
 ## v1.13: arsenal
 
 - Armas agora têm modelos próprios por classe, cada um com nome e desenho (24×24, com sombreamento):
