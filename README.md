@@ -13,9 +13,19 @@ Idle RPG minúsculo que mora na barra de tarefas, no formato de *TBH: Task Bar H
 
 Abra `prototype/index.html` no navegador. É um único arquivo, sem dependências de build.
 
+## Como a v0.3 funciona
+
+A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inventário, Invocar, Fases e Log abrem como painéis pequenos acima dela.
+
+- **Dados** (KB → MB → GB) são o dinheiro do jogo. Servem pra aprimorar **dano** e **resistência** de cada personagem (+12% por nível; o nível fica com o personagem mesmo quando ele sai do esquadrão).
+- **Fases:** 5 por setor (1-1 … 1-5, 2-1 …). Cada uma tem 10 vírus e um chefe. Vencer o chefe libera a próxima. Dá pra escolher qualquer fase liberada pra farmar. Cada fase mostra o **poder recomendado** (verde, âmbar ou vermelho em relação ao seu). Com "avançar sozinho", o esquadrão sobe de fase e recua uma se cair 2 vezes.
+- **Inventário (12 espaços):** módulos (8% por vírus, 100% no chefe) e chips de invocação. Com o inventário cheio, o que cai é reciclado em dados.
+- **Chips de invocação:** Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
+- **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
+
 ## Invocação (gacha)
 
-Em `invocar.exe` o jogador gasta **núcleos ◆** (chefe dá +3; vírus comum tem 4% de chance de dar +1; também rende offline) para invocar personagens. Cada classe tem seu próprio banner e contador de garantia.
+Em **Invocar** o jogador gasta chips de invocação para invocar personagens. Cada classe tem seu próprio banner e contador de garantia.
 
 **Banner de tanques**
 
@@ -26,7 +36,6 @@ Em `invocar.exe` o jogador gasta **núcleos ◆** (chefe dá +3; vírus comum te
 | ★3 | 80% | FIREWALL, AURA VANGUARD Mk.II |
 
 - ×10 garante ao menos um ★4; ★5 garantido a cada 50 invocações sem ★5
-- Repetido vira sincronização: +12% de HP/ATK por nível, até +5 (depois disso devolve núcleos)
 - Cada tanque tem uma passiva própria (redução de dano, reflexo, regeneração, bônus de equipe)
 
 **Banner de DPS**

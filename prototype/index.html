@@ -9,198 +9,164 @@
     --bg:#0e0c1d; --win:#17142b; --winhi:#201c3d; --line:#2e2856;
     --text:#e7e3ff; --mute:#8f89b8; --amber:#ffb454; --cyan:#5ce1e6;
     --pink:#ff3d7f; --green:#6ee7a8; --dock:#0a0916; --bar:#07060f;
+    --mono:"IBM Plex Mono",ui-monospace,monospace; --pix:"Silkscreen",ui-monospace,monospace;
   }
   html,body{height:100%}
-  body{
-    background:var(--bg); color:var(--text);
-    font:14px/1.55 "IBM Plex Sans",system-ui,sans-serif;
-    display:flex; flex-direction:column; overflow:hidden;
-  }
-  main{
-    flex:1; overflow:auto; padding:28px 16px 20px;
+  body{background:var(--bg); color:var(--text); font:13px/1.45 "IBM Plex Sans",system-ui,sans-serif; display:flex; flex-direction:column; overflow:hidden}
+
+  /* área de trabalho falsa: o jogo mora só na barra de baixo */
+  .desk{
+    flex:1; position:relative; padding:16px;
     background:
-      radial-gradient(600px 300px at 12% 0%, rgba(255,180,84,.10), transparent 70%),
-      linear-gradient(rgba(46,40,86,.35) 1px, transparent 1px) 0 0/32px 32px,
-      linear-gradient(90deg, rgba(46,40,86,.35) 1px, transparent 1px) 0 0/32px 32px,
+      radial-gradient(700px 360px at 80% 20%, rgba(185,140,255,.10), transparent 70%),
+      radial-gradient(500px 300px at 10% 90%, rgba(92,225,230,.07), transparent 70%),
       var(--bg);
   }
-  .brand{max-width:1100px; margin:0 auto 20px; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 18px}
-  .brand h1{
-    margin:0; font-family:"Silkscreen",ui-monospace,monospace; font-weight:400;
-    font-size:clamp(30px,6vw,54px); line-height:1; color:var(--amber);
-    letter-spacing:.03em; text-shadow:3px 3px 0 #3a1d00;
-  }
-  .brand h1 span{color:var(--pink)}
-  .brand p{margin:0; color:var(--mute); font:13px/1.4 "IBM Plex Mono",ui-monospace,monospace}
-  .wins{max-width:1100px; margin:0 auto; display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); align-items:start}
-  .win{background:var(--win); border:1px solid var(--line); box-shadow:5px 5px 0 #000}
-  .win h2{
-    margin:0; display:flex; justify-content:space-between; gap:8px;
-    font:600 12px/1 "IBM Plex Mono",ui-monospace,monospace; letter-spacing:.04em;
-    background:var(--winhi); border-bottom:1px solid var(--line); padding:8px 10px; color:var(--text);
-  }
-  .win h2 small{color:var(--mute); font-weight:400}
-  .body{padding:14px 16px}
-  .readme p{margin:0 0 10px; max-width:62ch}
-  .readme p:last-child{margin:0}
-  .readme b{color:var(--amber); font-weight:600}
-  .readme .k{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; color:var(--cyan)}
-  #squad{display:grid; gap:12px}
-  .d{display:grid; gap:4px 12px; grid-template-columns:72px 1fr}
-  .d > :not(.por){grid-column:2}
-  .por{grid-row:1 / span 4; align-self:center; justify-self:center; image-rendering:pixelated; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--gl) 45%, transparent))}
-  .prev{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute)}
-  .prev button{padding:2px 6px; color:var(--rc, var(--text))}
-  .prev button[aria-pressed="true"]{border-color:currentColor; background:#0b0a16}
-  .dh{display:flex; justify-content:space-between; font:12px "IBM Plex Mono",ui-monospace,monospace}
-  .dh b{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:13px; letter-spacing:.04em}
-  .dh span{color:var(--mute)}
-  .hp{height:6px; background:#0b0a16; border:1px solid var(--line)}
-  .hp i{display:block; height:100%; background:var(--green)}
-  .st{font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute); font-variant-numeric:tabular-nums}
-  .st em{color:var(--pink); font-style:normal}
-  .gear{font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--rc); border-left:3px solid var(--rc); padding-left:8px}
-  .gear small{opacity:.8}
-  #log{list-style:none; margin:0; padding:0; font:12px/1.5 "IBM Plex Mono",ui-monospace,monospace; display:grid; gap:4px; min-height:9em}
-  #log li{color:var(--mute)}
-  #log li time{color:#5d5790; margin-right:6px; font-variant-numeric:tabular-nums}
-  #log li.hl{color:var(--text)}
+  .dicon{display:grid; justify-items:center; gap:4px; width:84px; padding:6px; background:none; border:1px solid transparent; box-shadow:none; color:var(--text); font:11px var(--mono); cursor:pointer}
+  .dicon:hover{border-color:var(--line); background:rgba(255,255,255,.03)}
+  .dicon .ic{width:34px; height:40px; background:var(--text); clip-path:polygon(0 0,72% 0,100% 22%,100% 100%,0 100%); position:relative}
+  .dicon .ic::after{content:""; position:absolute; inset:14px 7px 8px; background:repeating-linear-gradient(#0e0c1d 0 2px, transparent 2px 5px)}
+  .wm{position:absolute; right:16px; bottom:12px; margin:0; font:11px var(--mono); color:#4c4677}
+  .wm b{font:400 12px var(--pix); color:#6b63a3}
 
-  .dock{background:var(--dock); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px)}
-  .hud{display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; padding:8px 16px; font:12px "IBM Plex Mono",ui-monospace,monospace}
-  .sector{display:flex; align-items:center; gap:8px}
-  #secName{font-family:"Silkscreen",ui-monospace,monospace; font-size:13px; color:var(--sec,var(--cyan)); min-width:9ch}
-  .prog{width:90px; height:6px; border:1px solid var(--line); background:#0b0a16}
+  .dock{position:relative; background:var(--dock); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px)}
+  .hud{display:flex; align-items:center; gap:10px; height:28px; padding-inline:8px 6px; font:11px var(--mono); white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+  .hud::-webkit-scrollbar{display:none}
+  .stg{font:400 11px var(--pix); color:var(--sec,var(--cyan)); background:none; border:0; box-shadow:none; padding:0 2px}
+  .prog{flex:0 0 60px; height:5px; border:1px solid var(--line); background:#0b0a16}
   .prog i{display:block; height:100%; width:0; background:var(--sec,var(--cyan))}
-  #secTxt{color:var(--mute); font-variant-numeric:tabular-nums; min-width:5ch}
-  .data{display:flex; align-items:baseline; gap:6px}
-  .data .lbl{color:var(--mute); letter-spacing:.08em; font-size:11px}
-  #data{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:15px; color:var(--amber); font-variant-numeric:tabular-nums; min-width:8ch}
-  .upg{display:flex; flex-wrap:wrap; gap:6px}
-  .ctl{display:flex; gap:10px; align-items:center; margin-left:auto}
-  button{
-    font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--text); background:var(--winhi);
-    border:1px solid var(--line); padding:4px 8px; cursor:pointer; box-shadow:2px 2px 0 #000;
-  }
+  #secTxt{color:var(--mute); min-width:4ch; font-variant-numeric:tabular-nums}
+  .cur{display:flex; gap:4px; align-items:baseline}
+  .cur em{font-style:normal; color:var(--mute); font-size:10px; letter-spacing:.06em}
+  .cur b{font:400 12px var(--pix); color:var(--amber); font-variant-numeric:tabular-nums}
+  .cur.pw b{color:var(--cyan)}
+  .tabs{display:flex; gap:2px; margin-left:auto}
+  .tabs button{padding:2px 7px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
+  .tabs button:hover{color:var(--text); border-color:var(--line)}
+  .tabs button[aria-pressed="true"]{color:var(--amber); border-color:var(--amber); background:#12102a}
+  .tabs i{font-style:normal; color:var(--cyan)}
+  #strip{display:block; image-rendering:pixelated; image-rendering:crisp-edges; border-top:1px solid #000}
+  .taskbar{height:26px; display:flex; align-items:stretch; gap:2px; padding-inline:6px; background:var(--bar); border-top:1px solid #000; font:11px var(--mono); color:var(--mute); overflow:hidden; white-space:nowrap}
+  .taskbar span{display:flex; align-items:center; padding-inline:9px}
+  .start{color:var(--amber); font-size:14px}
+  .task.on{color:var(--text); border-bottom:2px solid var(--amber); background:#12102a}
+  .clock{margin-left:auto; font-variant-numeric:tabular-nums}
+
+  /* painel que abre acima da barra */
+  .panel{position:absolute; right:12px; bottom:calc(100% + 8px); width:min(560px, calc(100% - 24px)); max-height:min(360px, calc(100vh - 220px)); display:flex; flex-direction:column; background:var(--win); border:1px solid var(--line); box-shadow:5px 5px 0 #000; z-index:5}
+  .panel[hidden]{display:none}
+  .panel header{display:flex; justify-content:space-between; align-items:center; padding:5px 6px 5px 10px; background:var(--winhi); border-bottom:1px solid var(--line); font:600 12px var(--mono)}
+  .panel header button{padding:0 7px; box-shadow:none}
+  .pbody{overflow:auto; padding:10px 12px; font:12px/1.45 var(--mono)}
+  .pbody p{margin:0 0 8px}
+  .hint{color:var(--mute)}
+
+  button{font:11px var(--mono); color:var(--text); background:var(--winhi); border:1px solid var(--line); padding:3px 8px; cursor:pointer; box-shadow:2px 2px 0 #000}
   button:hover:not(:disabled){border-color:var(--amber)}
   button:active:not(:disabled){transform:translate(1px,1px); box-shadow:1px 1px 0 #000}
-  button:disabled{opacity:.45; cursor:default}
+  button:disabled{opacity:.4; cursor:default}
   button b{color:var(--amber); font-weight:600}
   button:focus-visible,input:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
-  label{display:flex; align-items:center; gap:5px; color:var(--mute); cursor:pointer}
-  .stripwrap{line-height:0; border-top:1px solid #000}
-  #strip{display:block; image-rendering:pixelated; image-rendering:crisp-edges}
-  .taskbar{
-    height:32px; display:flex; align-items:stretch; gap:2px; padding-inline:6px; background:var(--bar);
-    border-top:1px solid #000; font:12px "IBM Plex Mono",ui-monospace,monospace; color:var(--mute);
-    overflow:hidden; white-space:nowrap;
-  }
-  .taskbar span{display:flex; align-items:center; padding-inline:10px}
-  .start{color:var(--amber); font-size:15px}
-  .task{border-bottom:2px solid transparent}
-  .task.on{color:var(--text); border-bottom-color:var(--amber); background:#12102a}
-  .clock{margin-left:auto; font-variant-numeric:tabular-nums}
-  .gacha{grid-column:1 / -1}
-  .gtabs{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px}
-  .gtabs button{padding:6px 12px}
-  .gtabs button[aria-pressed="true"]{border-color:var(--amber); color:var(--amber); background:#0b0a16}
-  .gbar{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px}
-  .gcur{display:flex; align-items:baseline; gap:6px; margin-right:auto; font:12px "IBM Plex Mono",ui-monospace,monospace}
-  .gcur .lbl{color:var(--mute); letter-spacing:.08em; font-size:11px}
-  .gcur b{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:18px; color:var(--cyan)}
-  .gbar button{padding:6px 12px}
-  .gbar button b{color:var(--cyan)}
-  .gbar .ghost{background:transparent; color:var(--mute); box-shadow:none; border-style:dashed}
-  .rates{margin:10px 0 12px; font:12px/1.5 "IBM Plex Mono",ui-monospace,monospace; color:var(--mute)}
-  .rates b{color:var(--text)}
-  .gres{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:8px; min-height:120px}
-  .gres .empty{grid-column:1 / -1; margin:0; align-self:center; color:var(--mute); font:12px "IBM Plex Mono",ui-monospace,monospace; text-align:center; border:1px dashed var(--line); padding:28px 12px}
-  .card{display:grid; justify-items:center; align-content:start; gap:4px; padding:10px 6px; background:#0b0a16; border:1px solid var(--line); text-align:center; font:11px/1.3 "IBM Plex Mono",ui-monospace,monospace}
+  label{display:inline-flex; align-items:center; gap:5px; color:var(--mute); cursor:pointer}
+  .opts{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:10px; padding-top:8px; border-top:1px dashed var(--line)}
+
+  /* esquadrão */
+  .hr{display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; padding:6px 0; border-bottom:1px solid var(--line)}
+  .hr img{image-rendering:pixelated}
+  .hn{display:flex; gap:8px; align-items:baseline}
+  .hn b{font:400 12px var(--pix)}
+  .hn span{color:var(--mute); font-size:10px; text-transform:uppercase; letter-spacing:.06em}
+  .hp{height:4px; background:#0b0a16; border:1px solid var(--line); margin:3px 0}
+  .hp i{display:block; height:100%; background:var(--green)}
+  .st{color:var(--mute); font-size:11px; font-variant-numeric:tabular-nums}
+  .gear{color:var(--rc); font-size:11px}
+  .gear button{padding:0 5px; box-shadow:none; font-size:10px; margin-left:4px}
+  .hb{display:grid; gap:4px}
+  .hb button{text-align:left}
+  .prev{display:flex; flex-wrap:wrap; gap:4px; align-items:center; margin-top:8px; color:var(--mute); font-size:11px}
+  .prev button{padding:1px 5px; box-shadow:none; color:var(--rc)}
+  .prev button[aria-pressed="true"]{border-color:currentColor; background:#0b0a16}
+
+  /* inventário */
+  .inv{display:grid; grid-template-columns:repeat(6, 1fr); gap:5px}
+  .cell{aspect-ratio:1; max-width:100%; display:grid; place-content:center; gap:1px; padding:0; background:#0b0a16; border:1px solid var(--line); box-shadow:inset 0 -3px 0 var(--rc,transparent); color:var(--rc); text-align:center}
+  .cell.empty{border-style:dashed; opacity:.5; box-shadow:none}
+  .cell .ct{font:10px var(--mono); letter-spacing:.06em; color:var(--mute)}
+  .cell b{font:400 11px var(--pix); color:var(--rc)}
+  .cell.sel{border-color:var(--amber); outline:1px solid var(--amber)}
+  .det{margin-top:10px; padding:8px 10px; border:1px solid var(--line); background:#0b0a16; min-height:58px}
+  .det .row{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+
+  /* invocar */
+  .btabs{display:flex; gap:4px; margin-bottom:8px}
+  .btabs button[aria-pressed="true"]{border-color:var(--amber); color:var(--amber); background:#0b0a16}
+  .chips{display:grid; grid-template-columns:repeat(3, 1fr); gap:6px}
+  .chip{display:grid; gap:3px; padding:6px 8px; border:1px solid var(--line); border-top:3px solid var(--rc); background:#0b0a16}
+  .chip b{color:var(--rc); font-weight:600}
+  .chip small{color:var(--mute); font-size:10px}
+  .chip div{display:flex; gap:4px}
+  .pity{margin:8px 0 4px; color:var(--mute); font-size:11px}
+  .res,.col{display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:5px}
+  .card{display:grid; justify-items:center; align-content:start; gap:2px; padding:6px 4px; background:#0b0a16; border:1px solid var(--line); text-align:center; font-size:10px; line-height:1.3}
   .card img{image-rendering:pixelated}
   .card .nm{color:var(--text); font-weight:600}
-  .card .st5,.card .st4,.card .st3{letter-spacing:.1em}
+  .card .ps{color:var(--mute)}
+  .card button{width:100%; padding:2px 4px; box-shadow:none; margin-top:3px}
+  .card.lock img{filter:brightness(0); opacity:.5}
+  .card.on{outline:2px solid var(--amber); outline-offset:-2px}
+  .s5{border-color:#ffb454} .s4{border-color:#c38cff}
   .st5{color:#ffb454} .st4{color:#c38cff} .st3{color:#5ca8ff}
-  .card.s5{border-color:#ffb454; box-shadow:0 0 16px rgba(255,180,84,.35), inset 0 0 20px rgba(255,180,84,.12)}
-  .card.s4{border-color:#c38cff; box-shadow:inset 0 0 16px rgba(195,140,255,.12)}
-  .tag{font-size:10px; letter-spacing:.08em; padding:1px 5px; border:1px solid currentColor}
-  .tag.new{color:var(--amber)} .tag.sync{color:var(--cyan)} .tag.max{color:var(--mute)}
-  .gres .card{animation:pop .35s both; animation-delay:calc(var(--i) * 110ms)}
-  @keyframes pop{from{opacity:0; transform:translateY(8px) scale(.9)} to{opacity:1; transform:none}}
-  @media (prefers-reduced-motion:reduce){ .gres .card{animation:none} }
-  .sub{margin:18px 0 10px; font:600 12px "IBM Plex Mono",ui-monospace,monospace; letter-spacing:.06em; color:var(--text); display:flex; gap:8px; align-items:baseline}
+  .tag{font-size:9px; letter-spacing:.06em; padding:0 4px; border:1px solid currentColor}
+  .tag.new{color:var(--amber)} .tag.dup{color:var(--green)}
+  .res .card{animation:pop .3s both; animation-delay:calc(var(--i) * 90ms)}
+  @keyframes pop{from{opacity:0; transform:translateY(6px) scale(.92)} to{opacity:1; transform:none}}
+  .sub{margin:10px 0 6px; font-weight:600; font-size:11px; letter-spacing:.06em; color:var(--text)}
   .sub small{color:var(--mute); font-weight:400}
-  .roster{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px}
-  .roster .card{padding:12px 10px; gap:6px}
-  .roster .card.lock img{filter:brightness(0); opacity:.55}
-  .roster .card.lock .nm{color:var(--mute)}
-  .roster .ps{color:var(--mute); min-height:3.9em}
-  .roster .card.on{outline:2px solid var(--amber); outline-offset:-2px}
-  .roster button{width:100%}
-  @media (max-width:560px){ .task.opt{display:none} .ctl{margin-left:0} }
+
+  /* fases */
+  .stl{list-style:none; margin:8px 0 0; padding:0; display:grid; gap:3px}
+  .stl li{display:grid; grid-template-columns:3.2em 1fr auto auto; gap:10px; align-items:center; padding:3px 6px; border:1px solid transparent}
+  .stl li.cur{border-color:var(--amber); background:#0b0a16}
+  .stl li.lock{opacity:.55}
+  .stl .lb{font:400 11px var(--pix)}
+  .rp{font-size:11px; font-variant-numeric:tabular-nums}
+  .rp.ok{color:var(--green)} .rp.warn{color:var(--amber)} .rp.bad{color:var(--pink)}
+  .stl button{padding:1px 8px}
+
+  .log{list-style:none; margin:0; padding:0; display:grid; gap:3px}
+  .log li{color:var(--mute)} .log li.hl{color:var(--text)}
+  .log time{color:#5d5790; margin-right:6px}
+  .k{color:var(--cyan)}
+
+  @media (max-width:560px){ .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
+  @media (prefers-reduced-motion:reduce){ .res .card{animation:none} }
 </style>
 
-<main>
-  <header class="brand">
-    <h1>DAEMON<span>//</span>BAR</h1>
-    <p>protótipo v0.1 · um idle RPG que mora na sua barra de tarefas</p>
-  </header>
-
-  <div class="wins">
-    <section class="win readme">
-      <h2>LEIA-ME.txt <small>_ □ ×</small></h2>
-      <div class="body">
-        <p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
-        <p>Três agentes digitais patrulham o seu próprio computador enquanto você trabalha. São programas com corpo humano e armadura de combate: um tanque de sobretudo com lâmina pesada e escudo hexagonal, uma atiradora de cachecol e railgun e uma médica de capa iridescente com um cajado de nanobots. Eles começam na pasta temporária, descem até o kernel e depois saem pra rede, caçando bugs, worms e trojans.</p>
-        <p>Cada vírus apagado vira dados. A moeda sobe como um disco enchendo: <span class="k">KB → MB → GB → TB</span>. Dados compram upgrades. Às vezes um vírus deixa cair um módulo, e os mais raros são <span class="k" style="color:#c38cff">Zero-Day</span> e <span class="k" style="color:var(--amber)">Quântico</span>.</p>
-        <p>Os módulos também mudam o visual: as luzes dos agentes ganham a cor da raridade, e raridades altas acrescentam peças (escudo maior, cano mais longo, capa mais longa) e uma aura. Use a prévia em daemons.cfg pra ver cada nível.</p>
-        <p>No fim de cada setor aparece um <span class="k" style="color:var(--pink)">RANSOMWARE</span>. Se o esquadrão cair, o sistema faz rollback do setor, mas você não perde os dados.</p>
-        <p>Em <span class="k">invocar.exe</span> você gasta núcleos ◆ pra invocar novos tanques e DPS (★3 a ★5), cada classe no seu banner. Cada um tem visual e habilidade próprios, e repetidos ficam mais fortes.</p>
-        <p>Como jogar: não precisa fazer nada, é só deixar rodando. Compre upgrades na barra lá embaixo ou deixe o <span class="k">auto</span> ligado.</p>
-      </div>
-    </section>
-
-    <section class="win">
-      <h2>daemons.cfg <small>esquadrão</small></h2>
-      <div class="body"><div id="squad"></div>
-        <div class="prev" id="prev"><span>prévia do visual:</span></div></div>
-    </section>
-
-    <section class="win">
-      <h2>syslog <small>eventos</small></h2>
-      <div class="body"><ol id="log"></ol></div>
-    </section>
-
-    <section class="win gacha">
-      <h2>invocar.exe <small>protocolo de invocação</small></h2>
-      <div class="body">
-        <div class="gtabs"><button type="button" data-ban="fw" aria-pressed="true">Banner · Tanques</button><button type="button" data-ban="sc" aria-pressed="false">Banner · DPS</button></div>
-        <div class="gbar">
-          <div class="gcur"><span class="lbl">NÚCLEOS</span><b id="gCores">◆ 0</b></div>
-          <button id="pull1" type="button">Invocar ×1 · <b>◆1</b></button>
-          <button id="pull10" type="button">Invocar ×10 · <b>◆10</b></button>
-          <button id="gFree" type="button" class="ghost">protótipo: +10 ◆</button>
-        </div>
-        <p class="rates"><span style="color:#ffb454">★5 3%</span> · <span style="color:#c38cff">★4 17%</span> · <span style="color:#5ca8ff">★3 80%</span> · ×10 garante ★4 ou melhor · ★5 garantido em <b id="pity">50</b> invocações · repetidos viram sincronização (+12% por nível, até +5)</p>
-        <div id="gRes" class="gres"><p class="empty">Os resultados da invocação aparecem aqui. Núcleos ◆ caem dos chefes (+3) e às vezes de vírus comuns.</p></div>
-        <h3 class="sub"><span id="colTitle">Coleção de tanques</span> <small id="owned"></small></h3>
-        <div id="roster" class="roster"></div>
-      </div>
-    </section>
-  </div>
+<main class="desk">
+  <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.3</p>
 </main>
 
 <footer class="dock">
+  <section class="panel" id="panel" hidden>
+    <header><span id="pTitle"></span><button type="button" id="pClose" aria-label="Fechar painel">×</button></header>
+    <div class="pbody" id="pBody"></div>
+  </section>
   <div class="hud">
-    <div class="sector"><span id="secName">C:\TEMP</span><div class="prog"><i id="secBar"></i></div><span id="secTxt">0/10</span></div>
-    <div class="data"><span class="lbl">DADOS</span><b id="data">0 KB</b></div>
-    <div class="upg" id="upg"></div>
-    <div class="ctl">
-      <label for="auto"><input type="checkbox" id="auto"> auto</label>
-      <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
-      <button id="reset" type="button" title="Apagar o progresso salvo">wipe</button>
-    </div>
+    <button class="stg" id="stgBtn" type="button" data-open="stages" title="Escolher fase"></button>
+    <div class="prog"><i id="secBar"></i></div><span id="secTxt"></span>
+    <span class="cur"><em>DADOS</em><b id="data"></b></span>
+    <span class="cur pw"><em>PODER</em><b id="pow"></b></span>
+    <nav class="tabs">
+      <button type="button" data-open="squad" aria-pressed="false">Esquadrão</button>
+      <button type="button" data-open="inv" aria-pressed="false">Inventário <i id="invN"></i></button>
+      <button type="button" data-open="gacha" aria-pressed="false">Invocar</button>
+      <button type="button" data-open="stages" aria-pressed="false">Fases</button>
+      <button type="button" data-open="log" aria-pressed="false">Log</button>
+    </nav>
+    <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
   </div>
-  <div class="stripwrap"><canvas id="strip" aria-label="Esquadrão de daemons lutando contra vírus"></canvas></div>
+  <canvas id="strip" aria-label="Esquadrão lutando contra vírus"></canvas>
   <div class="taskbar">
     <span class="start">▣</span>
     <span class="task opt">relatorio_q3.xlsx</span>
@@ -213,7 +179,7 @@
 <script>
 (() => {
 const $ = s => document.querySelector(s);
-const SCALE = 2, H = 72, GROUND = 64, KEY = 'daemonbar.v1';
+const SCALE = 2, H = 52, GROUND = 47, KEY = 'daemonbar.v2';
 const cv = $('#strip'), ctx = cv.getContext('2d');
 let W = 320;
 
@@ -657,15 +623,23 @@ const SECTORS = [
   {name:'RAM', tint:'#b98cff'}, {name:'KERNEL', tint:'#ffb454'},
   {name:'REDE LOCAL', tint:'#6ee7a8'}, {name:'DEEP WEB', tint:'#ff3d7f'},
 ];
-const sec = (i = S.sector) => {
-  const s = SECTORS[i % SECTORS.length], loop = Math.floor(i / SECTORS.length);
-  return {name: s.name + (loop ? ' ×' + (loop + 1) : ''), tint: s.tint};
+// Fases: 5 por setor. A fase `s` usa inimigos de nível s*10 … s*10+10 (chefe).
+const PER = 5;
+const stageSec = s => {
+  const i = Math.floor(s / PER), b = SECTORS[i % SECTORS.length], loop = Math.floor(i / SECTORS.length);
+  return {name: b.name + (loop ? ' ×' + (loop + 1) : ''), tint: b.tint, idx: i};
 };
+const stageLabel = s => `${Math.floor(s / PER) + 1}-${s % PER + 1}`;
+const sec = () => stageSec(S.stage);
+const recPow = s => 140 * 1.9 ** s;
+
 const HERO_DEF = [
   {id:'pt', name:'PATCHER',  role:'médica · cajado de nanobots', hp:70,  atk:3,  range:80,  cd:1.5, x:6, w:26},
-  {id:'sc', name:'SCANNER',  role:'atiradora · railgun', hp:55,  atk:10, range:110, cd:1.1, x:32, w:30},
+  {id:'sc', name:'SCANNER',  role:'DPS · railgun', hp:55,  atk:10, range:110, cd:1.1, x:32, w:30},
   {id:'fw', name:'FIREWALL', role:'tanque · lâmina e escudo', hp:130, atk:5,  range:6,   cd:0.9, x:62, w:30},
 ];
+const SLOTS = [['fw', 'Tanque'], ['sc', 'DPS'], ['pt', 'Suporte']];
+const SLOTTAG = {fw:'TNK', sc:'DPS', pt:'SUP'};
 const TYPES = {
   bug:{hp:1, atk:1, rw:1, cd:1.2}, worm:{hp:1.5, atk:.8, rw:1.2, cd:1.0},
   trojan:{hp:2.3, atk:1.4, rw:1.8, cd:1.5}, boss:{hp:6, atk:1.6, rw:12, cd:1.6},
@@ -680,80 +654,81 @@ const GEAR = {
   sc:['Heurística','Regex Afiada','Assinatura','Sonda DPI'],
   pt:['Hotfix','Patch Cumulativo','Snapshot','Ponto de Restauração'],
 };
-const UPG = [
-  {k:'dmg', label:'Overclock', base:40, max:99},
-  {k:'hp',  label:'Blindagem', base:40, max:99},
-  {k:'spd', label:'Threads',   base:60, max:12},
+// Chips de invocação: caem raramente das fases. p5/p4 = chance de ★5/★4.
+const CHIPS = [
+  {n:'Comum', c:'#9aa0b5', p5:.02, p4:.13, drop:.015, boss:.30, val:5},
+  {n:'Raro', c:'#5ca8ff', p5:.08, p4:.42, drop:.003, boss:.08, val:25},
+  {n:'Lendário', c:'#ffb454', p5:.30, p4:.70, drop:.0003, boss:.015, val:120},
 ];
+const UPBASE = {3:30, 4:45, 5:70};
 
-const S0 = {data:0, sector:0, kills:0, upg:{dmg:0,hp:0,spd:0}, gear:{fw:null,sc:null,pt:null}, auto:true, last:0,
-  tank:'firewall', gunner:'scanner', roster:{firewall:0, scanner:0}, cores:20, pity:{fw:0, sc:0}};
+const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:null, sc:null, pt:null},
+  inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, autoUp:true, autoEq:true, autoAdv:true, last:0,
+  tank:'firewall', gunner:'scanner', roster:{firewall:1, scanner:1}, pity:{fw:0, sc:0}};
 let S = load();
-if (typeof S.pity !== 'object') S.pity = {fw: S.pity || 0, sc: 0};
-if (!('scanner' in S.roster)) S.roster.scanner = 0;
 function load() {
-  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.upg) return Object.assign(structuredClone(S0), r); } catch (e) {}
+  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.lv) return Object.assign(structuredClone(S0), r); } catch (e) {}
   return structuredClone(S0);
 }
 function save() { S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const gm = id => 1 + (S.gear[id] ? S.gear[id].b / 100 : 0);
 const equipped = cls => charOf(S[CLASSES[cls].key]) || CLASSES[cls].list[0];
-const tank = () => equipped('fw');
 const pT = () => equipped('fw').passive, pG = () => equipped('sc').passive;
-const sync = id => 1 + .12 * (S.roster[id] || 0);
-// Os slots de tanque ('fw') e atirador ('sc') usam o personagem equipado.
+const lvOf = aid => S.lv[aid] || (S.lv[aid] = {a:0, h:0});
+const starsOf = aid => (charOf(aid) || {stars:3}).stars;
+const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * 1.28 ** lvOf(aid)[k]);
 function applySlots() {
   for (const cls in CLASSES) {
     const C = CLASSES[cls], T = equipped(cls), d = HERO_DEF[C.idx];
     d.name = T.name; d.role = (cls === 'sc' ? 'DPS' : C.one) + ' · ' + T.role;
-    d.hp = C.stars[T.stars].hp * sync(T.id); d.atk = C.stars[T.stars].atk * sync(T.id);
+    d.hp = C.stars[T.stars].hp; d.atk = C.stars[T.stars].atk;
   }
 }
-const maxHp = h => h.def.hp * 1.3 ** S.upg.hp * gm(h.def.id) * (1 + (pT().teamHp || 0));
-const atk = h => h.def.atk * 1.3 ** S.upg.dmg * gm(h.def.id) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0));
-const cdOf = h => h.def.cd * 0.92 ** S.upg.spd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1);
-const cost = u => Math.floor(u.base * 1.55 ** S.upg[u.k]);
-const rewardAt = L => 6 * 1.15 ** L;
+const maxHp = h => h.def.hp * 1.12 ** lvOf(slotAid(h.def.id)).h * gm(h.def.id) * (1 + (pT().teamHp || 0));
+const atk = h => h.def.atk * 1.12 ** lvOf(slotAid(h.def.id)).a * gm(h.def.id) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0));
+const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1);
+const rewardAt = L => 5 * 1.10 ** L;
+const power = () => heroes.reduce((a, h) => a + atk(h) / cdOf(h) * 4 + maxHp(h) * .5, 0);
 
 function fmt(kb) {
   const u = ['KB','MB','GB','TB','PB','EB']; let i = 0;
   while (kb >= 1024 && i < u.length - 1) { kb /= 1024; i++; }
   return (kb < 10 ? kb.toFixed(2) : kb < 100 ? kb.toFixed(1) : Math.floor(kb)) + ' ' + u[i];
 }
-const fmtN = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toString();
+const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toString();
 
 // ---------- runtime ----------
 let heroes, enemies = [], shots = [], parts = [], floats = [];
-let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0;
+let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0, fails = 0, obsCount = 0;
+const LOG = [];
 applySlots();
 function resetHeroes() {
   heroes = HERO_DEF.map(def => ({def, hp:0, t:Math.random()*.5, dead:false, respawn:0, flash:0, lunge:0}));
   heroes.forEach(h => h.hp = maxHp(h));
 }
 resetHeroes();
+const heroOf = k => heroes.find(h => h.def.id === k);
 
 function say(txt, hl) {
-  const li = document.createElement('li');
   const d = new Date();
-  li.innerHTML = `<time>${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</time>` + txt;
-  if (hl) li.className = 'hl';
-  const log = $('#log'); log.prepend(li);
-  while (log.children.length > 9) log.lastChild.remove();
+  LOG.unshift({time: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`, txt, hl});
+  LOG.length = Math.min(LOG.length, 40);
+  if (openP === 'log') renderPanel();
 }
 function showBanner(text, color) { banner = {text, color: color || '#ffb454', life: 2.2}; }
 
 function spawn(boss) {
-  const L = S.sector * 10 + spawned;
-  const pool = S.sector === 0 ? ['bug'] : S.sector === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
+  const L = S.stage * 10 + spawned, si = sec().idx;
+  const pool = si === 0 ? ['bug'] : si === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
   const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
-  const T = TYPES[tn], s = boss ? 4 : 2;
+  const T = TYPES[tn], s = boss ? 3 : 2;
   const w = SPR[tn].width * s, h = SPR[tn].height * s;
   const last = enemies[enemies.length - 1];
   enemies.push({
     tn, boss, w, h, x: Math.max(W + 4, last ? last.x + last.w + 4 : 0),
-    hp: 22 * 1.13 ** L * T.hp, max: 22 * 1.13 ** L * T.hp,
-    atk: 3 * 1.11 ** L * T.atk, cd: T.cd, t: T.cd * .6,
+    hp: 20 * 1.09 ** L * T.hp, max: 20 * 1.09 ** L * T.hp,
+    atk: 3 * 1.085 ** L * T.atk, cd: T.cd, t: T.cd * .6,
     reward: rewardAt(L) * T.rw, flash: 0, lunge: 0, atStop: false,
   });
 }
@@ -761,7 +736,7 @@ function spawn(boss) {
 function burst(x, y, c, n) {
   for (let i = 0; i < n; i++) parts.push({x, y, vx:(Math.random()-.5)*60, vy:-Math.random()*50-10, life:.5+Math.random()*.4, c});
 }
-function float(x, y, txt, c) { floats.push({x, y, txt, c, life: 1}); }
+function float(x, y, txt, c) { floats.push({x, y: Math.max(2, y), txt, c, life: 1}); }
 
 function hit(e, d) {
   e.hp -= d; e.flash = .08;
@@ -773,57 +748,120 @@ function kill(e) {
   S.data += e.reward;
   burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
-  if (e.boss || Math.random() < .15) drop(e.boss);
-  if (e.boss || Math.random() < .04) {
-    const n = e.boss ? 3 : 1;
-    S.cores += n; renderGachaBar();
-    float(e.x + e.w / 2, GROUND - e.h - 26, '+' + n + ' ◆', '#5ce1e6');
-    if (e.boss) say(`+${n} <span style="color:var(--cyan)">◆ núcleos</span> pelo chefe`);
-  }
-  if (e.boss) sectorClear(); else S.kills++;
+  if (e.boss || Math.random() < .08) dropGear(e.boss);
+  dropChip(e);
+  if (e.boss) stageClear(); else S.kills++;
 }
-function drop(boss) {
+
+// ---------- itens ----------
+const gearVal = it => rewardAt(it.s * 10) * 3 * RAR[it.r].m;
+const chipVal = r => rewardAt(S.maxStage * 10) * CHIPS[r].val;
+const chipCount = r => (S.inv.find(x => x.k === 'chip' && x.r === r) || {n:0}).n;
+const itemColor = it => it.k === 'chip' ? CHIPS[it.r].c : RAR[it.r].c;
+const gearTag = it => `<span style="color:${RAR[it.r].c}">${it.name} [${RAR[it.r].n}]</span>`;
+function addItem(it) {
+  if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r); if (st) { st.n += it.n; return true; } }
+  if (S.inv.length >= 12) return false;
+  S.inv.push(it); return true;
+}
+function dropGear(boss) {
   let roll = Math.random() * 100, r = 0;
   for (; r < RAR.length - 1; r++) { roll -= RAR[r].w; if (roll < 0) break; }
   if (boss) r = Math.max(r, 1);
-  const ids = ['fw','sc','pt'], id = ids[Math.random() * 3 | 0];
-  const names = GEAR[id];
-  const item = {
-    name: names[Math.random() * names.length | 0] + ' v' + (S.sector + 1) + '.' + (Math.random() * 10 | 0),
-    r, b: Math.round(12 * RAR[r].m * 1.35 ** S.sector * (.8 + Math.random() * .4)),
-  };
-  const hero = HERO_DEF.find(d => d.id === id).name;
-  const tag = `<span style="color:${RAR[r].c}">${item.name} [${RAR[r].n}]</span>`;
-  if (!S.gear[id] || item.b > S.gear[id].b) {
-    S.gear[id] = item;
-    say(`${hero} instalou ${tag} +${item.b}%`, true);
+  const slot = ['fw','sc','pt'][Math.random() * 3 | 0], names = GEAR[slot];
+  const it = {k:'gear', slot, r, s:S.stage,
+    name: names[Math.random() * names.length | 0] + ' v' + (S.stage + 1) + '.' + (Math.random() * 10 | 0),
+    b: Math.round(10 * RAR[r].m * 1.25 ** S.stage * (.8 + Math.random() * .4))};
+  const cur = S.gear[slot];
+  if (S.autoEq && (!cur || it.b > cur.b)) {
+    S.gear[slot] = it;
+    if (cur) S.data += gearVal(cur);
+    say(`${heroOf(slot).def.name} instalou ${gearTag(it)} +${it.b}%${cur ? ' (antigo reciclado)' : ''}`, true);
     if (r >= 3) showBanner(RAR[r].n.toUpperCase() + '!', RAR[r].c);
-  } else {
-    const kb = rewardAt(S.sector * 10) * 2 * RAR[r].m;
-    S.data += kb;
-    say(`${tag} reciclado → +${fmt(kb)}`);
+  } else if (addItem(it)) say(`${gearTag(it)} foi pro inventário`);
+  else { S.data += gearVal(it); say(`Inventário cheio: ${gearTag(it)} reciclado → +${fmt(gearVal(it))}`); }
+  if (openP === 'inv' || openP === 'squad') renderPanel();
+}
+function dropChip(e) {
+  for (let r = CHIPS.length - 1; r >= 0; r--) {
+    if (Math.random() >= (e.boss ? CHIPS[r].boss : CHIPS[r].drop)) continue;
+    const C = CHIPS[r];
+    if (addItem({k:'chip', r, n:1})) {
+      float(e.x + e.w / 2, GROUND - e.h - 26, 'CHIP ' + C.n.toUpperCase(), C.c);
+      say(`Chip de invocação <span style="color:${C.c}">${C.n}</span> encontrado!`, true);
+      if (r >= 1) showBanner('CHIP ' + C.n.toUpperCase() + '!', C.c);
+    } else { S.data += chipVal(r); say(`Inventário cheio: chip ${C.n} reciclado → +${fmt(chipVal(r))}`); }
+    if (openP === 'inv' || openP === 'gacha') renderPanel();
+    return;
   }
 }
-function sectorClear() {
-  say(`<span style="color:${sec().tint}">${sec().name}</span> limpo. Descendo para <span style="color:${sec(S.sector+1).tint}">${sec(S.sector+1).name}</span>`, true);
-  S.sector++; S.kills = 0; spawned = 0; bossUp = false;
-  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
-  showBanner('SETOR LIMPO', sec().tint);
-  save();
+function equipItem(i) {
+  const it = S.inv[i]; if (!it || it.k !== 'gear') return;
+  const cur = S.gear[it.slot];
+  S.inv.splice(i, 1);
+  S.gear[it.slot] = it;
+  if (cur && !addItem(cur)) S.data += gearVal(cur);
+  say(`${heroOf(it.slot).def.name} instalou ${gearTag(it)}`);
+  selInv = -1; renderPanel(); save();
 }
-function rollback() {
-  enemies = []; shots = []; S.kills = 0; spawned = 0; bossUp = false; spawnT = 2;
-  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
-  showBanner('ROLLBACK', '#ff3d7f');
-  say('Esquadrão derrubado. Rollback do setor (os dados ficam).', true);
+function sellItem(i) {
+  const it = S.inv[i]; if (!it) return;
+  const v = it.k === 'chip' ? chipVal(it.r) * it.n : gearVal(it);
+  S.data += v; S.inv.splice(i, 1);
+  say(`Reciclado → +${fmt(v)}`);
+  selInv = -1; renderPanel(); save();
+}
+function unequip(slot) {
+  const g = S.gear[slot]; if (!g) return;
+  if (!addItem(g)) { say('Inventário cheio: libere um espaço antes de remover o módulo.'); return; }
+  S.gear[slot] = null; renderPanel(); save();
+}
+function sellWorse() {
+  let v = 0;
+  S.inv = S.inv.filter(it => {
+    if (it.k !== 'gear' || (S.gear[it.slot] && it.b > S.gear[it.slot].b)) return true;
+    v += gearVal(it); return false;
+  });
+  if (v) say(`Módulos piores reciclados → +${fmt(v)}`);
+  S.data += v; selInv = -1; renderPanel(); save();
 }
 
-function buy(u) {
-  const c = cost(u);
-  if (S.data < c || S.upg[u.k] >= u.max) return false;
-  S.data -= c; S.upg[u.k]++;
-  heroes.forEach(h => { if (!h.dead) h.hp = Math.min(maxHp(h), h.hp * 1.3); });
+// ---------- aprimoramento ----------
+function buyUp(slot, k) {
+  const aid = slotAid(slot), c = upCost(aid, k);
+  if (S.data < c) return false;
+  S.data -= c; lvOf(aid)[k]++;
+  const h = heroOf(slot);
+  if (!h.dead) h.hp = Math.min(maxHp(h), h.hp * (k === 'h' ? 1.12 : 1));
   return true;
+}
+
+// ---------- fases ----------
+function startStage(s, msg) {
+  S.stage = s; S.kills = 0; spawned = 0; bossUp = false; enemies = []; shots = []; spawnT = 1.5;
+  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
+  showBanner(msg || stageLabel(s) + ' ' + stageSec(s).name, stageSec(s).tint);
+  if (openP === 'stages') renderPanel();
+  save();
+}
+function stageClear() {
+  const s = S.stage;
+  fails = 0;
+  if (s === S.maxStage) { S.maxStage++; say(`Fase ${stageLabel(s)} concluída! <span class="k">${stageLabel(s + 1)}</span> desbloqueada.`, true); }
+  else say(`Fase ${stageLabel(s)} limpa.`);
+  const next = S.autoAdv && s < S.maxStage ? s + 1 : s;
+  startStage(next, next === s ? 'FASE LIMPA · REPETINDO' : 'FASE LIMPA → ' + stageLabel(next));
+}
+function rollback() {
+  fails++;
+  if (S.autoAdv && fails >= 2 && S.stage > 0) {
+    fails = 0;
+    say(`Poder insuficiente em ${stageLabel(S.stage)}. Voltando pra farmar ${stageLabel(S.stage - 1)}.`, true);
+    startStage(S.stage - 1, 'RECUANDO → ' + stageLabel(S.stage - 1));
+  } else {
+    say(`Esquadrão derrubado em ${stageLabel(S.stage)}. Rollback da fase.`, true);
+    startStage(S.stage, 'ROLLBACK');
+  }
 }
 
 function update(dt) {
@@ -833,7 +871,6 @@ function update(dt) {
   const front = alive.reduce((a, h) => h.def.x > a.def.x ? h : a);
   const stopX = front.def.x + front.def.w + 2;
 
-  // enemies close in and queue up
   let slot = stopX;
   for (const e of enemies) {
     if (e.x > slot) e.x = Math.max(slot, e.x - 32 * dt);
@@ -844,12 +881,11 @@ function update(dt) {
   const engaged = enemies.length > 0 && enemies[0].atStop;
   if (!engaged) scroll += 22 * dt;
 
-  // heroes
   for (const h of heroes) {
     h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
     if (h.dead) {
       h.respawn -= dt;
-      if (h.respawn <= 0) { h.dead = false; h.hp = maxHp(h) * .4; say(`${h.def.name} reiniciado`); }
+      if (h.respawn <= 0) { h.dead = false; h.hp = maxHp(h) * .4; }
       continue;
     }
     if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
@@ -883,7 +919,6 @@ function update(dt) {
     else shots.push({x: h.def.x + 25, y: GROUND - 28, dmg: atk(h), c: '#6ee7a8'});
   }
 
-  // shots
   for (let i = shots.length - 1; i >= 0; i--) {
     const s = shots[i], e = enemies[0];
     if (!e) { shots.splice(i, 1); continue; }
@@ -901,14 +936,13 @@ function update(dt) {
       if (s.obs) {
         showBanner('ATAQUE ORBITAL', '#ff3a3a');
         enemies.slice().forEach(o => {
-          for (let k = 0; k < 6; k++) parts.push({x: o.x + Math.random() * o.w, y: 0, vx: 0, vy: 140 + Math.random() * 60, life: .6, c: k % 2 ? '#ff3a3a' : '#ffb454'});
+          for (let k = 0; k < 6; k++) parts.push({x: o.x + Math.random() * o.w, y: 0, vx: 0, vy: 140 + Math.random() * 60, life: .5, c: k % 2 ? '#ff3a3a' : '#ffb454'});
           if (enemies.includes(o)) hit(o, s.dmg * 3);
         });
       }
     }
   }
 
-  // enemies attack the front daemon
   const e = enemies[0];
   if (e && e.atStop) {
     e.t -= dt;
@@ -917,23 +951,20 @@ function update(dt) {
       const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1);
       front.hp -= dmg; front.flash = .1;
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
-      if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; say(`${front.def.name} caiu`); }
+      if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; }
       if (isTank && pT().reflect) hit(e, dmg * pT().reflect);
     }
   }
 
-  // spawning
   spawnT -= dt;
   if (!bossUp) {
     if (spawned < 10) {
       if (spawnT <= 0 && enemies.length < 3) { spawn(false); spawned++; spawnT = 1.2 + Math.random() * 1.6; }
     } else if (!enemies.length) {
       spawn(true); bossUp = true; showBanner('!! RANSOMWARE !!', '#ff3d7f');
-      say(`<span style="color:var(--pink)">RANSOMWARE</span> detectado em ${sec().name}`, true);
     }
   }
 
-  // fx: aura dos agentes com módulo Zero-Day ou Quântico
   for (const h of heroes) {
     const vt = visTier(h.def.id);
     if (h.dead || vt < 3 || Math.random() > dt * (vt === 4 ? 14 : 7)) continue;
@@ -948,10 +979,12 @@ function update(dt) {
   if (banner) { banner.life -= dt; if (banner.life <= 0) banner = null; }
 
   autoT -= dt;
-  if (S.auto && autoT <= 0) {
+  if (S.autoUp && autoT <= 0) {
     autoT = .5;
-    const u = UPG.filter(u => S.upg[u.k] < u.max).sort((a, b) => cost(a) - cost(b))[0];
-    if (u && buy(u)) say(`auto: ${u.label} → nv ${S.upg[u.k]}`);
+    const opts = [];
+    for (const [k] of SLOTS) for (const u of ['a', 'h']) opts.push([k, u, upCost(slotAid(k), u)]);
+    const best = opts.sort((a, b) => a[2] - b[2])[0];
+    if (best && buyUp(best[0], best[1]) && openP === 'squad') renderPanel();
   }
 }
 
@@ -966,7 +999,6 @@ function rgba(hex, a) {
   return rgbaCache[k];
 }
 const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-
 function text(str, x, y, c, center) {
   ctx.font = '8px Silkscreen, monospace';
   ctx.textBaseline = 'top';
@@ -977,20 +1009,16 @@ function text(str, x, y, c, center) {
 }
 
 function draw() {
-  const tint = sec().tint;
+  const sc = sec(), tint = sc.tint;
   ctx.fillStyle = '#0b0a16'; ctx.fillRect(0, 0, W, H);
-
-  // far layer: via grid
   ctx.fillStyle = rgba(tint, .12);
   const o1 = (scroll * .25) % 8;
   for (let x = -o1; x < W; x += 8) for (let y = 4; y < GROUND - 2; y += 8) ctx.fillRect(Math.round(x), y, 1, 1);
-
-  // mid layer: circuit traces
   const cw = 28, par = .5, first = Math.floor(scroll * par / cw) - 2;
   for (let c = first; c < first + W / cw + 4; c++) {
-    const r = hash(c + S.sector * 97);
+    const r = hash(c + sc.idx * 97);
     if (r < .25) continue;
-    const x = Math.round(c * cw - scroll * par), y = 5 + Math.floor(r * (GROUND - 16));
+    const x = Math.round(c * cw - scroll * par), y = 4 + Math.floor(r * (GROUND - 14));
     const len = 8 + Math.floor(hash(c * 7.3) * 34), dy = hash(c * 3.1) > .5 ? 6 : -6;
     ctx.fillStyle = rgba(tint, .25);
     ctx.fillRect(x, y, len, 1);
@@ -999,16 +1027,13 @@ function draw() {
     ctx.fillStyle = rgba(tint, .55); ctx.fillRect(x - 1, y - 1, 3, 3);
     ctx.fillStyle = '#0b0a16'; ctx.fillRect(x, y, 1, 1);
   }
-
-  // ground bus
   ctx.fillStyle = rgba(tint, .6); ctx.fillRect(0, GROUND, W, 1);
-  ctx.fillStyle = rgba(tint, .18); ctx.fillRect(0, GROUND + 5, W, 1);
+  ctx.fillStyle = rgba(tint, .18); ctx.fillRect(0, GROUND + 4, W, 1);
   const o2 = scroll % 6;
-  for (let x = -o2; x < W; x += 6) ctx.fillRect(Math.round(x), GROUND + 1, 1, 4);
+  for (let x = -o2; x < W; x += 6) ctx.fillRect(Math.round(x), GROUND + 1, 1, 3);
   ctx.fillStyle = rgba(tint, .9);
-  for (let i = 0; i < 5; i++) ctx.fillRect(Math.round((i * 97 + t * 45) % (W + 20)) - 10, GROUND + 3, 3, 1);
+  for (let i = 0; i < 5; i++) ctx.fillRect(Math.round((i * 97 + t * 45) % (W + 20)) - 10, GROUND + 2, 3, 1);
 
-  // heroes
   for (const h of heroes) {
     const k = h.def.id;
     const walking = !enemies[0]?.atStop && !h.dead;
@@ -1038,7 +1063,6 @@ function draw() {
     ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(bx, y - 3, Math.ceil(16 * p), 1);
   }
 
-  // enemies
   for (const e of enemies) {
     const x = Math.round(e.x - e.lunge * 2), y = GROUND - e.h;
     ctx.drawImage(e.flash > 0 ? SPRW[e.tn] : SPR[e.tn], x, y, e.w, e.h);
@@ -1047,7 +1071,6 @@ function draw() {
     ctx.fillStyle = e.boss ? '#ffb454' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(e.w * p), 1);
   }
 
-  // shots
   for (const s of shots) {
     const x = Math.round(s.x);
     if (s.style === 'laser') {
@@ -1067,163 +1090,251 @@ function draw() {
       ctx.fillStyle = s.c; ctx.fillRect(x, s.y, 3, 1);
     }
   }
-  // particles
   for (const p of parts) { ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
-  // floating numbers
   for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life * 2); text(f.txt, f.x, f.y, f.c, true); }
   ctx.globalAlpha = 1;
-
   if (banner) {
     ctx.globalAlpha = Math.min(1, banner.life * 2);
-    text(banner.text, W / 2, 10, banner.color, true);
+    text(banner.text, W / 2, 3, banner.color, true);
     ctx.globalAlpha = 1;
   }
 }
 
-// ---------- UI ----------
-const upgEl = $('#upg');
-const upgBtns = UPG.map(u => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.addEventListener('click', () => { if (buy(u)) { say(`${u.label} → nv ${S.upg[u.k]}`); renderHud(); } });
-  upgEl.appendChild(b);
-  return b;
-});
-$('#auto').checked = S.auto;
-$('#auto').addEventListener('change', e => { S.auto = e.target.checked; save(); });
-$('#speed').addEventListener('click', e => {
-  speed = speed === 1 ? 3 : speed === 3 ? 10 : 1;
-  e.target.textContent = speed + '×';
-});
-const prevEl = $('#prev');
-[{n:'real', v:null}, ...RAR.map((r, i) => ({n:r.n, v:i, c:r.c}))].forEach(o => {
-  const b = document.createElement('button');
-  b.type = 'button'; b.textContent = o.n;
-  if (o.c) b.style.setProperty('--rc', o.c);
-  b.setAttribute('aria-pressed', String(o.v === previewTier));
-  b.addEventListener('click', () => {
-    previewTier = o.v;
-    prevEl.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    renderSquad();
-  });
-  prevEl.appendChild(b);
-});
 // ---------- invocação ----------
 const stars = n => '★'.repeat(n);
-let gBanner = 'fw', obsCount = 0;
-function pullOne(cls, minStars) {
+const dupVal = st => rewardAt(S.maxStage * 10 + 5) * {3:15, 4:60, 5:250}[st];
+let gBanner = 'fw', lastPull = null;
+function pullOne(cls, chip, minStars) {
   S.pity[cls]++;
-  const r = Math.random();
-  let st = S.pity[cls] >= 50 ? 5 : r < .03 ? 5 : r < .20 ? 4 : 3;
+  const C = CHIPS[chip], r = Math.random();
+  let st = S.pity[cls] >= 50 ? 5 : r < C.p5 ? 5 : r < C.p5 + C.p4 ? 4 : 3;
   st = Math.max(st, minStars);
   if (st === 5) S.pity[cls] = 0;
   const pool = CLASSES[cls].list.filter(x => x.stars === st), T = pool[Math.random() * pool.length | 0];
-  let res;
-  if (!(T.id in S.roster)) { S.roster[T.id] = 0; res = 'new'; }
-  else if (S.roster[T.id] < 5) { S.roster[T.id]++; res = 'sync'; }
-  else { S.cores += st - 2; res = 'max'; }
-  return {T, res};
+  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }
+  const v = dupVal(st); S.data += v;
+  return {T, res:'dup', v};
 }
-function summon(n) {
-  if (S.cores < n) { say(`Faltam ${n - S.cores} ◆ núcleos pra invocar ×${n}.`); return; }
-  S.cores -= n;
+function summon(chip, n) {
+  const st = S.inv.find(x => x.k === 'chip' && x.r === chip);
+  if (!st || st.n < n) return;
+  st.n -= n; if (!st.n) S.inv.splice(S.inv.indexOf(st), 1);
   const out = [];
   for (let i = 0; i < n; i++) {
     const needFour = n === 10 && i === n - 1 && !out.some(o => o.T.stars >= 4);
-    out.push(pullOne(gBanner, needFour ? 4 : 3));
+    out.push(pullOne(gBanner, chip, needFour ? 4 : 3));
   }
-  $('#gRes').innerHTML = out.map((o, i) => {
-    const tag = o.res === 'new' ? '<span class="tag new">NOVO</span>' : o.res === 'sync' ? `<span class="tag sync">SYNC +${S.roster[o.T.id]}</span>` : `<span class="tag max">MÁX · +${o.T.stars - 2}◆</span>`;
-    return `<div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" alt="" width="64" height="64"><span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>${tag}</div>`;
-  }).join('');
+  lastPull = {cls: gBanner, out};
   const best = out.reduce((a, o) => o.T.stars > a.T.stars ? o : a);
+  const dup = out.filter(o => o.res === 'dup').reduce((a, o) => a + o.v, 0);
   if (best.T.stars === 5) { showBanner('★★★★★ ' + best.T.name, '#ffb454'); say(`<span style="color:#ffb454">★5 ${best.T.name}</span> invocado!`, true); }
-  else say(`Invocação ×${n}: melhor resultado ${stars(best.T.stars)} ${best.T.name}`);
-  applySlots(); renderRoster(); renderGachaBar(); save();
+  else say(`Invocação ×${n}: melhor ${stars(best.T.stars)} ${best.T.name}`);
+  if (dup) say(`Repetidos convertidos → +${fmt(dup)}`);
+  renderPanel(); save();
 }
 function equip(id) {
   if (!(id in S.roster)) return;
   const cls = clsOf(id);
   S[CLASSES[cls].key] = id; applySlots();
-  const h = heroes.find(x => x.def.id === cls);
+  const h = heroOf(cls);
   if (!h.dead) h.hp = maxHp(h);
   say(`${cls === 'sc' ? 'DPS' : 'Tanque'} ativo: ${charOf(id).name}`, true);
-  renderRoster(); renderSquad(); save();
+  renderPanel(); save();
 }
-function renderGachaBar() {
-  $('#gCores').textContent = '◆ ' + S.cores;
-  $('#pity').textContent = 50 - S.pity[gBanner];
-  $('#pull1').disabled = S.cores < 1; $('#pull10').disabled = S.cores < 10;
-}
-function renderRoster() {
-  const C = CLASSES[gBanner];
-  $('#colTitle').textContent = 'Coleção de ' + (C.label === 'DPS' ? 'DPS' : C.label.toLowerCase());
-  $('#owned').textContent = `${C.list.filter(x => x.id in S.roster).length}/${C.list.length}`;
-  $('#roster').innerHTML = C.list.map(T => {
-    const own = T.id in S.roster, on = S[C.key] === T.id;
-    return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}">
-      <img src="${portraitOf(T.id, -1)}" alt="" width="64" height="64">
-      <span class="st${T.stars}">${stars(T.stars)}</span>
-      <span class="nm">${own ? T.name : '???'}</span>
-      <span class="ps">${own ? T.ptxt : 'Ainda não invocado.'}</span>
-      ${own ? `<span class="tag sync">SYNC +${S.roster[T.id]}</span>` : ''}
-      <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'Equipado' : own ? 'Equipar' : 'Bloqueado'}</button>
+
+// ---------- painéis ----------
+let openP = null, selInv = -1;
+const PANELS = {squad:'Esquadrão', inv:'Inventário · 12 espaços', gacha:'Invocar', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
+const pct = x => Math.round(x * 100) + '%';
+const RENDER = {
+  squad: () => SLOTS.map(([k, lab]) => {
+    const h = heroOf(k), g = S.gear[k];
+    return `<div class="hr">
+      <img src="${portrait(k, visTier(k))}" width="48" height="48" alt="">
+      <div>
+        <div class="hn"><b>${h.def.name}</b><span>${lab}</span></div>
+        <div class="hp"><i id="hp-${k}"></i></div>
+        <div class="st" id="st-${k}"></div>
+        <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} +${g.b}%<button type="button" data-unequip="${k}">remover</button>` : 'sem módulo'}</div>
+      </div>
+      <div class="hb">
+        <button type="button" id="ua-${k}" data-up="${k}:a"></button>
+        <button type="button" id="uh-${k}" data-up="${k}:h"></button>
+        ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">trocar</button>`}
+      </div>
     </div>`;
-  }).join('');
+  }).join('') + `
+    <div class="opts">
+      <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
+      <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar módulos melhores</label>
+    </div>
+    <div class="prev">prévia do visual: ${[['real', -9], ...RAR.map((r, i) => [r.n, i])].map(([n, v]) =>
+      `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
+
+  inv: () => {
+    const cells = Array.from({length: 12}, (_, i) => {
+      const it = S.inv[i];
+      if (!it) return '<div class="cell empty"></div>';
+      return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" style="--rc:${itemColor(it)}" title="${it.k === 'chip' ? 'Chip ' + CHIPS[it.r].n : it.name}">${
+        it.k === 'chip' ? `<span class="ct">CHIP</span><b>×${it.n}</b>` : `<span class="ct">${SLOTTAG[it.slot]}</span><b>+${it.b}%</b>`}</button>`;
+    }).join('');
+    const it = S.inv[selInv];
+    let det = '<p class="hint">Clique num item. Módulos caem dos vírus (8%) e sempre do chefe; chips de invocação são raros.</p>';
+    if (it && it.k === 'gear') {
+      const cur = S.gear[it.slot], diff = it.b - (cur ? cur.b : 0);
+      det = `${gearTag(it)} · módulo de <b>${SLOTTAG[it.slot]}</b> · +${it.b}% de ATK e HP
+        <div class="hint">Equipado agora: ${cur ? `${cur.name} +${cur.b}%` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? '+' : ''}${diff}%</span></div>
+        <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
+    } else if (it) {
+      const C = CHIPS[it.r];
+      det = `<span style="color:${C.c}">Chip de invocação ${C.n}</span> ×${it.n} · ★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}
+        <div class="row"><button type="button" data-go="fw">Invocar tanque</button><button type="button" data-go="sc">Invocar DPS</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
+    }
+    return `<div class="inv">${cells}</div><div class="det">${det}</div>
+      <div class="opts"><button type="button" data-sellworse>Reciclar módulos piores que os equipados</button></div>`;
+  },
+
+  gacha: () => {
+    const C = CLASSES[gBanner];
+    const res = lastPull && lastPull.cls === gBanner ? `<div class="res">${lastPull.out.map((o, i) => `
+      <div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" width="40" height="40" alt="">
+      <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
+      ${o.res === 'new' ? '<span class="tag new">NOVO</span>' : `<span class="tag dup">+${fmt(o.v)}</span>`}</div>`).join('')}</div>` : '';
+    const col = C.list.map(T => {
+      const own = T.id in S.roster, on = S[C.key] === T.id;
+      return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
+        <img src="${portraitOf(T.id, -1)}" width="40" height="40" alt="">
+        <span class="st${T.stars}">${stars(T.stars)}</span>
+        <span class="nm">${own ? T.name : '???'}</span>
+        <span class="ps">${own ? T.ptxt : 'Não invocado'}</span>
+        <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'Equipado' : own ? 'Equipar' : 'Bloqueado'}</button>
+      </div>`;
+    }).join('');
+    return `<div class="btabs">
+        <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Banner · Tanques</button>
+        <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Banner · DPS</button>
+      </div>
+      <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
+        <span><b>${c.n}</b> ×${n}</span><small>★5 ${pct(c.p5)} · ★4 ${pct(c.p4)}</small>
+        <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Usar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
+      <p class="pity">★5 garantido em ${50 - S.pity[gBanner]} invocações · ×10 garante ★4 · repetido vira dados (★3 ${fmt(dupVal(3))}, ★4 ${fmt(dupVal(4))}, ★5 ${fmt(dupVal(5))})
+        · <button type="button" data-free>protótipo: +chips</button></p>
+      ${res}
+      <p class="sub">Coleção de ${gBanner === 'sc' ? 'DPS' : 'tanques'} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length}</small></p>
+      <div class="col">${col}</div>`;
+  },
+
+  stages: () => {
+    const pw = power(), rows = [];
+    for (let s = 0; s <= S.maxStage + 1; s++) {
+      const sc = stageSec(s), rp = recPow(s), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad';
+      const lock = s > S.maxStage, cur = s === S.stage;
+      rows.push(`<li class="${cur ? 'cur' : lock ? 'lock' : ''}"><span class="lb">${stageLabel(s)}</span>
+        <span style="color:${sc.tint}">${sc.name}</span><span class="rp ${cls}">poder ${fmtN(rp)}</span>
+        <button type="button" data-stage="${s}" ${lock || cur ? 'disabled' : ''}>${cur ? 'atual' : lock ? 'bloqueada' : 'farmar'}</button></li>`);
+    }
+    return `<p>Seu poder: <b class="k">${fmtN(pw)}</b>. Cada fase tem 10 vírus e um chefe. Vencer o chefe libera a próxima fase; fases mais altas dão mais dados e módulos melhores.</p>
+      <label><input type="checkbox" id="oAdv" ${S.autoAdv ? 'checked' : ''}> avançar sozinho (e recuar uma fase se o esquadrão cair 2 vezes)</label>
+      <ol class="stl">${rows.reverse().join('')}</ol>`;
+  },
+
+  log: () => `<ol class="log">${LOG.map(l => `<li class="${l.hl ? 'hl' : ''}"><time>${l.time}</time>${l.txt}</li>`).join('') || '<li>Nada ainda.</li>'}</ol>`,
+
+  readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
+    <p>Um esquadrão de agentes digitais (tanque, DPS e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">dados</span> (KB → MB → GB), o dinheiro do jogo.</p>
+    <p><b>Esquadrão:</b> gaste dados pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> 12 espaços pros módulos e chips que caem. <b>Invocar:</b> use chips Comum, Raro ou Lendário nos banners de tanques e DPS; repetidos viram dados. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
+};
+function renderPanel() {
+  if (!openP) return;
+  $('#pTitle').textContent = PANELS[openP];
+  const body = $('#pBody'), top = body.scrollTop;
+  body.innerHTML = RENDER[openP]();
+  body.scrollTop = top;
+  livePanel();
 }
-$('#roster').addEventListener('click', e => { const b = e.target.closest('[data-eq]'); if (b) equip(b.dataset.eq); });
-document.querySelectorAll('[data-ban]').forEach(b => b.addEventListener('click', () => {
-  gBanner = b.dataset.ban;
-  document.querySelectorAll('[data-ban]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  renderRoster(); renderGachaBar();
-}));
-$('#pull1').addEventListener('click', () => summon(1));
-$('#pull10').addEventListener('click', () => summon(10));
-$('#gFree').addEventListener('click', () => { S.cores += 10; renderGachaBar(); save(); });
+function livePanel() {
+  if (openP === 'squad') for (const [k] of SLOTS) {
+    const h = heroOf(k), aid = slotAid(k), lv = lvOf(aid), el = $('#hp-' + k);
+    if (!el) return;
+    const p = h.dead ? 0 : h.hp / maxHp(h) * 100;
+    el.style.width = p.toFixed(1) + '%'; el.style.background = p < 35 ? 'var(--pink)' : '';
+    $('#st-' + k).textContent = `ATK ${fmtN(atk(h))} · HP ${fmtN(h.hp)}/${fmtN(maxHp(h))}${h.dead ? ' · reiniciando…' : ''}`;
+    for (const u of ['a', 'h']) {
+      const b = $(`#u${u}-${k}`), c = upCost(aid, u);
+      b.innerHTML = `${u === 'a' ? '+Dano' : '+Resist.'} nv${lv[u]} · <b>${fmt(c)}</b>`;
+      b.disabled = S.data < c;
+    }
+  }
+}
+function openPanel(k, force) {
+  openP = !force && openP === k ? null : k;
+  $('#panel').hidden = !openP;
+  document.querySelectorAll('.tabs [data-open]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.open === openP)));
+  if (openP) renderPanel();
+}
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]');
+  if (o) { openPanel(o.dataset.open); return; }
+});
+$('#pClose').addEventListener('click', () => openPanel(null, true));
 let wipeArmed = 0;
-$('#reset').addEventListener('click', e => {
-  if (Date.now() - wipeArmed > 3000) { wipeArmed = Date.now(); e.target.textContent = 'confirmar?'; setTimeout(() => e.target.textContent = 'wipe', 3000); return; }
-  S = structuredClone(S0); enemies = []; shots = []; spawned = 0; bossUp = false; applySlots(); resetHeroes(); save();
-  renderRoster(); renderGachaBar(); $('#gRes').innerHTML = '<p class="empty">Os resultados da invocação aparecem aqui.</p>';
-  $('#auto').checked = S.auto; e.target.textContent = 'wipe'; say('Progresso apagado. Sistema limpo.', true);
+$('#pBody').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.up) { const [k, u] = d.up.split(':'); if (buyUp(k, u)) livePanel(); }
+  else if (d.unequip) unequip(d.unequip);
+  else if (d.swap) { gBanner = d.swap; openPanel('gacha', true); }
+  else if (d.prev !== undefined) { const v = +d.prev; previewTier = v < 0 ? null : v; renderPanel(); }
+  else if (d.cell !== undefined) { selInv = +d.cell; renderPanel(); }
+  else if (d.equip !== undefined) equipItem(+d.equip);
+  else if (d.sell !== undefined) sellItem(+d.sell);
+  else if (d.sellworse !== undefined) sellWorse();
+  else if (d.go) { gBanner = d.go; openPanel('gacha', true); }
+  else if (d.ban) { gBanner = d.ban; renderPanel(); }
+  else if (d.pull) { const [r, n] = d.pull.split(':').map(Number); summon(r, n); }
+  else if (d.eq) equip(d.eq);
+  else if (d.stage !== undefined) { fails = 0; startStage(+d.stage); say(`Farmando ${stageLabel(+d.stage)}`); }
+  else if (d.free !== undefined) { addItem({k:'chip', r:0, n:10}); addItem({k:'chip', r:1, n:3}); addItem({k:'chip', r:2, n:1}); renderPanel(); save(); }
+  else if (b.id === 'wipe') {
+    if (Date.now() - wipeArmed > 3000) { wipeArmed = Date.now(); b.textContent = 'Clique de novo pra confirmar'; return; }
+    S = structuredClone(S0); applySlots(); resetHeroes(); lastPull = null; selInv = -1;
+    startStage(0); say('Progresso apagado.', true); renderPanel();
+  }
+});
+$('#pBody').addEventListener('change', e => {
+  const id = e.target.id;
+  if (id === 'oUp') S.autoUp = e.target.checked;
+  if (id === 'oEq') S.autoEq = e.target.checked;
+  if (id === 'oAdv') S.autoAdv = e.target.checked;
+  save();
+});
+$('#speed').addEventListener('click', e => {
+  speed = speed === 1 ? 3 : speed === 3 ? 10 : 1;
+  e.target.textContent = speed + '×';
 });
 
 function renderHud() {
   const s = sec();
   document.querySelector('.dock').style.setProperty('--sec', s.tint);
-  $('#secName').textContent = s.name;
+  $('#stgBtn').textContent = stageLabel(S.stage) + ' ' + s.name;
   $('#secBar').style.width = (bossUp ? 100 : S.kills / 10 * 100) + '%';
   $('#secTxt').textContent = bossUp ? 'BOSS' : S.kills + '/10';
   $('#data').textContent = fmt(S.data);
-  UPG.forEach((u, i) => {
-    const maxed = S.upg[u.k] >= u.max;
-    upgBtns[i].innerHTML = `${u.label} ${S.upg[u.k]} · <b>${maxed ? 'máx' : fmt(cost(u))}</b>`;
-    upgBtns[i].disabled = maxed || S.data < cost(u);
-  });
-}
-function renderSquad() {
-  $('#squad').innerHTML = heroes.slice().reverse().map(h => {
-    const g = S.gear[h.def.id], p = h.dead ? 0 : h.hp / maxHp(h) * 100;
-    const vt = visTier(h.def.id);
-    return `<div class="d">
-      <img class="por" src="${portrait(h.def.id, vt)}" alt="" width="64" height="64" style="--gl:${heroSpr(h.def.id, vt).glow}">
-      <div class="dh"><b>${h.def.name}</b><span>${h.def.role}</span></div>
-      <div class="hp"><i style="width:${p.toFixed(1)}%;${p < 35 ? 'background:var(--pink)' : ''}"></i></div>
-      <div class="st">ATK ${fmtN(atk(h))} · HP ${fmtN(h.hp)}/${fmtN(maxHp(h))}${h.dead ? ' · <em>reiniciando…</em>' : ''}</div>
-      <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} <small>[${RAR[g.r].n}] +${g.b}%</small>` : 'sem módulo instalado'}</div>
-    </div>`;
-  }).join('');
+  $('#pow').textContent = fmtN(power());
+  $('#invN').textContent = S.inv.length + '/12';
 }
 function clock() { const d = new Date(); $('#clock').textContent = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
 
 function offline(ms) {
   const sec_ = Math.min(ms / 1000, 8 * 3600);
   if (sec_ < 30) return;
-  const gain = sec_ * rewardAt(S.sector * 10 + 5) * .3;
+  const gain = sec_ * rewardAt(S.stage * 10 + 5) * .25;
   S.data += gain;
-  S.cores += Math.floor(sec_ / 1800);
+  const chips = Math.floor(sec_ / 1800);
+  if (chips) addItem({k:'chip', r:0, n:chips});
   const h = Math.floor(sec_ / 3600), m = Math.floor(sec_ % 3600 / 60);
-  say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min), seus daemons coletaram <span style="color:var(--amber)">${fmt(gain)}</span>`, true);
+  say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min): +${fmt(gain)}${chips ? ` e ${chips} chip(s) comum(ns)` : ''}`, true);
   showBanner('+' + fmt(gain) + ' OFFLINE', '#ffb454');
 }
 
@@ -1237,18 +1348,18 @@ function resize() {
 new ResizeObserver(resize).observe(cv.parentElement);
 resize();
 
-// boot
-say('daemon.exe iniciado. Varredura em C:\\TEMP…', true);
+say('daemon.exe iniciado.', true);
 if (S.last) offline(Date.now() - S.last);
+startStage(S.stage);
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = Date.now(); save(); }
   else if (hiddenAt) { offline(Date.now() - hiddenAt); hiddenAt = 0; }
 });
 setInterval(save, 5000);
-setInterval(() => { renderHud(); renderSquad(); }, 250);
+setInterval(() => { renderHud(); livePanel(); }, 250);
 setInterval(clock, 10000); clock();
-renderHud(); renderSquad(); renderRoster(); renderGachaBar();
+renderHud();
 
 let lastT = performance.now();
 function frame(now) {
