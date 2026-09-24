@@ -29,12 +29,13 @@ Em `invocar.exe` o jogador gasta **núcleos ◆** (chefe dá +3; vírus comum te
 - Repetido vira sincronização: +12% de HP/ATK por nível, até +5 (depois disso devolve núcleos)
 - Cada tanque tem uma passiva própria (redução de dano, reflexo, regeneração, bônus de equipe)
 
-**Banner de atiradores**
+**Banner de DPS**
 
-| ★ | Atiradores | Passiva |
+| ★ | DPS | Passiva |
 |---|---|---|
 | ★5 | SENTINEL ARCHER | 3 flechas por disparo, +10% velocidade |
 | ★5 | LASER-T | Feixe laser que atravessa toda a fila |
+| ★5 | SENTINEL TANK-M-1 | Modo tanque: artilharia com dano em área e ataque orbital a cada 5 disparos |
 | ★4 | INFILTRATOR | Esquadrão +12% dano |
 | ★4 | GHOST | 30% de crítico (×2,5) |
 | ★4 | NIGHTHAWK | Virote perfura o próximo inimigo (60%) |

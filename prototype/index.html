@@ -154,7 +154,7 @@
         <p>Cada vírus apagado vira dados. A moeda sobe como um disco enchendo: <span class="k">KB → MB → GB → TB</span>. Dados compram upgrades. Às vezes um vírus deixa cair um módulo, e os mais raros são <span class="k" style="color:#c38cff">Zero-Day</span> e <span class="k" style="color:var(--amber)">Quântico</span>.</p>
         <p>Os módulos também mudam o visual: as luzes dos agentes ganham a cor da raridade, e raridades altas acrescentam peças (escudo maior, cano mais longo, capa mais longa) e uma aura. Use a prévia em daemons.cfg pra ver cada nível.</p>
         <p>No fim de cada setor aparece um <span class="k" style="color:var(--pink)">RANSOMWARE</span>. Se o esquadrão cair, o sistema faz rollback do setor, mas você não perde os dados.</p>
-        <p>Em <span class="k">invocar.exe</span> você gasta núcleos ◆ pra invocar novos tanques e atiradores (★3 a ★5), cada classe no seu banner. Cada um tem visual e habilidade próprios, e repetidos ficam mais fortes.</p>
+        <p>Em <span class="k">invocar.exe</span> você gasta núcleos ◆ pra invocar novos tanques e DPS (★3 a ★5), cada classe no seu banner. Cada um tem visual e habilidade próprios, e repetidos ficam mais fortes.</p>
         <p>Como jogar: não precisa fazer nada, é só deixar rodando. Compre upgrades na barra lá embaixo ou deixe o <span class="k">auto</span> ligado.</p>
       </div>
     </section>
@@ -173,7 +173,7 @@
     <section class="win gacha">
       <h2>invocar.exe <small>protocolo de invocação</small></h2>
       <div class="body">
-        <div class="gtabs"><button type="button" data-ban="fw" aria-pressed="true">Banner · Tanques</button><button type="button" data-ban="sc" aria-pressed="false">Banner · Atiradores</button></div>
+        <div class="gtabs"><button type="button" data-ban="fw" aria-pressed="true">Banner · Tanques</button><button type="button" data-ban="sc" aria-pressed="false">Banner · DPS</button></div>
         <div class="gbar">
           <div class="gcur"><span class="lbl">NÚCLEOS</span><b id="gCores">◆ 0</b></div>
           <button id="pull1" type="button">Invocar ×1 · <b>◆1</b></button>
@@ -495,7 +495,7 @@ const TANKS = [
 ];
 TANKS[0].art = HERO_ART.fw;
 
-// Soldado configurável, usado pelos atiradores invocados.
+// Soldado configurável, usado pelos DPS invocados.
 // o: A, A2, B, acc, metal, weapon ('sniper'|'rifle'|'bow'|'crossbow'|'laser'), hair/skin/mask/crest, scarf, quiver, pack, treads, drone…
 function soldier(o) {
   return (P, f, v, t, gl) => {
@@ -559,6 +559,26 @@ function soldier(o) {
     P.line(18, 11, 22, 15, o.A, 2); P.set(22, 16, o.glove || o.A2);
   };
 }
+// Veículo de esteiras (modo tanque), usado pelo TANK-M-1.
+function tankMode(o) {
+  return (P, f, v, t, gl) => {
+    const M = o.metal, M2 = mix(M, '#ffffff', .25), T = '#2a2a22', T2 = '#5a5a44';
+    P.rect(4, 12, 5, 5, o.A2);
+    for (const q of [[5, 13], [7, 13], [5, 15], [7, 15]]) P.set(q[0], q[1], o.rack);
+    P.rect(3, 23, 25, 7, T); P.ell(3, 26, 3, 3, T); P.ell(27, 26, 3, 3, T);
+    P.line(3, 23, 27, 23, T2);
+    for (let x = 5 + f * 2; x <= 26; x += 5) { P.ell(x, 26, 2, 2, T2); P.set(x, 26, T); }
+    P.poly([[4, 16], [26, 16], [30, 22], [1, 22]], o.A);
+    P.line(5, 16, 25, 16, o.B); P.line(3, 20, 28, 20, o.A2);
+    for (let x = 6; x < 26; x += 4) P.set(x, 18, o.acc);
+    P.rect(9, 10, 12, 6, o.A); P.line(10, 10, 19, 10, o.B); P.rect(11, 8, 4, 2, o.A2);
+    P.rect(17, 12, 3, 2, gl); P.set(19, 12, '#ffffff');
+    const L = 26 + Math.max(0, t - 1);
+    P.rect(20, 12, L - 20, 2, M); P.line(20, 12, L - 1, 12, M2);
+    P.rect(L - 1, 11, 2, 4, M2); P.set(L, 12, gl);
+    if (t >= 3) { P.line(11, 8, 10, 3, M2); P.set(10, 2, gl); }
+  };
+}
 const GSTAR = {3:{hp:55, atk:10}, 4:{hp:65, atk:13}, 5:{hp:75, atk:17}};
 const GUNNERS = [
   {id:'scanner', name:'SCANNER', stars:3, role:'railgun e cachecol',
@@ -587,11 +607,15 @@ const GUNNERS = [
     passive:{pierce:1}, ptxt:'Canhão laser: o feixe atravessa a fila e acerta todos os inimigos (70% do dano nos de trás).',
     shot:{c:'#ff3a3a', style:'laser'},
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:soldier({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', weapon:'laser', lens:'#ff3a3a', treads:true, metal:'#2e3320'})}},
+  {id:'tankm1', name:'SENTINEL TANK-M-1', stars:5, role:'modo tanque · artilharia',
+    passive:{splash:.5, obs:5}, ptxt:'Artilharia: cada projétil explode e acerta todos os inimigos com 50% do dano. A cada 5 disparos chama um ataque orbital (×3 em todos).',
+    shot:{style:'shell', c:'#ffb454', x:31, y:19},
+    art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:tankMode({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', rack:'#ff3a3a', metal:'#2e3320'})}},
 ];
 GUNNERS[0].art = HERO_ART.sc;
 const CLASSES = {
   fw: {label:'Tanques', one:'tanque', list:TANKS, key:'tank', stars:STAR, idx:2},
-  sc: {label:'Atiradores', one:'atirador', list:GUNNERS, key:'gunner', stars:GSTAR, idx:1},
+  sc: {label:'DPS', one:'dps', list:GUNNERS, key:'gunner', stars:GSTAR, idx:1},
 };
 const charOf = id => TANKS.find(x => x.id === id) || GUNNERS.find(x => x.id === id);
 const clsOf = id => TANKS.some(x => x.id === id) ? 'fw' : 'sc';
@@ -682,7 +706,7 @@ const sync = id => 1 + .12 * (S.roster[id] || 0);
 function applySlots() {
   for (const cls in CLASSES) {
     const C = CLASSES[cls], T = equipped(cls), d = HERO_DEF[C.idx];
-    d.name = T.name; d.role = C.one + ' · ' + T.role;
+    d.name = T.name; d.role = (cls === 'sc' ? 'DPS' : C.one) + ' · ' + T.role;
     d.hp = C.stars[T.stars].hp * sync(T.id); d.atk = C.stars[T.stars].atk * sync(T.id);
   }
 }
@@ -851,8 +875,9 @@ function update(dt) {
     else if (h.def.id === 'sc') {
       const G = pG(), sh = equipped('sc').shot || {};
       const crit = Math.random() < (G.crit || 0), d = atk(h) * (crit ? G.critX || 2 : 1);
-      const base = {y: GROUND - 16, c: sh.c || heroSpr('sc', visTier('sc')).glow, style: sh.style, pierce: G.pierce || 0};
-      shots.push({...base, x: h.def.x + 27, dmg: d, crit});
+      const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc', visTier('sc')).glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0};
+      const obs = G.obs ? ++obsCount % G.obs === 0 : false;
+      shots.push({...base, x: h.def.x + (sh.x || 27), dmg: d, crit, obs});
       for (let m = 1; m <= (G.multishot || 0); m++) shots.push({...base, x: h.def.x + 27 - m * 8, y: base.y + (m % 2 ? -3 : 3), dmg: d * .5});
     }
     else shots.push({x: h.def.x + 25, y: GROUND - 28, dmg: atk(h), c: '#6ee7a8'});
@@ -869,6 +894,17 @@ function update(dt) {
       const behind = s.pierce ? enemies.slice(1, s.pierce >= 1 ? undefined : 2) : [];
       hit(e, s.dmg);
       behind.forEach(o => { if (enemies.includes(o)) hit(o, s.dmg * (s.pierce >= 1 ? .7 : s.pierce)); });
+      if (s.splash) {
+        burst(s.x, GROUND - 8, '#ffb454', 10);
+        enemies.slice().forEach(o => { if (o !== e && enemies.includes(o)) hit(o, s.dmg * s.splash); });
+      }
+      if (s.obs) {
+        showBanner('ATAQUE ORBITAL', '#ff3a3a');
+        enemies.slice().forEach(o => {
+          for (let k = 0; k < 6; k++) parts.push({x: o.x + Math.random() * o.w, y: 0, vx: 0, vy: 140 + Math.random() * 60, life: .6, c: k % 2 ? '#ff3a3a' : '#ffb454'});
+          if (enemies.includes(o)) hit(o, s.dmg * 3);
+        });
+      }
     }
   }
 
@@ -1018,6 +1054,10 @@ function draw() {
       ctx.fillStyle = rgba(s.c, .35); ctx.fillRect(x - 18, s.y - 1, 20, 3);
       ctx.fillStyle = s.c; ctx.fillRect(x - 18, s.y, 20, 1);
       ctx.fillStyle = '#ffffff'; ctx.fillRect(x - 6, s.y, 8, 1);
+    } else if (s.style === 'shell') {
+      ctx.fillStyle = rgba(s.c, .4); ctx.fillRect(x - 6, s.y, 6, 1);
+      ctx.fillStyle = '#2a2a22'; ctx.fillRect(x, s.y - 1, 3, 3);
+      ctx.fillStyle = s.c; ctx.fillRect(x + 2, s.y, 1, 1);
     } else if (s.style === 'arrow') {
       ctx.fillStyle = '#c9c3b0'; ctx.fillRect(x - 7, s.y, 7, 1);
       ctx.fillStyle = s.c; ctx.fillRect(x, s.y - 1, 1, 3); ctx.fillRect(x + 1, s.y, 1, 1);
@@ -1070,7 +1110,7 @@ const prevEl = $('#prev');
 });
 // ---------- invocação ----------
 const stars = n => '★'.repeat(n);
-let gBanner = 'fw';
+let gBanner = 'fw', obsCount = 0;
 function pullOne(cls, minStars) {
   S.pity[cls]++;
   const r = Math.random();
@@ -1107,7 +1147,7 @@ function equip(id) {
   S[CLASSES[cls].key] = id; applySlots();
   const h = heroes.find(x => x.def.id === cls);
   if (!h.dead) h.hp = maxHp(h);
-  say(`${CLASSES[cls].one[0].toUpperCase() + CLASSES[cls].one.slice(1)} ativo: ${charOf(id).name}`, true);
+  say(`${cls === 'sc' ? 'DPS' : 'Tanque'} ativo: ${charOf(id).name}`, true);
   renderRoster(); renderSquad(); save();
 }
 function renderGachaBar() {
@@ -1117,7 +1157,7 @@ function renderGachaBar() {
 }
 function renderRoster() {
   const C = CLASSES[gBanner];
-  $('#colTitle').textContent = 'Coleção de ' + C.label.toLowerCase();
+  $('#colTitle').textContent = 'Coleção de ' + (C.label === 'DPS' ? 'DPS' : C.label.toLowerCase());
   $('#owned').textContent = `${C.list.filter(x => x.id in S.roster).length}/${C.list.length}`;
   $('#roster').innerHTML = C.list.map(T => {
     const own = T.id in S.roster, on = S[C.key] === T.id;
