@@ -279,6 +279,7 @@
   .sh small{color:var(--mute); font-size:10px}
   .sh select{font:11px var(--mono); background:#0b0a16; color:var(--text); border:1px solid var(--line)}
   .raids{display:grid; gap:6px}
+  .btabs .banL{border-color:var(--amber); color:var(--amber)} .btabs .banL[aria-pressed="true"]{background:#1d1608}
   .feat{display:grid; gap:2px; padding:6px 8px; margin-bottom:6px; border:1px solid var(--amber); background:#1d1608; font-size:11px}
   .feat b{color:var(--amber)} .feat small{color:var(--mute)} .feat .fl b{color:var(--text)}
   .raid.guest{border-color:var(--rc); background:#12102a}
@@ -848,7 +849,7 @@ const SUPPORTS = [
 ];
 const CLASSES = {
   fw: {label:'Tanques', one:'tanque', list:TANKS, key:'tank', stars:STAR, idx:2},
-  sc: {label:'DPS', one:'dps', list:GUNNERS, key:'gunner', stars:GSTAR, idx:1},
+  sc: {label:'Agentes de ataque', one:'ataque', list:GUNNERS, key:'gunner', stars:GSTAR, idx:1},
 };
 const charOf = id => TANKS.find(x => x.id === id) || GUNNERS.find(x => x.id === id);
 const clsOf = id => TANKS.some(x => x.id === id) ? 'fw' : 'sc';
@@ -1314,32 +1315,32 @@ function addDup(T) {
   }
   return {T, res:'dup'};
 }
-// ---------- lançamentos e destaque ----------
-// Cada agente pode ter rel:'AAAA-MM-DD' (data de lançamento). Antes da data ele não existe no jogo. Nas 2 primeiras
-// semanas fica EM DESTAQUE no Download dele: metade dos resultados daquela raridade vai pra ele. Só entra na loja
-// de fragmentos 4 semanas depois do lançamento: sorte no primeiro mês, garantido pra todos depois disso.
-// Sem lançamento recente, o destaque gira entre os agentes que já existem a cada 2 semanas.
+// ---------- lançamentos: banner separado ----------
+// Cada agente pode ter rel:'AAAA-MM-DD' (data de lançamento); antes da data ele não existe no jogo.
+// Nas 2 primeiras semanas ele tem um Download PRÓPRIO (banner de lançamento): lá, metade dos resultados da raridade
+// dele sai pra ele e o resto é sorteado entre os agentes da mesma classe. Os Downloads padrão (Tanques / Ataque)
+// não têm destaque e só recebem o agente novo depois dessas 2 semanas. Loja de fragmentos: 4 semanas depois.
+// O jogador escolhe: gastar pacotes no agente novo ou nos antigos.
 const REL_FEAT = 14 * DAY, REL_SHOP = 28 * DAY, FEAT_P = .5;
-const relMs = T => T.rel ? Date.parse(T.rel + 'T12:00:00') : 0;
+const relMs = T => S.demoRel && S.demoRel.id === T.id ? S.demoRel.at : T.rel ? Date.parse(T.rel + 'T12:00:00') : 0;
 const released = T => relMs(T) <= nowMs();
+const inStd = T => nowMs() - relMs(T) >= REL_FEAT;   // já entrou nos Downloads padrão
 const inShop = T => nowMs() - relMs(T) >= REL_SHOP;
-const weekStart = w => (w * 7 - 3) * DAY + new Date().getTimezoneOffset() * 6e4;
-function featured(cls, st) {
-  const L = CLASSES[cls].list.filter(x => x.stars === st && released(x));
-  if (!L.length) return null;
-  const fresh = L.filter(x => x.rel && nowMs() - relMs(x) < REL_FEAT).sort((a, b) => relMs(b) - relMs(a))[0];
-  if (fresh) return {T:fresh, until:relMs(fresh) + REL_FEAT, fresh:true};
-  const k = Math.floor(weekIdx() / 2);
-  return {T:L[k % L.length], until:weekStart((k + 1) * 2)};
+const isBase = T => !T.rel && !(S.demoRel && S.demoRel.id === T.id);   // agentes padrão, que começam no jogo
+function launch() {
+  const L = [...TANKS, ...GUNNERS].filter(T => relMs(T) && released(T) && !inStd(T)).sort((a, b) => relMs(b) - relMs(a))[0];
+  return L ? {T:L, until:relMs(L) + REL_FEAT} : null;
 }
+const banCls = b => b === 'L' ? (launch() ? clsOf(launch().T.id) : 'fw') : b;
 const upcoming = () => [...TANKS, ...GUNNERS].filter(T => !released(T)).sort((a, b) => relMs(a) - relMs(b));
 const dm = ms => new Date(ms).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
 function featView() {
-  const f5 = featured(gBanner, 5), f4 = featured(gBanner, 4), up = upcoming();
-  const one = (f, st) => f ? `<span class="st${st}">${stars(st)}</span> <b>${f.T.name}</b>${f.fresh ? ' <span class="tag new">NOVO</span>' : ''} <small>até ${dm(f.until)}</small>` : '';
-  return `<div class="feat"><div><b>Em destaque</b> <small>metade dos ★5 e dos ★4 deste Download sai pro agente em destaque</small></div>
-    <div class="fl">${one(f5, 5)}</div><div class="fl">${one(f4, 4)}</div>
-    ${up.length ? `<div class="fl hint">Próximo lançamento: ${dm(relMs(up[0]))} · entra na loja de fragmentos 4 semanas depois</div>` : '<div class="fl hint">Novos agentes chegam a cada 2 semanas, em destaque. Depois de 4 semanas entram na loja de fragmentos.</div>'}</div>`;
+  const L = launch(), up = upcoming();
+  if (gBanner !== 'L' || !L) return L ? `<p class="hint">Agente novo disponível: <b class="k">${L.T.name}</b> no Download de lançamento, até ${dm(L.until)}.</p>` : '';
+  const C = CLASSES[banCls('L')], st = L.T.stars;
+  return `<div class="feat"><div><b>Lançamento: ${L.T.name}</b> <span class="st${st}">${stars(st)}</span> <span class="tag new">NOVO</span> <small>até ${dm(L.until)}</small></div>
+    <div class="fl">${pct(FEAT_P)} dos resultados ${stars(st)} saem pra ${L.T.name}; o resto é sorteado entre ${C.label.toLowerCase()}. Garantias deste Download são separadas dos padrão.</div>
+    <div class="fl hint">Depois de ${dm(L.until)} ele entra nos Downloads padrão, e em ${dm(relMs(L.T) + REL_SHOP)} na loja de fragmentos.${up.length ? ` Próximo lançamento: ${dm(relMs(up[0]))}.` : ''}</div></div>`;
 }
 // Loja de fragmentos
 const SHOP = [
@@ -2349,8 +2350,8 @@ const ACH = [
   {id:'f3', n:'Reinstalação profissional', d:'Use o Formatar C: 3 vezes.', ok:() => S.fmtN >= 3, rw:{raro:2}},
   {id:'t5', n:'Quântico', d:'Consiga um item T5.', ok:() => S.seenT >= 4, rw:{frag:30}},
   {id:'t6', n:'Acesso root', d:'Consiga um item T6 Root.', ok:() => S.seenT >= 5, rw:{frag:100}},
-  {id:'tanks', n:'Parede de fogo', d:'Tenha todos os tanques.', ok:() => TANKS.filter(released).every(T => T.id in S.roster), rw:{raro:1}},
-  {id:'atk', n:'Arsenal completo', d:'Tenha todos os agentes de ataque.', ok:() => GUNNERS.filter(released).every(T => T.id in S.roster), rw:{raro:1}},
+  {id:'tanks', n:'Parede de fogo', d:'Tenha todos os tanques padrão (os que começam no jogo).', ok:() => TANKS.filter(isBase).every(T => T.id in S.roster), rw:{raro:1}},
+  {id:'atk', n:'Arsenal completo', d:'Tenha todos os agentes de ataque padrão (os que começam no jogo).', ok:() => GUNNERS.filter(isBase).every(T => T.id in S.roster), rw:{raro:1}},
   {id:'v20', n:'Atualização completa', d:'Deixe um agente na v2.0.', ok:() => Object.values(S.ver).some(v => v.v >= 10), rw:{frag:50}},
   {id:'v20x5', n:'Tudo em dia', d:'Deixe 5 agentes na v2.0.', ok:() => Object.values(S.ver).filter(v => v.v >= 10).length >= 5, rw:{frag:200}},
   {id:'ctr', n:'Rotina de segurança', d:'Conclua 30 contratos.', ok:() => (S.stat.ctr || 0) >= 30, rw:{frag:60}},
@@ -2631,16 +2632,17 @@ function draw() {
 const stars = n => '★'.repeat(n);
 const dupVal = st => rewardAt(S.maxStage) * {3:40, 4:160, 5:600}[st];
 let gBanner = 'fw', lastPull = null;
-const pityOf = (cls, chip) => S.pity[cls][chip] || (S.pity[cls][chip] = {p5:0, p4:0});
-function pullOne(cls, chip, minStars) {
-  const C = CHIPS[chip], P = pityOf(cls, chip), r = Math.random();
+const pityOf = (b, chip) => { const P = S.pity[b] || (S.pity[b] = {}); return P[chip] || (P[chip] = {p5:0, p4:0}); };
+function pullOne(ban, chip, minStars) {
+  const cls = banCls(ban), L = ban === 'L' ? launch() : null;
+  const C = CHIPS[chip], P = pityOf(ban, chip), r = Math.random();
   P.p5++; P.p4++;
   let st = C.pity5 && P.p5 >= C.pity5 ? 5 : r < C.p5 ? 5 : C.pity4 && P.p4 >= C.pity4 ? 4 : r < C.p5 + C.p4 ? 4 : 3;
   st = Math.max(st, minStars, C.min || 3);
   if (st === 5) { P.p5 = 0; P.p4 = 0; }
   if (st === 4) P.p4 = 0;
-  const pool = CLASSES[cls].list.filter(x => x.stars === st && released(x)), F = featured(cls, st);
-  const T = F && Math.random() < FEAT_P ? F.T : pool[Math.random() * pool.length | 0];
+  const pool = CLASSES[cls].list.filter(x => x.stars === st && released(x) && (L ? true : inStd(x)));
+  const T = L && L.T.stars === st && Math.random() < FEAT_P ? L.T : pool[Math.random() * pool.length | 0];
   if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }
   return addDup(T);
 }
@@ -2887,7 +2889,7 @@ function oddsView() {
   return `<p class="hint">Todas as chances do jogo, lidas das mesmas constantes que fazem o sorteio. Mudar qualquer uma delas depois do lançamento exige aviso prévio.</p>
     <p class="sub">Pacotes de download <small>chance ao concluir uma fase · sem bônus</small></p>
     <table class="rates"><tr><td>Pacote</td><td>fase comum</td><td>fase de chefe</td><td>★5</td><td>★4</td><td>garantias</td></tr>${packs}</table>
-    <p class="hint">Destaque: dentro de cada Download, ${pct(FEAT_P)} dos resultados ★5 (e ${pct(FEAT_P)} dos ★4) saem pro agente em destaque; o resto é sorteado entre todos daquela raridade. Agente novo fica em destaque nas 2 primeiras semanas e entra na loja de fragmentos 4 semanas depois do lançamento.</p>
+    <p class="hint">Downloads padrão: todos os agentes da raridade sorteada têm a mesma chance. Download de lançamento (2 semanas): ${pct(FEAT_P)} dos resultados da raridade do agente novo saem pra ele, o resto é sorteado entre a mesma classe; garantias separadas. O agente novo entra nos Downloads padrão depois de 2 semanas e na loja de fragmentos depois de 4.</p>
     <p class="sub">Itens <small>chance por vírus: ${pct2(GEAR_N)} em fase comum, ${pct2(GEAR_B)} em fase de chefe</small></p>
     <table class="rates"><tr><td>Tier</td><td>fase comum</td><td>fase de chefe</td><td>agora (${DIFFS[d].n}, sorte +${pct(luck())})</td></tr>${tiers}</table>
     <p class="hint">T3 ou melhor: +25% por dificuldade acima de Normal e + sua sorte (máximo +50%). O chefe dá no mínimo T2. <b style="color:${RAR[5].c}">T6 Root</b> nunca cai das fases: só dos Chefões (tabela abaixo). Não sai do Compilador. Itens não têm garantia.</p>
@@ -2978,7 +2980,7 @@ function verCard(T) {
 }
 let shopPick = {};
 function shopView() {
-  const list = st => CLASSES[gBanner].list.filter(x => x.stars === st && released(x) && inShop(x));
+  const list = st => CLASSES[banCls(gBanner)].list.filter(x => x.stars === st && released(x) && inShop(x));
   const sel = st => { const L = list(st); if (!L.some(x => x.id === shopPick[st])) shopPick[st] = L[0].id;
     return `<select data-shopsel="${st}">${L.map(x => `<option value="${x.id}" ${x.id === shopPick[st] ? 'selected' : ''}>${x.name}${x.id in S.roster ? ' (' + verTxt(x.id) + ')' : ' (novo)'}</option>`).join('')}</select>`; };
   return `<p class="sub">Loja de fragmentos <small>você tem <b class="k">${fmtNum(S.frag)}</b> fragmentos · vinculados à conta</small></p>
@@ -3038,6 +3040,7 @@ const RENDER = {
   comp: () => compView(),
 
   gacha: () => {
+    if (gBanner === 'L' && !launch()) gBanner = 'fw';
     const res = lastPull && lastPull.cls === gBanner ? `<div class="res">${lastPull.out.map((o, i) => `
       <div class="card s${o.T.stars}" style="--i:${i}"><img class="bust" src="${bustOf(o.T.id)}" width="56" height="56" alt="">
       <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
@@ -3046,12 +3049,13 @@ const RENDER = {
       <div class="btabs">
         <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
         <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · Ataque</button>
+        ${launch() ? `<button type="button" class="banL" data-ban="L" aria-pressed="${gBanner === 'L'}">Lançamento · ${launch().T.name}</button>` : ''}
       </div>${featView()}
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
         <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}${chipCount(r, true) ? ` <small>(${chipCount(r, true)} vinculados)</small>` : ''}</span><small>★5 ${pct2(c.p5)} · ★4 ${pct2(c.p4)}${c.min ? ' · nunca ★3' : ''}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
         <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Baixar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
       <p class="pity">Repetido atualiza o agente (v1.0 → v2.0). Depois da v2.0 vira fragmentos (★3 ${FRAG[3]} · ★4 ${FRAG[4]} · ★5 ${FRAG[5]}).
-        · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-gocol>ver coleção</button></p>
+        · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-demorel>${S.demoRel ? 'protótipo: encerrar lançamento' : 'protótipo: simular lançamento'}</button> <button type="button" data-gocol>ver coleção</button></p>
       ${res}${shopView()}`;
   },
 
@@ -3235,7 +3239,7 @@ $('#pBody').addEventListener('click', e => {
   else if (d.ag) { agSel = d.ag; renderPanel(); }
   else if (d.agstep) { const ks = SLOTS.map(x => x[0]); agSel = ks[(ks.indexOf(agSel) + +d.agstep + ks.length) % ks.length]; renderPanel(); }
   else if (d.colc) { [colCls, colSub = colSub] = d.colc.split(':'); renderPanel(); }
-  else if (d.gocol !== undefined) { colCls = gBanner; openPanel('col', true); }
+  else if (d.gocol !== undefined) { colCls = banCls(gBanner); openPanel('col', true); }
   else if (d.prev !== undefined) { const v = +d.prev; previewTier = v < 0 ? null : v; renderPanel(); }
   else if (d.cell !== undefined) { if (selInv !== +d.cell) rootSel = []; selInv = +d.cell; renderPanel(); }
   else if (d.rpick) { const it = S.inv[selInv], k = d.rpick; rootSel = rootSel.includes(k) ? rootSel.filter(x => x !== k) : it && rootSel.length < it.pick ? [...rootSel, k] : rootSel; renderPanel(); }
@@ -3262,6 +3266,11 @@ $('#pBody').addEventListener('click', e => {
   else if (d.freedef !== undefined) { S.def += 500; renderPanel(); }
   else if (d.op) buyOp(+d.op);
   else if (d.shop) buyShop(d.shop);
+  else if (d.demorel !== undefined) {   // protótipo: trata um ★5 existente como se tivesse sido lançado agora
+    if (S.demoRel) S.demoRel = null;
+    else { const c = [...GUNNERS, ...TANKS].filter(T => T.stars === 5); const T = c.find(x => !(x.id in S.roster)) || c[0]; S.demoRel = {id:T.id, at:nowMs()}; gBanner = 'L'; }
+    renderPanel(); save();
+  }
   else if (d.fmt !== undefined) { if (nowMs() - fmtArmed > 3000) { fmtArmed = nowMs(); b.textContent = 'Clique de novo pra formatar'; return; } fmtArmed = 0; formatC(); }
   else if (d.ctr) { const [k, i] = d.ctr.split(':'); claimCtr(k, +i); }
   else if (d.pres !== undefined) claimPres();

@@ -23,6 +23,15 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.7.1: Download de lançamento separado
+
+- O agente novo tem um **Download próprio** nas 2 primeiras semanas, na aba "Lançamento · NOME". O jogador escolhe onde gastar os pacotes: no agente novo ou nos Downloads padrão.
+  - No Download de lançamento, 50% dos resultados da raridade do agente novo saem pra ele. O resto é sorteado entre a mesma classe. As garantias são separadas das dos Downloads padrão.
+  - Os Downloads padrão (Tanques e Ataque) não têm destaque: todos da raridade têm a mesma chance. O agente novo só entra neles depois das 2 semanas.
+  - Na loja de fragmentos, o agente novo entra 4 semanas depois do lançamento.
+  - Pra testar sem arte nova, o botão "protótipo: simular lançamento" trata um ★5 existente como se tivesse acabado de ser lançado.
+- As conquistas "Parede de fogo" e "Arsenal completo" agora pedem só os agentes **padrão** (os que começam no jogo). Os lançados depois não entram na conta.
+
 ## v1.7: lançamentos de agentes, chefão convidado da semana e fim das temporadas
 
 - **Temporadas e modificadores semanais removidos.** Saíram a aba de temporada do ranking, os prêmios de fim de temporada e as regras da semana (Semana do Worm etc.). O ranking abre em **Mais longe**.
