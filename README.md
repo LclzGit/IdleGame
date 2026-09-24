@@ -23,6 +23,23 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.9: chefões redesenhados, 5 vírus novos e morte sem volta na fase
+
+- **Morte:** um agente que cai fica fora ("OFF") até a próxima fase, porque ainda não existe suporte que revive. Os vírus param sempre na linha do tanque, mesmo com ele caído, e passam a cuspir à distância nos agentes de trás.
+- **Vírus novos**, no mesmo estilo dos atuais e com animação própria:
+
+  | Vírus | Onde aparece | Desenho |
+  |---|---|---|
+  | SPYWARE | a partir do Avançado | olho-câmera voador |
+  | ADWARE | a partir do Crítico | pop-up com dentes |
+  | KEYLOGGER | a partir do Zero-Day | aranha-teclado |
+  | CRYPTOMINER | no Kernel Panic e nas fases Blindados do Crítico em diante | robô minerador |
+  | ROOTKIT | **só nas fases Blindados** (a partir do Ato 2) | besouro de chapa de aço |
+
+  Cada um conta pra vacina de uma família: spyware = worm, adware e keylogger = bug, rootkit e cryptominer = trojan. Todos estão no bestiário.
+- **Chefões:** os 16 (10 fixos e 6 convidados) foram redesenhados em 64×64 com 2 quadros de animação, na batalha, no menu e no bestiário.
+- **Simulação 24/7 (168 h):** o começo ficou mais lento (Crítico 2-3 em 24 h; antes, Zero-Day 1-2), mas o Kernel Panic continua chegando em ~110–120 h.
+
 ## v1.8.1: animação dos personagens e dos vírus
 
 - **Agentes com ficha:**

@@ -1166,7 +1166,7 @@ function raidSprite(id, white) {
 const raidIconCache = {};
 function raidIcon(id) {
   if (raidIconCache[id]) return raidIconCache[id];
-  const src = raidSprite(id).canvas(false), c = document.createElement('canvas'); c.width = c.height = 64;
+  const src = ESPR['raid:' + id] ? ESPR['raid:' + id][0] : raidSprite(id).canvas(false), c = document.createElement('canvas'); c.width = c.height = 64;   // arte nova (scene.js) quando existe
   const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, 64, 64);
   return raidIconCache[id] = c.toDataURL();
 }
@@ -1262,6 +1262,198 @@ const ENEMY_PAINT = {
     P.line(8, 34, 32, 34, B); P.line(6, 38, 34, 38, '#1a0008', 2);
   },
 };
+// Vírus novos (aparecem em fases mais avançadas; o rootkit só nas fases Blindados).
+Object.assign(ESIZE, {spyware:[40, 28], rootkit:[44, 30], adware:[40, 36], keylogger:[44, 28], cryptominer:[40, 36]});
+Object.assign(ENEMY_PAINT, {
+  // Spyware: olho-câmera voador. Esfera escura, íris ciano com obturador, hélices e antena.
+  spyware(P, f) {
+    const B = '#2a3a4a', B2 = '#56708a', C = '#5ce1e6';
+    P.line(8, 6, 14, 10, '#8a9ab0'); P.line(32, 6, 26, 10, '#8a9ab0');
+    P.line(2 + f * 2, 5, 14 - f * 2, 5, '#dfe4ee'); P.line(26 + f * 2, 5, 38 - f * 2, 5, '#dfe4ee');
+    P.ell(20, 15, 11, 10, shadeY(B2, 5, 25, .5));
+    P.ell(22, 15, 7, 7, '#0b1a22'); P.ell(22, 15, 5, 5, shadeY(C, 10, 20, .4)); P.ell(22, 15, 2, 2, '#05040b'); P.set(20, 12, '#ffffff'); P.set(21, 12, '#ffffff');
+    for (let a = 0; a < 6; a++) { const r = a * Math.PI / 3; P.set(22 + Math.cos(r) * 6, 15 + Math.sin(r) * 6, '#1a3a44'); }
+    P.line(12, 22, 10, 26, B); P.line(28, 22, 30, 26, B); P.set(10, 26, C); P.set(30, 26, C);
+    P.line(16, 5, 14, 0, B2); P.set(14, 0, '#ff3d7f');
+  },
+  // Rootkit: besouro de chapa de aço rebitada, baixo e largo, com fendas vermelhas. Exclusivo das fases Blindados.
+  rootkit(P, f) {
+    const M = '#6a7488', M2 = '#3a4254', D = '#1a1e28', R = '#ff3a3a';
+    for (let i = 0; i < 4; i++) { const lx = 8 + i * 9, o = (i + f) % 2 ? 1 : -1; P.line(lx, 22, lx - 3 + o, 29, D, 2); }
+    P.poly([[4, 22], [8, 8], [36, 6], [42, 16], [40, 24]], shadeY(M, 6, 24, .5));
+    for (let x = 12; x < 38; x += 8) P.line(x, 7, x - 2, 23, M2);
+    P.line(6, 14, 41, 13, M2); for (let x = 9; x < 40; x += 4) { P.set(x, 10, '#c9cfe0'); P.set(x - 1, 20, '#c9cfe0'); }
+    P.rect(10, 16, 24, 2, D); for (let x = 12; x < 33; x += 5) P.rect(x, 16, 3, 2, R);
+    P.poly([[36, 12], [44, 10], [43, 18], [38, 20]], M2); P.ell(41, 14, 1, 1, R); P.set(41, 13, '#ffd0d0');
+    P.line(42, 18, 44, 24, M); P.line(40, 20, 43, 26, M);
+  },
+  // Adware: janela de pop-up com dentes, barra de título, botão X e um "!" piscando.
+  adware(P, f) {
+    const W_ = '#e9ecf5', T = '#ffb454', D = '#3a1a08';
+    P.rect(4, 4, 32, 26, W_); P.rect(4, 4, 32, 5, T); P.rect(30, 5, 4, 3, '#ff3a3a'); P.line(31, 5, 33, 7, '#ffffff'); P.line(33, 5, 31, 7, '#ffffff');
+    P.rect(6, 5, 2, 2, '#fff2c0'); P.rect(9, 5, 2, 2, '#fff2c0');
+    P.poly([[8, 14], [32, 14], [30, 26], [10, 26]], '#2a0808');
+    for (let x = 9; x < 31; x += 4) { P.poly([[x, 14], [x + 4, 14], [x + 2, 18 + f]], '#ffffff'); P.poly([[x + 1, 26], [x + 5, 26], [x + 3, 22 - f]], '#ffffff'); }
+    P.rect(18, 19, 4, 3, '#ff3d7f');
+    P.rect(36, 10, 3, 9, f ? '#ffd84a' : T); P.rect(36, 21, 3, 3, f ? '#ffd84a' : T);
+    P.line(10, 30, 8, 35, '#9aa0b5', 2); P.line(30, 30, 32, 35, '#9aa0b5', 2);
+  },
+  // Keylogger: aranha feita de teclado. Corpo de teclas, 8 patas e olhos vermelhos.
+  keylogger(P, f) {
+    const K = '#2a2d36', K2 = '#4a4f60', R = '#ff3a3a';
+    for (let i = 0; i < 4; i++) { const lx = 10 + i * 7, o = (i + f) % 2 ? 2 : -1; P.line(lx, 14, lx - 7 + o, 6, K2); P.line(lx - 7 + o, 6, lx - 10, 27, K2); P.line(lx + 4, 14, lx + 10 - o, 6, K2); P.line(lx + 10 - o, 6, lx + 13, 27, K2); }
+    P.rect(6, 11, 30, 12, K); P.line(6, 11, 35, 11, K2);
+    for (let y = 13; y < 22; y += 3) for (let x = 8 + (y % 2); x < 34; x += 3) P.rect(x, y, 2, 2, (x * 3 + y) % 7 ? '#9aa0b5' : '#ffb454');
+    P.ell(38, 16, 5, 4, K); P.ell(39, 15, 1, 1, R); P.ell(41, 17, 1, 1, R); P.set(39, 14, '#ffd0d0');
+  },
+  // Cryptominer: robô minerador com picareta, ventoinha e moedas brilhando.
+  cryptominer(P, f) {
+    const M = '#8a6a3a', M2 = '#5a4424', G = '#ffd84a', D = '#2a1e10';
+    P.rect(12, 30, 5, 6, D); P.rect(24, 30, 5, 6, D);
+    P.rect(8, 12, 26, 19, shadeY(M, 12, 31, .45)); P.rect(10, 14, 22, 4, M2);
+    P.ell(21, 23, 5, 5, D); for (let a = 0; a < 4; a++) { const r = a * Math.PI / 2 + f * .8; P.line(21, 23, 21 + Math.cos(r) * 4, 23 + Math.sin(r) * 4, '#9aa0b5'); }
+    P.rect(11, 5, 20, 8, M); P.rect(14, 7, 14, 3, '#1a1008'); P.rect(15 + f * 6, 8, 5, 1, G);
+    P.line(34, 16, 38, 8 - f, '#9aa0b5', 2); P.poly([[34, 6 - f], [40, 4 - f], [42, 10 - f]], '#c9cfe0');
+    for (const [x, y] of [[4, 30], [2, 25], [6, 22]]) { P.ell(x, y, 2, 2, G); P.set(x, y, '#fff2c0'); }
+  },
+});
+
+// ---------- chefões (malwares reais) em alta resolução, 64×64 com 2 quadros ----------
+const SH = shadeY, LT = c => mix(c, '#ffffff', .35), DK = c => mix(c, '#000000', .4);
+const BOSS_PAINT = {
+  creeper(P, f) {   // cipó verde enrolado com cabeça de monitor antigo escrevendo "CATCH ME"
+    const G = '#3fae6a', G2 = '#1f6a3a';
+    for (let i = 0; i < 26; i++) { const x = 4 + i * 1.6, y = 52 - Math.sin(i * .5 + f) * 5 - i * .6; P.ell(x, y, 4, 4, SH(i % 4 ? G : G2, y - 4, y + 4, .45)); }
+    for (let i = 0; i < 8; i++) { const x = 44 + i * .6, y = 36 - i * .4 + Math.sin(i + f) * 1; P.ell(x, y, 3, 3, SH(i % 3 ? G : G2, y - 3, y + 3, .45)); }
+    for (let i = 0; i < 5; i++) { const x = 8 + i * 8; P.poly([[x, 58], [x + 3, 50 - (i % 2) * 4], [x + 5, 58]], G2); P.set(x + 3, 50 - (i % 2) * 4, '#a6ffcf'); }
+    P.rect(36, 10, 26, 22, SH('#c9c3b0', 10, 32, .4)); P.rect(38, 12, 22, 16, '#0b1a10');
+    P.line(40, 16, 42, 16, '#6ee7a8'); P.line(44, 16, 52, 16, '#6ee7a8'); P.line(40, 20, 50, 20, '#6ee7a8'); P.rect(40 + f * 12, 23, 3, 2, '#a6ffcf');
+    P.rect(44, 32, 10, 4, DK('#c9cfe0')); P.line(36, 31, 61, 31, '#8a8470');
+  },
+  brain(P, f) {   // cérebro rosa pulsando em cima de um disquete de 5¼
+    const K = '#ff8ab8', K2 = '#c0507c';
+    P.rect(8, 38, 48, 24, SH('#2a2d4a', 38, 62, .3)); P.rect(20, 46, 22, 16, '#9aa0b5'); P.rect(36, 48, 4, 10, '#2a2d4a'); P.ell(32, 42, 4, 3, '#05040b');
+    const r = f ? 1 : 0;
+    P.ell(32, 22, 22 + r, 17 + r, SH(K, 5, 39, .5));
+    P.line(32, 6, 32, 38, K2, 2);
+    for (const [x0, y0, x1, y1] of [[14, 16, 24, 22], [18, 28, 28, 32], [40, 14, 50, 20], [38, 28, 48, 30], [22, 10, 28, 16], [40, 34, 46, 36], [12, 26, 16, 32]]) P.line(x0, y0, x1, y1, K2, 2);
+    for (const [x, y] of [[20, 12], [44, 10], [26, 26], [48, 26]]) P.ell(x, y, 2, 1, LT(K));
+    P.ell(24, 40, 3, 2, '#ffffff'); P.ell(40, 40, 3, 2, '#ffffff'); P.set(24, 40, '#05040b'); P.set(40, 40, '#05040b');
+  },
+  morris(P, f) {   // verme gigante se erguendo, com cópias menores saindo dele
+    const V = '#c38cff', V2 = '#6a3aa8';
+    for (let i = 0; i < 9; i++) { const x = 6 + i * 5, y = 54 - i * 3.6 + Math.sin(i + f * 2) * 2, r = 7 - i * .25; P.ell(x, y, r, r, SH(i % 2 ? V2 : V, y - r, y + r, .5)); P.line(x - 2, y - r + 1, x + 2, y - r + 1, LT(V)); }
+    P.ell(50, 18, 10, 11, SH(V, 7, 29, .45));
+    P.poly([[56, 12], [63, 16], [58, 20]], '#1a0a2a'); P.poly([[56, 20], [63, 24], [57, 26]], '#1a0a2a');
+    for (let k = 0; k < 3; k++) { P.set(58 + k * 2, 17, '#ffffff'); P.set(58 + k * 2, 22, '#ffffff'); }
+    P.ell(48, 13, 3, 3, '#ffffff'); P.ell(49, 13, 1, 1, '#1a0a2a');
+    for (let k = 0; k < 3; k++) { const x = 8 + k * 12, y = 60; P.ell(x, y, 2, 2, V); P.ell(x + 3, y, 2, 2, V2); }
+  },
+  melissa(P, f) {   // documento azul do Word com engrenagens de macro e braços de papel
+    const B = '#2a5ab0';
+    P.poly([[14, 4], [44, 4], [54, 14], [54, 60], [14, 60]], SH('#e9ecf5', 4, 60, .25)); P.poly([[44, 4], [54, 14], [44, 14]], '#9aa0b5');
+    P.rect(14, 4, 18, 18, B); P.line(17, 8, 20, 18, '#ffffff', 2); P.line(20, 18, 23, 11, '#ffffff', 2); P.line(23, 11, 26, 18, '#ffffff', 2); P.line(26, 18, 29, 8, '#ffffff', 2);
+    for (let y = 28; y < 56; y += 5) P.line(20, y, 48, y, '#b9c0d6');
+    for (const [cx, cy, r] of [[40, 40, 7], [28, 48, 5]]) { for (let a = 0; a < 8; a++) { const q = a * Math.PI / 4 + f * .4; P.rect(cx + Math.cos(q) * r - 1, cy + Math.sin(q) * r - 1, 3, 3, '#ff3d7f'); } P.ell(cx, cy, r - 2, r - 2, '#b0204f'); P.ell(cx, cy, 2, 2, '#e9ecf5'); }
+    P.ell(22, 32, 3, 3, '#ffffff'); P.ell(34, 32, 3, 3, '#ffffff'); P.ell(23, 33, 1, 1, '#05040b'); P.ell(35, 33, 1, 1, '#05040b');
+    P.line(14, 36, 4, 28 + f * 4, '#dfe4ee', 3); P.line(54, 36, 62, 30 - f * 4, '#dfe4ee', 3);
+  },
+  iloveyou(P, f) {   // carta de amor com dentes, selo de coração e um anexo .vbs de cauda
+    const R = '#ff3d7f';
+    P.rect(6, 16, 50, 36, SH('#f4e6ee', 16, 52, .25)); P.poly([[6, 16], [31, 36], [56, 16]], '#e0c0d0'); P.line(6, 16, 31, 36, '#c0507c'); P.line(56, 16, 31, 36, '#c0507c');
+    P.ell(31, 36, 8, 7, SH(R, 29, 43, .4)); P.ell(26, 33, 4, 4, R); P.ell(36, 33, 4, 4, R); P.set(28, 32, '#ffd0e4');
+    P.poly([[10, 52], [52, 52], [48, 58], [14, 58]], '#2a0810'); for (let x = 12; x < 50; x += 5) P.poly([[x, 52], [x + 4, 52], [x + 2, 56]], '#ffffff');
+    P.ell(20, 24, 3, 3, '#ffffff'); P.ell(42, 24, 3, 3, '#ffffff'); P.set(21, 25, '#1a0008'); P.set(43, 25, '#1a0008');
+    P.rect(52, 40 + f * 2, 11, 8, '#2a2d4a'); P.line(54, 44 + f * 2, 60, 44 + f * 2, '#a6e22e'); P.line(56, 38 + f * 2, 58, 34, '#9aa0b5');
+  },
+  codered(P, f) {   // serpente vermelha com faixa de pichação e fogo
+    const R = '#c8201e', R2 = '#ff5a2a';
+    for (let i = 0; i < 10; i++) { const x = 6 + i * 4.5, y = 50 - Math.sin(i * .6 + f) * 6; P.ell(x, y, 6, 6, SH(i % 2 ? R : '#8a1010', y - 6, y + 6, .5)); }
+    for (let i = 0; i < 5; i++) { const x = 48 + i * .8, y = 44 - i * 3.5; P.ell(x, y, 6 - i * .3, 6 - i * .3, SH(i % 2 ? R : '#8a1010', y - 6, y + 6, .5)); }
+    P.ell(52, 26, 11, 10, SH(R, 16, 36, .45)); P.poly([[58, 30], [64, 26], [64, 36]], '#1a0404');
+    for (let y = 28; y < 36; y += 3) P.set(62, y, '#ffffff');
+    P.ell(50, 22, 3, 3, '#ffd84a'); P.set(50, 22, '#1a0404');
+    P.rect(30, 6, 30, 8, '#1a0404'); P.rect(32, 8, 26, 4, R2); for (let x = 34; x < 56; x += 4) P.rect(x, 9, 2, 2, '#ffffff');
+    for (let k = 0; k < 5; k++) { const x = 10 + k * 8, h = 6 + (k + f) % 3 * 3; P.poly([[x, 62], [x + 3, 62 - h], [x + 6, 62]], k % 2 ? R2 : '#ffd84a'); }
+  },
+  mydoom(P, f) {   // caveira saindo de um envelope, com correntes de e-mails
+    P.rect(6, 30, 52, 30, SH('#3a3f5c', 30, 60, .3)); P.poly([[6, 30], [32, 48], [58, 30]], '#5a5f7a'); P.line(6, 30, 32, 48, '#9aa0b5'); P.line(58, 30, 32, 48, '#9aa0b5');
+    P.ell(32, 22, 15, 14, SH('#e9ecf5', 8, 36, .3)); P.rect(24, 32, 16, 8, '#e9ecf5');
+    P.ell(26, 20, 4, 5, '#05040b'); P.ell(38, 20, 4, 5, '#05040b'); P.set(26, 20, f ? '#ff3a3a' : '#05040b'); P.set(38, 20, f ? '#ff3a3a' : '#05040b');
+    P.poly([[32, 26], [30, 30], [34, 30]], '#05040b'); for (let x = 26; x < 40; x += 3) P.line(x, 34, x, 39, '#3a3f5c');
+    for (let k = 0; k < 4; k++) { const x = 2 + k * 16, y = 58 + (k + f) % 2; P.rect(x, y, 8, 5, '#9aa0b5'); P.line(x, y, x + 4, y + 3, '#3a3f5c'); P.line(x + 8, y, x + 4, y + 3, '#3a3f5c'); }
+  },
+  conficker(P, f) {   // aranha de botnet: patas terminam em nós de rede piscando
+    const O = '#ffb454', O2 = '#8a5a14';
+    for (let i = 0; i < 4; i++) for (const s of [-1, 1]) {
+      const bx = 32 + s * 8, by = 28 + i * 4, kx = 32 + s * (20 + i * 2), ky = 12 + i * 8 + (f && (i + (s > 0)) % 2 ? -3 : 0), ex = 32 + s * (28 + i), ey = 58;
+      P.line(bx, by, kx, ky, O2, 2); P.line(kx, ky, ex, ey, O2, 2); P.ell(ex, ey - 1, 2, 2, (i + f) % 2 ? '#ffd84a' : '#5ca8ff');
+    }
+    P.ell(32, 40, 12, 11, SH(O, 29, 51, .5)); P.ell(32, 24, 9, 8, SH(O2, 16, 32, .4));
+    for (const [x, y] of [[28, 22], [36, 22], [30, 26], [34, 26]]) P.ell(x, y, 1, 1, '#ff3a3a');
+    P.line(26, 40, 38, 40, O2); P.line(32, 34, 32, 46, O2); P.ell(32, 40, 2, 2, '#fff2c0');
+  },
+  stuxnet(P, f) {   // centrífuga com braços de cano e símbolo de radiação girando
+    const G = '#8aa24a';
+    P.rect(18, 4, 28, 54, SH(G, 4, 58, .5)); P.rect(20, 4, 6, 54, LT(G)); P.line(18, 4, 45, 4, '#e6ff9a');
+    for (let y = 12; y < 56; y += 8) P.line(18, y, 45, y, DK(G));
+    P.ell(32, 30, 9, 9, '#ffb454');
+    for (let a = 0; a < 3; a++) { const q = a * Math.PI * 2 / 3 + f * .5; P.poly([[32, 30], [32 + Math.cos(q) * 8, 30 + Math.sin(q) * 8], [32 + Math.cos(q + .7) * 8, 30 + Math.sin(q + .7) * 8]], '#05040b'); }
+    P.ell(32, 30, 2, 2, '#ffb454'); P.ell(32, 30, 1, 1, '#05040b');
+    P.line(18, 20, 6, 30, '#6a7488', 3); P.line(6, 30, 8, 44, '#6a7488', 3); P.line(46, 20, 58, 28 + f * 2, '#6a7488', 3); P.line(58, 28 + f * 2, 60, 40, '#6a7488', 3);
+    P.rect(12, 58, 40, 6, '#2a2d36');
+  },
+  wannacry(P, f) {   // cadeado vermelho gigante chorando, com moeda de resgate
+    const R = '#c8201e';
+    for (let y = 2; y < 30; y++) for (let x = 14; x < 50; x++) { const q = (x - 32) ** 2 / 256 + (y - 26) ** 2 / 529; if (q <= 1 && q > .5) P.set(x, y, (x + y) % 6 ? '#9aa0b5' : '#dfe4ee'); }
+    P.rect(8, 26, 48, 36, SH(R, 26, 62, .5)); P.rect(8, 26, 48, 4, '#ff5a4a');
+    P.ell(22, 40, 4, 4, '#05040b'); P.ell(42, 40, 4, 4, '#05040b'); P.set(23, 39, '#ffffff'); P.set(43, 39, '#ffffff');
+    P.poly([[24, 54], [40, 54], [36, 50], [28, 50]], '#05040b');
+    for (const x of [20, 44]) { P.line(x, 44, x, 50 + f * 4, '#5ce1e6', 2); P.ell(x, 51 + f * 4, 1, 2, '#9af6ff'); }
+    P.ell(56, 52, 6, 6, '#ffd84a'); P.line(55, 48, 55, 56, '#8a6a14'); P.line(53, 50, 58, 50, '#8a6a14'); P.line(53, 54, 58, 54, '#8a6a14');
+  },
+  slammer(P, f) {   // pacote-foguete azul, minúsculo e rapidíssimo
+    for (let i = 0; i < 6; i++) P.line(0, 20 + i * 5, 18 + (i + f) % 3 * 4, 20 + i * 5, i % 2 ? '#1f5a60' : '#5ce1e6');
+    P.poly([[20, 20], [50, 20], [62, 34], [50, 48], [20, 48]], SH('#2a6f8f', 20, 48, .45));
+    P.rect(24, 24, 22, 20, '#0b2a36'); P.line(26, 28, 44, 28, '#5ce1e6'); P.line(26, 32, 40, 32, '#5ce1e6'); P.line(26, 36, 44, 36, '#5ce1e6'); P.line(26, 40, 36, 40, '#5ce1e6');
+    P.ell(54, 34, 3, 3, '#ffffff'); P.poly([[16, 26], [20, 20], [20, 30]], '#ff8a3a'); P.poly([[16, 42], [20, 48], [20, 38]], '#ff8a3a');
+  },
+  blaster(P, f) {   // janela azul com contagem de desligamento e recado escondido
+    P.rect(4, 8, 56, 46, SH('#2a3a8a', 8, 54, .3)); P.rect(4, 8, 56, 7, '#5a7aff'); P.rect(52, 9, 6, 5, '#ff3a3a'); P.line(53, 9, 57, 13, '#ffffff'); P.line(57, 9, 53, 13, '#ffffff');
+    P.rect(10, 20, 44, 26, '#0b0a16'); P.line(14, 26, 44, 26, '#ff8a3a'); P.line(14, 31, 36, 31, '#ff8a3a');
+    P.rect(22, 36, 20, 7, '#1a1a3a'); P.rect(24, 38, 3, 3, '#ffd84a'); P.rect(29, 38, 3, 3, '#ffd84a'); P.rect(34 + f, 38, 3, 3, '#ffd84a');
+    P.ell(32, 58, 12, 4, '#ff8a3a'); P.line(20, 58, 44, 58, '#ffd84a');
+  },
+  zeus(P, f) {   // cofre de banco rachado por um raio
+    P.rect(8, 16, 46, 44, SH('#6a5a3a', 16, 60, .45)); P.rect(12, 20, 38, 36, '#3a2e1a');
+    P.ell(31, 38, 10, 10, SH('#c9a24a', 28, 48, .4)); for (let a = 0; a < 6; a++) { const q = a * Math.PI / 3; P.line(31, 38, 31 + Math.cos(q) * 9, 38 + Math.sin(q) * 9, '#6a5a3a'); } P.ell(31, 38, 3, 3, '#3a2e1a');
+    P.poly([[40, 0], [26, 24], [34, 24], [24, 50], [48, 18], [38, 18], [46, 0]], f ? '#fff6c0' : '#ffd84a');
+    P.rect(4, 58, 54, 6, '#2a2418');
+  },
+  cryptolocker(P, f) {   // arquivo acorrentado com cadeado roxo
+    P.poly([[14, 4], [40, 4], [50, 14], [50, 60], [14, 60]], SH('#dcd8f0', 4, 60, .3)); P.poly([[40, 4], [50, 14], [40, 14]], '#9a94b8');
+    for (let y = 20; y < 56; y += 5) P.line(20, y, 44, y, '#b9b3de');
+    for (const [s, o] of [[1, 0], [-1, 1]]) for (let k = 0; k < 7; k++) { const x = s > 0 ? 8 + k * 8 : 56 - k * 8, y = 12 + k * 7 + (f && k % 2 ? 1 : 0); P.ell(x, y, 3, 2, (k + o) % 2 ? '#8a5ad0' : '#c38cff'); }
+    P.rect(24, 30, 16, 14, SH('#8a5ad0', 30, 44, .4)); for (let y = 20; y < 31; y++) for (let x = 25; x < 40; x++) { const q = (x - 32) ** 2 / 49 + (y - 30) ** 2 / 100; if (q <= 1 && q > .45) P.set(x, y, '#c9cfe0'); }
+    P.ell(32, 36, 2, 2, '#1a0a2a'); P.rect(31, 37, 2, 4, '#1a0a2a');
+  },
+  mirai(P, f) {   // câmera de segurança zumbi, com roteadores infectados em volta
+    P.rect(8, 16, 36, 20, SH('#9aa0b5', 16, 36, .45)); P.rect(44, 18, 12, 16, '#5a5f73'); P.ell(20, 26, 7, 7, '#1d1d2e'); P.ell(20, 26, 4, 4, '#1a3a24'); P.ell(20, 26, 2, 2, f ? '#a6ffcf' : '#6ee7a8');
+    P.rect(24, 36, 6, 14, '#5a5f73'); P.rect(12, 50, 30, 6, '#5a5f73');
+    P.line(10, 16, 6, 8, '#6ee7a8'); P.set(6, 8, '#a6ffcf');
+    for (const x of [2, 48]) { P.rect(x, 50, 14, 8, '#3a3f5c'); for (let k = 0; k < 3; k++) P.set(x + 3 + k * 4, 54, (k + f) % 2 ? '#6ee7a8' : '#1a3a24'); P.line(x + 3, 50, x + 1, 42, '#9aa0b5'); }
+    P.poly([[32, 20], [36, 22], [34, 30]], '#6ee7a8');
+  },
+  notpetya(P, f) {   // caveira sobre um disco rígido sendo apagado
+    P.ell(32, 46, 28, 16, SH('#3a1022', 30, 62, .4)); P.ell(32, 46, 18, 10, '#5a1a34'); P.ell(32, 46, 4, 3, '#ff3d7f');
+    for (let a = 0; a < 8; a++) { const q = a * Math.PI / 4 + f * .3; P.set(32 + Math.cos(q) * 13, 46 + Math.sin(q) * 7, '#ff8ab8'); }
+    P.ell(32, 16, 13, 12, SH('#e9ecf5', 4, 28, .3)); P.rect(25, 24, 14, 8, '#e9ecf5');
+    P.ell(27, 15, 3, 4, '#05040b'); P.ell(37, 15, 3, 4, '#05040b'); P.set(27, 15, '#ff3d7f'); P.set(37, 15, '#ff3d7f');
+    for (let x = 27; x < 38; x += 3) P.line(x, 28, x, 32, '#3a1022');
+  },
+};
+for (const id in BOSS_PAINT) { ENEMY_PAINT['raid:' + id] = BOSS_PAINT[id]; ESIZE['raid:' + id] = [64, 64]; }
+
 const ESPR = {}, ESPRW = {};
 for (const k in ENEMY_PAINT) {
   ESPR[k] = []; ESPRW[k] = [];
@@ -1360,7 +1552,22 @@ const SLOTTAG = {fw:'TNK', sc:'ATQ', pt:'SUP'};
 const TYPES = {
   bug:{hp:1, atk:1, rw:1, cd:1.2}, worm:{hp:1.5, atk:.8, rw:1.2, cd:1.0},
   trojan:{hp:2.3, atk:1.4, rw:1.8, cd:1.5}, boss:{hp:6, atk:1.6, rw:12, cd:1.6},
+  // novos: fam = família pra efeito das vacinas
+  spyware:{hp:1.2, atk:1.1, rw:1.3, cd:.9, fam:'worm'}, rootkit:{hp:3.5, atk:1.2, rw:2.7, cd:1.6, fam:'trojan'},
+  adware:{hp:1.8, atk:1, rw:1.5, cd:1.1, fam:'bug'}, keylogger:{hp:2, atk:1.5, rw:1.8, cd:1, fam:'bug'},
+  cryptominer:{hp:2.8, atk:1.3, rw:2.2, cd:1.3, fam:'trojan'},
 };
+// Quais vírus aparecem em cada fase: novos entram com a dificuldade; o rootkit só nas fases Blindados.
+function virusPool(st, d, si) {
+  if (st.armored && (d > 0 || si >= 2)) return d >= 2 ? ['trojan', 'rootkit', 'rootkit', 'cryptominer'] : ['trojan', 'rootkit'];
+  const P = d === 0 && si === 0 ? ['bug'] : d === 0 && si === 1 ? ['bug', 'worm'] : ['bug', 'worm', 'trojan'];
+  if (d >= 1) P.push('spyware');
+  if (d >= 2) P.push('adware');
+  if (d >= 3) P.push('keylogger');
+  if (d >= 4) P.push('cryptominer');
+  return P;
+}
+const VCOL = {bug:'#ff3d7f', worm:'#a6e22e', trojan:'#c07a2a', boss:'#ffb454', spyware:'#5ce1e6', rootkit:'#9aa4b8', adware:'#ffb454', keylogger:'#ff3a3a', cryptominer:'#ffd84a'};
 const RAR = [
   {n:'Comum', c:'#9aa0b5', m:1, w:60}, {n:'Otimizado', c:'#6ee7a8', m:1.6, w:25},
   {n:'Criptografado', c:'#5ca8ff', m:2.5, w:10}, {n:'Zero-Day', c:'#c38cff', m:4, w:4},
@@ -1701,7 +1908,7 @@ const fmt = n => fmtNum(n) + ' cr';
 const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toString();
 
 // ---------- runtime ----------
-let heroes, enemies = [], shots = [], parts = [], floats = [];
+let heroes, enemies = [], shots = [], parts = [], floats = [], espits = [];
 // Cada fase tem tempo limite: sem isso, fases difíceis viram lutas eternas e o ritmo de
 // fases concluídas (de onde vêm os pacotes) despenca.
 const STAGE_TIME = 150, RAID_TIME = 90;
@@ -1774,11 +1981,11 @@ function showBanner(text, color) { banner = {text, color: color || '#ffb454', li
 
 function spawn(boss) {
   const st = ST(), L = S.stage + (boss ? 1 : spawned / st.count), si = sec().idx;
-  const pool = sec().d === 0 && si === 0 ? ['bug'] : sec().d === 0 && si === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
+  const pool = virusPool(st, sec().d, si);
   const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
   const T = TYPES[tn], s = boss ? (st.bossHp ? 4 : 3) : 2;
   const hpM = boss ? (st.bossHp || 6) / T.hp : st.hp, atkM = boss ? st.bossAtk || 1 : 1, rwM = boss ? (st.bossHp ? 2.5 : 1) : st.rw;
-  const w = SPR[tn].width * s, h = SPR[tn].height * s;
+  const w = (ESIZE[tn] ? ESIZE[tn][0] / 4 : SPR[tn].width) * s, h = (ESIZE[tn] ? ESIZE[tn][1] / 4 : SPR[tn].height) * s;
   const last = enemies[enemies.length - 1];
   enemies.push({
     tn, boss, w, h, x: Math.max(W + 4, last ? last.x + last.w + 4 : 0),
@@ -1803,7 +2010,7 @@ function hit(e, d) {
 function deal(e, d, area, dps) {
   if (area) d *= (1 + tv('aoe') + glob('aoe')) * (e.armored ? .5 : 1);
   if (e.boss) d *= 1 + tv('boss') + glob('boss');
-  d *= 1 + vaccine(e.raid ? 'boss' : e.tn);
+  d *= 1 + vaccine(e.raid ? 'boss' : (TYPES[e.tn] && TYPES[e.tn].fam) || e.tn);
   if (dps) {
     const sb = dpsSub();
     if (sb === 'boss') d *= e.boss ? 1.8 : e.armored ? 1.4 : 1;
@@ -1818,7 +2025,7 @@ function kill(e) {
   S.kc[e.tn] = (S.kc[e.tn] || 0) + 1; ev('kill');
   S.data += e.reward;
   S.def += Math.round((e.boss ? 5 + Math.floor(S.stage / 2) : 1 + Math.floor(S.stage / 15)) * (1 + glob('def') + tv('def')) * (buffOn('def') ? 2 : 1));
-  burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
+  burst(e.x + e.w / 2, GROUND - e.h / 2, VCOL[e.tn] || '#ff3d7f', e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
   if (e.boss || Math.random() < gearChance()) dropGear(e.boss);
   // o bônus de armas soma só a parte extra: chance de arma × bônus
@@ -2458,6 +2665,11 @@ function metaSecond() {   // 1× por segundo, em tempo real
 // ---------- bestiário e conquistas ----------
 const kcTotal = () => Object.values(S.kc).reduce((a, b) => a + b, 0);
 const VIR_TXT = {
+  spyware:'Spyware: olho voador que espiona tudo. Rápido e frágil. A partir do Avançado.',
+  rootkit:'Rootkit: se esconde fundo no sistema, coberto de chapa de aço. Só aparece nas fases Blindados.',
+  adware:'Adware: pop-up com dentes que não fecha nunca. A partir do Crítico.',
+  keylogger:'Keylogger: aranha-teclado que anota tudo que você digita. Bate forte. A partir do Zero-Day.',
+  cryptominer:'Cryptominer: rouba o seu processador pra minerar moedas. Resistente. No Kernel Panic.',
   bug:'Bug: o erro mais comum. Pouca vida, chega em bando.', worm:'Worm: se copia sozinho pela rede. Um pouco mais resistente.',
   trojan:'Trojan: se disfarça de programa útil. Muita vida e bate forte.', boss:'Ransomware: o chefe de cada fase. Sequestra seus arquivos.',
 };
@@ -2494,8 +2706,8 @@ function codexView() {
     return `<div class="raid${open ? '' : ' lock'}" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="56" height="56" alt="">
       <div class="ri"><b>${open ? R.n : '???'}</b> <small>${open ? R.y : ''}${R.guest ? ' · convidado' : ''}</small><p>${open ? R.d : R.guest ? 'Convidado de outra semana: ainda não apareceu pra você.' : 'Ainda não encontrado.'}</p>
       <div class="rd2">${w ? `eliminado ${w.n}× · primeira vez em ${new Date(w.first).toLocaleDateString('pt-BR')}` : open ? 'ainda não eliminado' : ''}</div></div><span></span></div>`; }).join('');
-  else if (codexTab === 'vir') body = ['bug', 'worm', 'trojan', 'boss'].map(tn => `<div class="raid" style="--rc:${ART[tn][1].b}"><img src="${ESPR[tn][0].toDataURL()}" width="56" height="${Math.round(56 * ESPR[tn][0].height / ESPR[tn][0].width)}" alt="" style="image-rendering:pixelated">
-      <div class="ri"><b>${VIR[tn].toUpperCase()}</b><p>${VIR_TXT[tn]}</p><div class="rd2">apagados: ${fmtNum(S.kc[tn] || 0)}</div></div><span></span></div>`).join('');
+  else if (codexTab === 'vir') body = ['bug', 'worm', 'trojan', 'boss', 'spyware', 'rootkit', 'adware', 'keylogger', 'cryptominer'].map(tn => `<div class="raid" style="--rc:${VCOL[tn]}"><img src="${ESPR[tn][0].toDataURL()}" width="56" height="${Math.round(56 * ESPR[tn][0].height / ESPR[tn][0].width)}" alt="" style="image-rendering:pixelated">
+      <div class="ri"><b>${(VIR[tn] || tn).toUpperCase()}</b><p>${VIR_TXT[tn]}</p><div class="rd2">apagados: ${fmtNum(S.kc[tn] || 0)}</div></div><span></span></div>`).join('');
   else body = ACH.map(A => { const got = S.ach[A.id], ok = A.ok();
     return `<div class="ct${got ? ' ok' : ok ? ' done' : ''}"><span><b>${A.n}</b> <small>${A.d}</small></span><span></span><small>${rwTxt(A.rw)}</small>
       <button type="button" data-ach="${A.id}" ${ok && !got ? '' : 'disabled'}>${got ? 'pega' : ok ? 'Pegar' : 'bloqueada'}</button></div>`; }).join('');
@@ -2507,8 +2719,10 @@ function update(dt) {
   if (stT > (raid ? RAID_TIME : STAGE_TIME)) { if (raid) raidEnd(false, 'time'); else rollback('time'); return; }
   const alive = heroes.filter(h => !h.dead);
   if (!alive.length) { if (raid) raidEnd(false); else rollback(); return; }
+  // Os vírus param sempre na linha do tanque (o agente mais à frente), mesmo se ele cair: ninguém passa por cima
+  // de um agente caído. Quem cai fica fora até a próxima fase (ainda não existe suporte que revive).
   const front = alive.reduce((a, h) => h.def.x > a.def.x ? h : a);
-  const stopX = front.def.x + front.def.w + 2;
+  const line = heroes.reduce((a, h) => h.def.x > a.def.x ? h : a), stopX = line.def.x + line.def.w + 2;
 
   let slot = stopX;
   for (const e of enemies) {
@@ -2522,11 +2736,7 @@ function update(dt) {
 
   for (const h of heroes) {
     h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
-    if (h.dead) {
-      h.respawn -= dt;
-      if (h.respawn <= 0) { h.dead = false; h.hp = maxHp(h) * .4; }
-      continue;
-    }
+    if (h.dead) continue;
     if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
     else h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * ((h.def.id === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
     h.t -= dt;
@@ -2595,7 +2805,8 @@ function update(dt) {
       const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
       if (!dodged) { front.hp -= dmg; front.flash = .1; }
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
-      if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; }
+      if (front !== line) espits.push({x:e.x, tx:front.def.x + front.def.w - 2, y:GROUND - e.h * .6, t:0});   // tanque caído: o vírus cospe à distância
+      if (front.hp <= 0) { front.dead = true; front.hp = 0; say(`${front.def.name} caiu. Volta na próxima fase.`); }
       if (isTank && pT().reflect) hit(e, dmg * pT().reflect);
     }
   }
@@ -2700,7 +2911,7 @@ function drawSheetHero(h, SI, walking) {
   if (!h.dead && h.flash > 0 && P.white) { ctx.globalAlpha = .7; ctx.drawImage(P.white, -P.fx, -P.h, P.w, P.h); }
   ctx.restore(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
   const top = gy + bob - P.h * sy;
-  if (h.dead) text(Math.ceil(h.respawn) + 's', ax, top - 8, '#8f89b8', true);
+  if (h.dead) text('OFF', ax, top - 8, '#8f89b8', true);
   return top;
 }
 function draw() {
@@ -2741,7 +2952,7 @@ function draw() {
       ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
       ctx.drawImage(heroSpr(k).n[0][0], x, y);
       ctx.globalAlpha = 1;
-      text(Math.ceil(h.respawn) + 's', x + 15, y - 10, '#8f89b8', true);
+      text('OFF', x + 15, y - 10, '#8f89b8', true);
       continue;
     }
     const hs = heroSpr(k), frames = (h.flash > 0 ? hs.w : hs.n)[fr];
@@ -2769,10 +2980,14 @@ function draw() {
       if (e.tn === 'bug') { hop = moving ? Math.abs(Math.sin(cyc)) * 1.6 : Math.abs(Math.sin(cyc * .5)) * .5; sy = 1 - (moving ? (1 - Math.abs(Math.sin(cyc))) * .08 : 0); sx = 2 - sy; }
       else if (e.tn === 'worm') { sx = 1 + Math.sin(cyc) * .08; sy = 1 - Math.sin(cyc) * .06; }
       else if (e.tn === 'trojan') { hop = moving ? Math.abs(Math.sin(cyc)) * .8 : 0; }
+      else if (e.tn === 'spyware') { hop = 3 + Math.sin(t * 4 + ph) * 1.5; }
+      else if (e.tn === 'rootkit' || e.tn === 'keylogger') { hop = moving ? Math.abs(Math.sin(cyc * 1.3)) * .5 : 0; sx = 1 + Math.sin(cyc) * .02; }
+      else if (e.tn === 'adware') { hop = moving ? Math.abs(Math.sin(cyc)) * 1.2 : 0; sy = 1 + Math.sin(t * 8 + ph) * .03; }
+      else if (e.tn === 'cryptominer') { hop = moving ? Math.abs(Math.sin(cyc)) * .7 : 0; }
       else { sy = 1 + Math.sin(t * 2.2 + ph) * .03; sx = 1 - Math.sin(t * 2.2 + ph) * .02; }
       if (e.lunge > 0) { sx *= 1 + e.lunge * .08; sy *= 1 - e.lunge * .05; }
       const cx = x + e.w / 2, gy = GROUND;
-      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx, gy - .3, e.w * .42 * (1 - hop * .06), 1.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx, gy - .3, e.w * .42 * Math.max(.4, 1 - hop * .06), 1.2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.save(); ctx.translate(cx, gy - hop); ctx.scale(sx, sy);
       ctx.drawImage((e.flash > 0 ? ESPRW : ESPR)[e.tn][fr], -e.w / 2, -e.h, e.w, e.h);
       ctx.restore();
@@ -2805,6 +3020,11 @@ function draw() {
   for (const p of parts) { ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
   for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life * 2); text(f.txt, f.x, f.y, f.c, true); }
   ctx.globalAlpha = 1;
+  for (let i = espits.length - 1; i >= 0; i--) {   // cuspe de vírus (visual)
+    const q = espits[i]; q.t += .06; if (q.t >= 1) { espits.splice(i, 1); continue; }
+    const x = q.x + (q.tx - q.x) * q.t, y = q.y - Math.sin(q.t * Math.PI) * 8;
+    ctx.fillStyle = 'rgba(255,61,127,.35)'; ctx.fillRect(x - 1.5, y - 1.5, 3, 3); ctx.fillStyle = '#ff3d7f'; ctx.fillRect(x - .5, y - .5, 1.5, 1.5);
+  }
   if (gold) {
     const gx = Math.round(gold.x), gy = Math.round(gold.y + Math.sin(t * 6) * 2);
     ctx.globalAlpha = .35 + .25 * Math.sin(t * 10); ctx.fillStyle = '#ffd84a'; ctx.fillRect(gx - 7, gy - 5, 14, 11); ctx.globalAlpha = 1;
