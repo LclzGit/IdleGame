@@ -100,6 +100,39 @@
   .task{border-bottom:2px solid transparent}
   .task.on{color:var(--text); border-bottom-color:var(--amber); background:#12102a}
   .clock{margin-left:auto; font-variant-numeric:tabular-nums}
+  .gacha{grid-column:1 / -1}
+  .gbar{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px}
+  .gcur{display:flex; align-items:baseline; gap:6px; margin-right:auto; font:12px "IBM Plex Mono",ui-monospace,monospace}
+  .gcur .lbl{color:var(--mute); letter-spacing:.08em; font-size:11px}
+  .gcur b{font-family:"Silkscreen",ui-monospace,monospace; font-weight:400; font-size:18px; color:var(--cyan)}
+  .gbar button{padding:6px 12px}
+  .gbar button b{color:var(--cyan)}
+  .gbar .ghost{background:transparent; color:var(--mute); box-shadow:none; border-style:dashed}
+  .rates{margin:10px 0 12px; font:12px/1.5 "IBM Plex Mono",ui-monospace,monospace; color:var(--mute)}
+  .rates b{color:var(--text)}
+  .gres{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:8px; min-height:120px}
+  .gres .empty{grid-column:1 / -1; margin:0; align-self:center; color:var(--mute); font:12px "IBM Plex Mono",ui-monospace,monospace; text-align:center; border:1px dashed var(--line); padding:28px 12px}
+  .card{display:grid; justify-items:center; align-content:start; gap:4px; padding:10px 6px; background:#0b0a16; border:1px solid var(--line); text-align:center; font:11px/1.3 "IBM Plex Mono",ui-monospace,monospace}
+  .card img{image-rendering:pixelated}
+  .card .nm{color:var(--text); font-weight:600}
+  .card .st5,.card .st4,.card .st3{letter-spacing:.1em}
+  .st5{color:#ffb454} .st4{color:#c38cff} .st3{color:#5ca8ff}
+  .card.s5{border-color:#ffb454; box-shadow:0 0 16px rgba(255,180,84,.35), inset 0 0 20px rgba(255,180,84,.12)}
+  .card.s4{border-color:#c38cff; box-shadow:inset 0 0 16px rgba(195,140,255,.12)}
+  .tag{font-size:10px; letter-spacing:.08em; padding:1px 5px; border:1px solid currentColor}
+  .tag.new{color:var(--amber)} .tag.sync{color:var(--cyan)} .tag.max{color:var(--mute)}
+  .gres .card{animation:pop .35s both; animation-delay:calc(var(--i) * 110ms)}
+  @keyframes pop{from{opacity:0; transform:translateY(8px) scale(.9)} to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion:reduce){ .gres .card{animation:none} }
+  .sub{margin:18px 0 10px; font:600 12px "IBM Plex Mono",ui-monospace,monospace; letter-spacing:.06em; color:var(--text); display:flex; gap:8px; align-items:baseline}
+  .sub small{color:var(--mute); font-weight:400}
+  .roster{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px}
+  .roster .card{padding:12px 10px; gap:6px}
+  .roster .card.lock img{filter:brightness(0); opacity:.55}
+  .roster .card.lock .nm{color:var(--mute)}
+  .roster .ps{color:var(--mute); min-height:3.9em}
+  .roster .card.on{outline:2px solid var(--amber); outline-offset:-2px}
+  .roster button{width:100%}
   @media (max-width:560px){ .task.opt{display:none} .ctl{margin-left:0} }
 </style>
 
@@ -118,6 +151,7 @@
         <p>Cada vírus apagado vira dados. A moeda sobe como um disco enchendo: <span class="k">KB → MB → GB → TB</span>. Dados compram upgrades. Às vezes um vírus deixa cair um módulo, e os mais raros são <span class="k" style="color:#c38cff">Zero-Day</span> e <span class="k" style="color:var(--amber)">Quântico</span>.</p>
         <p>Os módulos também mudam o visual: as luzes dos agentes ganham a cor da raridade, e raridades altas acrescentam peças (escudo maior, cano mais longo, capa mais longa) e uma aura. Use a prévia em daemons.cfg pra ver cada nível.</p>
         <p>No fim de cada setor aparece um <span class="k" style="color:var(--pink)">RANSOMWARE</span>. Se o esquadrão cair, o sistema faz rollback do setor, mas você não perde os dados.</p>
+        <p>Em <span class="k">invocar.exe</span> você gasta núcleos ◆ pra invocar novos tanques (★3 a ★5). Cada um tem visual e habilidade próprios, e repetidos ficam mais fortes.</p>
         <p>Como jogar: não precisa fazer nada, é só deixar rodando. Compre upgrades na barra lá embaixo ou deixe o <span class="k">auto</span> ligado.</p>
       </div>
     </section>
@@ -131,6 +165,22 @@
     <section class="win">
       <h2>syslog <small>eventos</small></h2>
       <div class="body"><ol id="log"></ol></div>
+    </section>
+
+    <section class="win gacha">
+      <h2>invocar.exe <small>protocolo de invocação · tanques</small></h2>
+      <div class="body">
+        <div class="gbar">
+          <div class="gcur"><span class="lbl">NÚCLEOS</span><b id="gCores">◆ 0</b></div>
+          <button id="pull1" type="button">Invocar ×1 · <b>◆1</b></button>
+          <button id="pull10" type="button">Invocar ×10 · <b>◆10</b></button>
+          <button id="gFree" type="button" class="ghost">protótipo: +10 ◆</button>
+        </div>
+        <p class="rates"><span style="color:#ffb454">★5 3%</span> · <span style="color:#c38cff">★4 17%</span> · <span style="color:#5ca8ff">★3 80%</span> · ×10 garante ★4 ou melhor · ★5 garantido em <b id="pity">50</b> invocações · repetidos viram sincronização (+12% por nível, até +5)</p>
+        <div id="gRes" class="gres"><p class="empty">Os resultados da invocação aparecem aqui. Núcleos ◆ caem dos chefes (+3) e às vezes de vírus comuns.</p></div>
+        <h3 class="sub">Coleção de tanques <small id="owned"></small></h3>
+        <div id="roster" class="roster"></div>
+      </div>
     </section>
   </div>
 </main>
@@ -359,12 +409,94 @@ const HERO_ART = {
     if (t >= 3) { P.set(20, 3, gl); P.set(28, 3, gl); P.set(24, 0, gl); }
   }},
 };
+// Mecha pesado configurável, usado pelos tanques invocados.
+// o: A (armadura), A2 (sombra), B (placas claras), C (acabamento), coat, visor, shield, weapon, drone…
+function mech(o) {
+  return (P, f, v, t, gl) => {
+    const dim = mix(gl, '#000000', .55), M = o.metal || '#2e2a2a', M2 = mix(M, '#ffffff', .25);
+    if (o.coat) P.poly([[10, 11], [21, 11], [25, 29], [6, 29]], x => x < 9 || x > 22 ? mix(o.coat, '#ffffff', .1) : o.coat);
+    if (o.drone) {
+      const dy = v ? 1 : 0;
+      P.ell(4, 4 + dy, 2, 2, o.drone); P.set(2, 4 + dy, mix(o.drone, '#000000', .4));
+      P.set(5, 4 + dy, gl); P.set(3, 7 + dy, gl);
+    }
+    const [bf, ff] = stride(f);
+    leg(P, 12, 20, 12 + bf, o.A2, o.A2, mix(o.A2, '#000000', .3), 4);
+    if (o.weapon === 'gunblade') {
+      P.line(11, 16, 4, 23, M, 3); P.line(9, 18, 7, 20, o.B, 1);
+      P.line(4, 23, 0, 29, o.blade, 2); P.line(5, 25, 2, 29, gl);
+    } else if (o.weapon === 'claw') {
+      P.line(11, 16, 6, 21, M, 4); P.line(8, 18, 9, 19, o.C);
+      P.line(5, 21, 2, 20, M2); P.line(5, 22, 2, 25, M2); P.line(6, 23, 5, 26, M2);
+      if (o.orb) { P.ell(2, 23, 2, 2, dim); P.ell(2, 23, 1, 1, gl); }
+    } else {
+      P.line(11, 16, 1, 22, M, 3); P.rect(6, 16, 4, 2, M2); P.set(1, 22, gl); P.set(0, 23, gl);
+    }
+    P.line(12, 11, 10, 16, o.A2, 4);
+    leg(P, 17, 20, 17 + ff, o.A, o.B, o.C, 4);
+    P.ell(18 + ff / 2, 25, 1, 1, o.B);
+    P.poly([[10, 8], [22, 8], [20, 20], [12, 20]], o.A);
+    P.line(14, 15, 18, 15, o.A2); P.line(14, 17, 18, 17, o.A2); P.line(16, 14, 16, 19, o.A2);
+    const cr = t >= 4 ? 3 : 2;
+    P.ell(16, 11, cr, cr, dim); P.ell(16, 11, cr - 1, cr - 1, gl); P.set(16, 11, '#ffffff');
+    P.ell(10, 10, 4, 3, o.B); P.line(7, 8, 13, 8, o.C);
+    if (t >= 3) { P.set(8, 6, o.C); P.set(9, 7, o.C); P.set(11, 6, o.C); }
+    P.rect(13, 1, 7, 7, o.A); P.line(14, 1, 18, 1, o.B); P.rect(13, 6, 7, 2, o.A2);
+    P.rect(15, 3, 5, 3, o.A2);
+    if (o.visor === 'eyes') { P.set(16, 4, gl); P.set(18, 4, gl); }
+    else if (o.visor === 'dots') { [[15, 3], [17, 3], [19, 3], [16, 4], [18, 4], [17, 5]].forEach(q => P.set(q[0], q[1], gl)); }
+    else { P.line(15, 3, 19, 3, gl); P.line(17, 4, 17, 5, gl); }
+    P.ell(22, 10, 4, 3, o.B);
+    P.line(22, 11, 24, 15, o.A, 4);
+    if (o.shield === 'gear') {
+      const g = t >= 2 ? 1 : 0;
+      for (const w of [[[23, 3 - g], [28, 1 - g], [30, 12], [24, 12]], [[24, 20], [30, 20], [28, 31], [23, 29 + g]]]) {
+        P.poly(w, dim); w.forEach((a, i) => { const b = w[(i + 1) % 4]; P.line(a[0], a[1], b[0], b[1], gl); });
+      }
+      for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4; P.set(26 + Math.cos(an) * 5, 16 + Math.sin(an) * 5, o.C); }
+      P.ell(26, 16, 4, 4, o.B); P.ell(26, 16, 2, 2, o.A2); P.set(26, 16, gl);
+    } else if (o.shield === 'tower') {
+      const sh = [[22, 5], [29, 6], [30, 26], [23, 28]];
+      P.poly(sh, o.shieldCol); sh.forEach((a, i) => { const b = sh[(i + 1) % 4]; P.line(a[0], a[1], b[0], b[1], o.C); });
+      P.line(26, 9, 26, 24, gl); P.line(24, 15, 29, 15, gl);
+      P.line(24, 10, 24, 13, o.gold); P.line(28, 10, 28, 13, o.gold); P.line(24, 18, 25, 22, o.gold); P.line(28, 18, 27, 22, o.gold);
+      if (t >= 2) { P.line(29, 8, 30, 24, gl); P.line(23, 7, 23, 26, dim); }
+      P.ell(26, 15, 1, 1, '#ffffff');
+    } else {
+      for (let a = -70; a <= 70; a += 6) { const r = a * Math.PI / 180; P.set(25 + Math.cos(r) * (t >= 2 ? 6 : 5), 15 + Math.sin(r) * 10, gl); }
+      P.rect(24, 14, 2, 3, o.B);
+    }
+  };
+}
+// Tanques colecionáveis: invocados em invocar.exe. hp/atk vêm das estrelas; a passiva é única.
+const STAR = {3:{hp:130, atk:5, c:'#5ca8ff'}, 4:{hp:175, atk:7, c:'#c38cff'}, 5:{hp:230, atk:9, c:'#ffb454'}};
+const TANKS = [
+  {id:'firewall', name:'FIREWALL', stars:3, role:'lâmina e escudo hexagonal',
+    passive:{dmgRed:.1}, ptxt:'Escudo hexagonal: recebe 10% menos dano.'},
+  {id:'aura2', name:'AURA VANGUARD Mk.II', stars:3, role:'rifle e drone de reconhecimento',
+    passive:{teamAtk:.1}, ptxt:'Drone de reconhecimento: esquadrão causa +10% de dano.',
+    art:{w:30, base:'#4fd6c8', line:'#0d1512', cloth:2, draw:mech({A:'#2f4a3e', A2:'#1f3029', B:'#8c9a96', C:'#c08050', visor:'slit', shield:'bubble', weapon:'rifle', drone:'#3a4a44', metal:'#2a2f2e'})}},
+  {id:'sentinel', name:'SENTINEL BULWARK', stars:4, role:'garra hidráulica e escudo-torre',
+    passive:{dmgRed:.2}, ptxt:'Escudo-torre: recebe 20% menos dano.',
+    art:{w:30, base:'#5ce1e6', line:'#0b0e16', cloth:1, draw:mech({A:'#3a4458', A2:'#262c3a', B:'#4f5a76', C:'#8a8f9c', visor:'dots', shield:'tower', shieldCol:'#4a5568', gold:'#c89b3c', weapon:'claw', metal:'#2c2f36'})}},
+  {id:'valkyrie', name:'VALKYRIE-9', stars:4, role:'canhão de garra e echo-drone',
+    passive:{regen:.02}, ptxt:'Echo-drone: regenera 2% do HP por segundo em combate.',
+    art:{w:30, base:'#5ce1e6', line:'#1a2238', cloth:2, draw:mech({A:'#e6e9f2', A2:'#9aa3b8', B:'#ffffff', C:'#c8913c', visor:'slit', shield:'tower', shieldCol:'#dfe4ee', gold:'#c8913c', weapon:'claw', orb:true, drone:'#e6e9f2', metal:'#8d96ad'})}},
+  {id:'bulwark7', name:'BULWARK-7', stars:5, role:'lâmina-canhão e escudo de engrenagem',
+    passive:{reflect:.3}, ptxt:'Núcleo de fusão: devolve 30% do dano recebido.',
+    art:{w:30, base:'#ff6a2a', line:'#000000', cloth:1, draw:mech({A:'#2a2624', A2:'#1a1716', B:'#8a5a3a', C:'#c08050', coat:'#241f1d', visor:'eyes', shield:'gear', weapon:'gunblade', blade:'#b8321e', metal:'#2e2a28'})}},
+  {id:'x1', name:'SENTINEL BULWARK-X1', stars:5, role:'escudo colossal e drone Aegis',
+    passive:{dmgRed:.25, teamHp:.15}, ptxt:'Aegis: recebe 25% menos dano e o esquadrão ganha +15% de HP.',
+    art:{w:30, base:'#5ce1e6', line:'#0c1410', cloth:2, draw:mech({A:'#34503f', A2:'#22352a', B:'#7a5a3e', C:'#a9b0a8', visor:'dots', shield:'tower', shieldCol:'#56625c', gold:'#b07a4a', weapon:'rifle', drone:'#4a5a50', metal:'#2a302c'})}},
+];
+TANKS[0].art = HERO_ART.fw;
+const tankOf = id => TANKS.find(x => x.id === id) || TANKS[0];
 const heroCache = {};
-// Sprites de um agente na raridade visual `tier` (-1 = sem módulo): [pernas][pano].
-function heroSpr(k, tier) {
-  const key = k + tier;
+// Sprites na raridade visual `tier` (-1 = sem módulo): [pernas][pano]. `aid` é um agente ou um tanque.
+function spriteFor(aid, tier) {
+  const key = aid + tier;
   if (heroCache[key]) return heroCache[key];
-  const art = HERO_ART[k], glow = tier <= 0 ? art.base : RAR[tier].c;
+  const art = HERO_ART[aid] || tankOf(aid).art, glow = tier <= 0 ? art.base : RAR[tier].c;
   const n = [], w = [];
   for (let f = 0; f < 2; f++) {
     n.push([]); w.push([]);
@@ -377,11 +509,13 @@ function heroSpr(k, tier) {
   }
   return heroCache[key] = {n, w, glow};
 }
+const heroSpr = (k, tier) => spriteFor(k === 'fw' ? S.tank : k, tier);
 const portraitCache = {};
-function portrait(k, tier) {
-  const key = k + tier;
-  return portraitCache[key] || (portraitCache[key] = heroSpr(k, tier).n[0][0].toDataURL());
+function portraitOf(aid, tier) {
+  const key = aid + tier;
+  return portraitCache[key] || (portraitCache[key] = spriteFor(aid, tier).n[0][0].toDataURL());
 }
+const portrait = (k, tier) => portraitOf(k === 'fw' ? S.tank : k, tier);
 let previewTier = null;
 const visTier = id => previewTier ?? (S.gear[id] ? S.gear[id].r : -1);
 const SPR = {}, SPRW = {};
@@ -422,7 +556,8 @@ const UPG = [
   {k:'spd', label:'Threads',   base:60, max:12},
 ];
 
-const S0 = {data:0, sector:0, kills:0, upg:{dmg:0,hp:0,spd:0}, gear:{fw:null,sc:null,pt:null}, auto:true, last:0};
+const S0 = {data:0, sector:0, kills:0, upg:{dmg:0,hp:0,spd:0}, gear:{fw:null,sc:null,pt:null}, auto:true, last:0,
+  tank:'firewall', roster:{firewall:0}, cores:20, pity:0};
 let S = load();
 function load() {
   try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.upg) return Object.assign(structuredClone(S0), r); } catch (e) {}
@@ -431,8 +566,17 @@ function load() {
 function save() { S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const gm = id => 1 + (S.gear[id] ? S.gear[id].b / 100 : 0);
-const maxHp = h => h.def.hp * 1.3 ** S.upg.hp * gm(h.def.id);
-const atk = h => h.def.atk * 1.3 ** S.upg.dmg * gm(h.def.id);
+const tank = () => tankOf(S.tank);
+const pas = () => tank().passive;
+const sync = id => 1 + .12 * (S.roster[id] || 0);
+// O slot de tanque (id 'fw') usa o tanque equipado.
+function applyTank() {
+  const T = tank(), d = HERO_DEF[2];
+  d.name = T.name; d.role = 'tanque · ' + T.role;
+  d.hp = STAR[T.stars].hp * sync(T.id); d.atk = STAR[T.stars].atk * sync(T.id);
+}
+const maxHp = h => h.def.hp * 1.3 ** S.upg.hp * gm(h.def.id) * (1 + (pas().teamHp || 0));
+const atk = h => h.def.atk * 1.3 ** S.upg.dmg * gm(h.def.id) * (1 + (pas().teamAtk || 0));
 const cdOf = h => h.def.cd * 0.92 ** S.upg.spd;
 const cost = u => Math.floor(u.base * 1.55 ** S.upg[u.k]);
 const rewardAt = L => 6 * 1.15 ** L;
@@ -447,6 +591,7 @@ const fmtN = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed
 // ---------- runtime ----------
 let heroes, enemies = [], shots = [], parts = [], floats = [];
 let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0;
+applyTank();
 function resetHeroes() {
   heroes = HERO_DEF.map(def => ({def, hp:0, t:Math.random()*.5, dead:false, respawn:0, flash:0, lunge:0}));
   heroes.forEach(h => h.hp = maxHp(h));
@@ -494,6 +639,12 @@ function kill(e) {
   burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
   if (e.boss || Math.random() < .15) drop(e.boss);
+  if (e.boss || Math.random() < .04) {
+    const n = e.boss ? 3 : 1;
+    S.cores += n; renderGachaBar();
+    float(e.x + e.w / 2, GROUND - e.h - 26, '+' + n + ' ◆', '#5ce1e6');
+    if (e.boss) say(`+${n} <span style="color:var(--cyan)">◆ núcleos</span> pelo chefe`);
+  }
   if (e.boss) sectorClear(); else S.kills++;
 }
 function drop(boss) {
@@ -567,6 +718,7 @@ function update(dt) {
       continue;
     }
     if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
+    else if (h.def.id === 'fw' && pas().regen) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * pas().regen * dt);
     h.t -= dt;
     if (h.t > 0) continue;
     if (h.def.id === 'pt') {
@@ -602,9 +754,11 @@ function update(dt) {
     e.t -= dt;
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
-      front.hp -= e.atk; front.flash = .1;
+      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pas().dmgRed || 0) : 1);
+      front.hp -= dmg; front.flash = .1;
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; say(`${front.def.name} caiu`); }
+      if (isTank && pas().reflect) hit(e, dmg * pas().reflect);
     }
   }
 
@@ -779,10 +933,74 @@ const prevEl = $('#prev');
   });
   prevEl.appendChild(b);
 });
+// ---------- invocação ----------
+const stars = n => '★'.repeat(n);
+function pullOne(minStars) {
+  S.pity++;
+  const r = Math.random();
+  let st = S.pity >= 50 ? 5 : r < .03 ? 5 : r < .20 ? 4 : 3;
+  st = Math.max(st, minStars);
+  if (st === 5) S.pity = 0;
+  const pool = TANKS.filter(x => x.stars === st), T = pool[Math.random() * pool.length | 0];
+  let res;
+  if (!(T.id in S.roster)) { S.roster[T.id] = 0; res = 'new'; }
+  else if (S.roster[T.id] < 5) { S.roster[T.id]++; res = 'sync'; }
+  else { S.cores += st - 2; res = 'max'; }
+  return {T, res};
+}
+function summon(n) {
+  if (S.cores < n) { say(`Faltam ${n - S.cores} ◆ núcleos pra invocar ×${n}.`); return; }
+  S.cores -= n;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const needFour = n === 10 && i === n - 1 && !out.some(o => o.T.stars >= 4);
+    out.push(pullOne(needFour ? 4 : 3));
+  }
+  $('#gRes').innerHTML = out.map((o, i) => {
+    const tag = o.res === 'new' ? '<span class="tag new">NOVO</span>' : o.res === 'sync' ? `<span class="tag sync">SYNC +${S.roster[o.T.id]}</span>` : `<span class="tag max">MÁX · +${o.T.stars - 2}◆</span>`;
+    return `<div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" alt="" width="64" height="64"><span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>${tag}</div>`;
+  }).join('');
+  const best = out.reduce((a, o) => o.T.stars > a.T.stars ? o : a);
+  if (best.T.stars === 5) { showBanner('★★★★★ ' + best.T.name, '#ffb454'); say(`<span style="color:#ffb454">★5 ${best.T.name}</span> invocado!`, true); }
+  else say(`Invocação ×${n}: melhor resultado ${stars(best.T.stars)} ${best.T.name}`);
+  applyTank(); renderRoster(); renderGachaBar(); save();
+}
+function equipTank(id) {
+  if (!(id in S.roster)) return;
+  S.tank = id; applyTank();
+  const h = heroes.find(x => x.def.id === 'fw');
+  if (!h.dead) h.hp = maxHp(h);
+  say(`Tanque ativo: ${tank().name}`, true);
+  renderRoster(); renderSquad(); save();
+}
+function renderGachaBar() {
+  $('#gCores').textContent = '◆ ' + S.cores;
+  $('#pity').textContent = 50 - S.pity;
+  $('#pull1').disabled = S.cores < 1; $('#pull10').disabled = S.cores < 10;
+}
+function renderRoster() {
+  $('#owned').textContent = `${Object.keys(S.roster).length}/${TANKS.length}`;
+  $('#roster').innerHTML = TANKS.map(T => {
+    const own = T.id in S.roster, on = S.tank === T.id;
+    return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}">
+      <img src="${portraitOf(T.id, -1)}" alt="" width="64" height="64">
+      <span class="st${T.stars}">${stars(T.stars)}</span>
+      <span class="nm">${own ? T.name : '???'}</span>
+      <span class="ps">${own ? T.ptxt : 'Ainda não invocado.'}</span>
+      ${own ? `<span class="tag sync">SYNC +${S.roster[T.id]}</span>` : ''}
+      <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'Equipado' : own ? 'Equipar' : 'Bloqueado'}</button>
+    </div>`;
+  }).join('');
+}
+$('#roster').addEventListener('click', e => { const b = e.target.closest('[data-eq]'); if (b) equipTank(b.dataset.eq); });
+$('#pull1').addEventListener('click', () => summon(1));
+$('#pull10').addEventListener('click', () => summon(10));
+$('#gFree').addEventListener('click', () => { S.cores += 10; renderGachaBar(); save(); });
 let wipeArmed = 0;
 $('#reset').addEventListener('click', e => {
   if (Date.now() - wipeArmed > 3000) { wipeArmed = Date.now(); e.target.textContent = 'confirmar?'; setTimeout(() => e.target.textContent = 'wipe', 3000); return; }
-  S = structuredClone(S0); enemies = []; shots = []; spawned = 0; bossUp = false; resetHeroes(); save();
+  S = structuredClone(S0); enemies = []; shots = []; spawned = 0; bossUp = false; applyTank(); resetHeroes(); save();
+  renderRoster(); renderGachaBar(); $('#gRes').innerHTML = '<p class="empty">Os resultados da invocação aparecem aqui.</p>';
   $('#auto').checked = S.auto; e.target.textContent = 'wipe'; say('Progresso apagado. Sistema limpo.', true);
 });
 
@@ -819,6 +1037,7 @@ function offline(ms) {
   if (sec_ < 30) return;
   const gain = sec_ * rewardAt(S.sector * 10 + 5) * .3;
   S.data += gain;
+  S.cores += Math.floor(sec_ / 1800);
   const h = Math.floor(sec_ / 3600), m = Math.floor(sec_ % 3600 / 60);
   say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min), seus daemons coletaram <span style="color:var(--amber)">${fmt(gain)}</span>`, true);
   showBanner('+' + fmt(gain) + ' OFFLINE', '#ffb454');
@@ -845,7 +1064,7 @@ document.addEventListener('visibilitychange', () => {
 setInterval(save, 5000);
 setInterval(() => { renderHud(); renderSquad(); }, 250);
 setInterval(clock, 10000); clock();
-renderHud(); renderSquad();
+renderHud(); renderSquad(); renderRoster(); renderGachaBar();
 
 let lastT = performance.now();
 function frame(now) {
