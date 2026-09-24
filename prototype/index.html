@@ -119,9 +119,9 @@
   .proc .mini{grid-column:2; height:3px; background:#1a1733; display:block}
   .proc .mini i{display:block; height:100%; background:var(--green)}
   .proc.on{border-color:var(--cyan); background:#0e2629}
-  .dx{display:grid; grid-template-columns:150px 1fr; gap:12px}
+  .dx{display:grid; grid-template-columns:160px 1fr; gap:12px}
   .scan{display:grid; justify-items:center; gap:3px; text-align:center}
-  .chamber{position:relative; width:120px; height:120px; display:grid; place-items:center; overflow:hidden;
+  .chamber{position:relative; width:136px; height:136px; display:grid; place-items:center; overflow:hidden;
     background:linear-gradient(rgba(92,225,230,.12) 1px, transparent 1px) 0 0/100% 8px, radial-gradient(circle, #123338, #070612 70%);
     border:1px solid #1f5a60}
   .chamber::before,.chamber::after{content:""; position:absolute; width:14px; height:14px; border:2px solid var(--cyan)}
@@ -235,6 +235,22 @@
   .res,.col{display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:5px}
   .card{display:grid; justify-items:center; align-content:start; gap:2px; padding:6px 4px; background:#0b0a16; border:1px solid var(--line); text-align:center; font-size:10px; line-height:1.3}
   .card img{image-rendering:pixelated}
+  img.bust{border:1px solid var(--line); background:#07060f}
+  .card.on img.bust{border-color:var(--amber)}
+  .btabs{flex-wrap:wrap}
+  .btabs button[style*="--rc"][aria-pressed="true"]{border-color:var(--rc); color:var(--rc)}
+  .root{margin:6px 0; padding:6px 8px; border:1px solid #d0304c; background:#1c0a12}
+  .rps{display:flex; flex-wrap:wrap; gap:4px; margin:6px 0}
+  .rp{font-size:10px; padding:2px 6px; box-shadow:none}
+  .rp.on{border-color:#d0304c; color:#ff8098; background:#2a0c16}
+  .opbox{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; margin-bottom:6px; border:1px solid var(--line); background:#0b0a16}
+  .opbox .lbl{margin:0; color:var(--mute); font-size:10px; text-transform:uppercase; letter-spacing:.06em}
+  .opl{display:block; font-size:18px; color:var(--amber)}
+  table.rk{width:100%; border-collapse:collapse; font-size:11px; font-variant-numeric:tabular-nums}
+  table.rk td{padding:2px 6px; border-bottom:1px solid #1d1a36}
+  table.rk td.num{text-align:right; white-space:nowrap}
+  table.rk tr.me td{background:#2a2410; color:var(--amber)}
+  .tbl{overflow-x:auto}
   .card .nm{color:var(--text); font-weight:600}
   .card .ps{color:var(--mute)}
   .card button{width:100%; padding:2px 4px; box-shadow:none; margin-top:3px}
@@ -298,7 +314,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.2</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.3</p>
 </main>
 
 <footer class="dock">
@@ -320,6 +336,7 @@
       <button type="button" data-open="tree" aria-pressed="false" title="Antivírus"><span>Antivírus</span></button>
       <button type="button" data-open="stages" aria-pressed="false" title="Fases"><span>Fases</span></button>
       <button type="button" data-open="upload" aria-pressed="false" title="Central de Upload (Steam)"><span>Upload</span></button>
+      <button type="button" data-open="rank" aria-pressed="false" title="Ranking e nível do operador"><span>Ranking</span></button>
       <button type="button" data-open="log" aria-pressed="false" title="Log"><span>Log</span></button>
     </nav>
     <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
@@ -414,6 +431,14 @@ function Painter(w, h) {
         if (src[y * w + x]) continue;
         const n = (x > 0 && src[y * w + x - 1]) || (x < w - 1 && src[y * w + x + 1]) || (y > 0 && src[(y - 1) * w + x]) || (y < h - 1 && src[(y + 1) * w + x]);
         if (n) g[y * w + x] = c;
+      }
+    },
+    // luz de borda: pixel preenchido com vizinho vazio na direção (dx, dy) ganha um toque de `c`
+    rim(c, k, dx, dy) {
+      const src = g.slice();
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const v = src[y * w + x], nx = x + dx, ny = y + dy;
+        if (v && !(nx >= 0 && ny >= 0 && nx < w && ny < h && src[ny * w + nx])) g[y * w + x] = mix(v, c, k);
       }
     },
     canvas(white) {
@@ -540,7 +565,7 @@ const HERO_ART = {
 // Mecha pesado configurável, usado pelos tanques invocados.
 // o: A (armadura), A2 (sombra), B (placas claras), C (acabamento), coat, visor, shield, weapon, drone…
 function mech(o) {
-  return (P, f, v, t, gl) => {
+  const d = (P, f, v, t, gl) => {
     const dim = mix(gl, '#000000', .55), M = o.metal || '#2e2a2a', M2 = mix(M, '#ffffff', .25);
     if (o.coat) P.poly([[10, 11], [21, 11], [25, 29], [6, 29]], x => x < 9 || x > 22 ? mix(o.coat, '#ffffff', .1) : o.coat);
     if (o.drone) {
@@ -595,6 +620,7 @@ function mech(o) {
       P.rect(24, 14, 2, 3, o.B);
     }
   };
+  d.o = o; d.k = 'mech'; return d;
 }
 // Tanques colecionáveis: invocados em invocar.exe. hp/atk vêm das estrelas; a passiva é única.
 const STAR = {3:{hp:130, atk:5, c:'#5ca8ff'}, 4:{hp:175, atk:7, c:'#c38cff'}, 5:{hp:230, atk:9, c:'#ffb454'}};
@@ -622,7 +648,7 @@ TANKS[0].art = HERO_ART.fw;
 // Soldado configurável, usado pelos DPS invocados.
 // o: A, A2, B, acc, metal, weapon ('sniper'|'rifle'|'bow'|'crossbow'|'laser'), hair/skin/mask/crest, scarf, quiver, pack, treads, drone…
 function soldier(o) {
-  return (P, f, v, t, gl) => {
+  const d = (P, f, v, t, gl) => {
     const dim = mix(gl, '#000000', .55), M = o.metal || '#2a2d36', M2 = mix(M, '#ffffff', .25), acc = o.acc || gl;
     if (o.scarf) for (let i = 0; i < 11; i++) {
       const x = 12 - i, y = 9 + Math.round(Math.sin(i * .8 + v * 2.2) * 1.4) + (i >> 2);
@@ -682,10 +708,11 @@ function soldier(o) {
     }
     P.line(18, 11, 22, 15, o.A, 2); P.set(22, 16, o.glove || o.A2);
   };
+  d.o = o; d.k = 'soldier'; return d;
 }
 // Veículo de esteiras (modo tanque), usado pelo TANK-M-1.
 function tankMode(o) {
-  return (P, f, v, t, gl) => {
+  const d = (P, f, v, t, gl) => {
     const M = o.metal, M2 = mix(M, '#ffffff', .25), T = '#2a2a22', T2 = '#5a5a44';
     P.rect(4, 12, 5, 5, o.A2);
     for (const q of [[5, 13], [7, 13], [5, 15], [7, 15]]) P.set(q[0], q[1], o.rack);
@@ -702,6 +729,7 @@ function tankMode(o) {
     P.rect(L - 1, 11, 2, 4, M2); P.set(L, 12, gl);
     if (t >= 3) { P.line(11, 8, 10, 3, M2); P.set(10, 2, gl); }
   };
+  d.o = o; d.k = 'veh'; return d;
 }
 const GSTAR = {3:{hp:55, atk:10}, 4:{hp:65, atk:13}, 5:{hp:75, atk:17}};
 const GUNNERS = [
@@ -761,6 +789,7 @@ function overlay(P, art, f, lk) {
     if (lk.h >= 2) { P.set(x0 - 1, y + 1, c); P.set(x1 + 1, y + 1, c); }
     if (lk.h >= 3) P.set(mid, y - 1, c);
     if (lk.h >= 4) { P.set(mid, y - 2, '#ffffff'); P.set(mid - 2, y - 1, c); P.set(mid + 2, y - 1, c); }
+    if (lk.h >= 5) { P.set(mid - 3, y - 2, c); P.set(mid + 3, y - 2, c); P.set(mid, y - 3, c); }
   }
   if (lk.a >= 0) {
     const c = RAR[lk.a].c;
@@ -769,6 +798,7 @@ function overlay(P, art, f, lk) {
       if (lk.a >= 2) P.line(x, y + 1, x + 3, y + 1, mix(c, '#000000', .4));
       if (lk.a >= 3) { P.set(x + 1, y - 1, c); P.set(x + 2, y - 1, c); }
       if (lk.a >= 4) P.set(x + 1, y - 2, '#ffffff');
+      if (lk.a >= 5) { P.set(x, y - 2, c); P.set(x + 3, y - 2, c); P.set(x + 1, y - 3, c); }
     });
   }
   if (lk.b >= 0) {
@@ -816,6 +846,175 @@ const lookOf = id => { const G = gearOf(id), T = x => previewTier ?? (x ? x.t : 
 const SPR = {}, SPRW = {};
 for (const k in ART) { SPR[k] = mk(...ART[k]); SPRW[k] = mk(ART[k][0], ART[k][1], true); }
 
+// ---------- retratos (busto 64x64) ----------
+// Aparecem na tela de diagnóstico, na Coleção e no resultado do Download. Mesma paleta do sprite,
+// com mais detalhe: rosto ou visor, ombreiras, arma nas costas e luz de borda na cor do tier.
+// o.head: 'hair' | 'helm' | 'mech'; o.hairStyle: 'spiky' | 'long' | 'short'.
+const BUST_BASE = {
+  fw: {head:'hair', hairStyle:'spiky', hair:'#e0613f', skin:'#e8b896', A:'#2a2a3a', A2:'#1f1f2b', B:'#4a4a62', C:'#aab0c4', coat:'#1d1d28', gear:'hex', eyes:'glow', line:'#000000'},
+  sc: {head:'hair', hairStyle:'short', hair:'#d4d8ee', skin:'#f1c7a8', A:'#2a3561', A2:'#1d2547', B:'#e9ecf5', C:'#b9c0d6', scarf:'#ff3d7f', gear:'rail', goggles:true, line:'#141a2e'},
+  pt: {head:'hair', hairStyle:'long', hair:'#f2f0ff', skin:'#7a4a33', A:'#dcd8f0', A2:'#8b86ad', B:'#f4f2ff', C:'#b9b3de', cape:true, gear:'staff', band:true, line:'#2a2640'},
+};
+// detalhes por personagem pra que capacetes parecidos fiquem distintos
+const BUST_X = {pulse:{hood:true}, blade:{cap:true}, infiltrator:{headset:true}, nighthawk:{horns:true}, lasert:{gogHelm:true}, tankm1:{gogHelm:true}};
+function bustSpec(aid) { const b = bustSpec0(aid); return BUST_X[aid] ? {...b, ...BUST_X[aid]} : b; }
+function bustSpec0(aid) {
+  if (BUST_BASE[aid]) return BUST_BASE[aid];
+  if (aid === 'firewall') return BUST_BASE.fw;
+  if (aid === 'scanner') return BUST_BASE.sc;
+  const art = charOf(aid).art, o = art.draw.o || {}, k = art.draw.k;
+  if (k === 'mech') return {head:'mech', A:o.A, A2:o.A2, B:o.B, C:o.C, visor:o.visor, coat:o.coat, drone:o.drone, gear:o.shield === 'tower' ? 'tower' : o.shield === 'gear' ? 'cog' : 'bubble', gold:o.gold, shieldCol:o.shieldCol, blade:o.blade, line:art.line};
+  if (k === 'veh') return {head:'helm', A:o.A, A2:o.A2, B:o.B, C:o.acc, gear:'cannon', headset:true, line:art.line, acc:o.acc};
+  return {head:o.hair ? 'hair' : 'helm', hairStyle:'long', hair:o.hair, skin:o.skin || '#f1c7a8', mask:o.mask, A:o.A, A2:o.A2, B:o.B, C:mix(o.B, '#ffffff', .2), acc:o.acc,
+    crest:o.crest, scarf:o.scarf, quiver:o.quiver, pack:o.pack, gear:o.weapon, scope:o.scope, line:art.line};
+}
+function paintBust(P, o, gl) {
+  const dk = c => mix(c, '#000000', .3), lt = c => mix(c, '#ffffff', .18), dim = mix(gl, '#000000', .55), M = '#2a2d36', M2 = '#4a4f60';
+  // --- atrás do corpo: capa, arma nas costas, aljava
+  if (o.cape) P.poly([[14, 44], [50, 44], [60, 64], [4, 64]], (x, y) => ['#e8c8f5', '#bfe3ff', '#d9d2ff'][((x + y) >> 2) % 3]);
+  if (o.coat) P.poly([[8, 46], [56, 46], [62, 64], [2, 64]], x => x < 12 || x > 52 ? lt(o.coat) : o.coat);
+  if (o.quiver) { P.poly([[40, 20], [46, 22], [40, 50], [34, 48]], o.quiver); for (let i = 0; i < 4; i++) { P.line(41 + i, 21 - i, 43 + i * 2, 10 - i, '#c9c3b0'); P.set(43 + i * 2, 9 - i, gl); } }
+  if (o.pack) P.rect(8, 36, 12, 18, o.pack);
+  if (o.gear === 'sniper' || o.gear === 'rifle' || o.gear === 'rail' || o.gear === 'laser') {
+    const th = o.gear === 'laser' ? 5 : 3;
+    P.line(6, 58, 62, 14, M, th); P.line(7, 56, 62, 12, M2);
+    if (o.gear === 'rail') for (let i = 0; i < 6; i++) P.set(20 + i * 7, 46 - i * 5.5, gl);
+    if (o.scope || o.gear === 'sniper') { P.line(40, 26, 50, 18, M2, 3); P.set(51, 18, gl); }
+    P.set(62, 13, gl); P.set(61, 14, gl);
+  } else if (o.gear === 'bow') {
+    for (let y = 2; y <= 58; y++) { const x = 8 + Math.round(6 * Math.sin(Math.PI * (y - 2) / 56)); P.set(x, y, M); P.set(x + 1, y, y % 8 === 0 ? gl : M2); }
+    P.line(9, 2, 9, 58, mix(gl, '#ffffff', .4));
+  } else if (o.gear === 'crossbow') {
+    P.line(40, 8, 60, 28, M2, 2); P.line(46, 40, 60, 8, M, 3); P.set(60, 8, gl);
+  } else if (o.gear === 'staff') {
+    P.line(54, 64, 54, 10, '#8b86ad', 2); P.line(51, 12, 57, 12, '#8b86ad');
+    P.ell(54, 6, 5, 5, dim); P.ell(54, 6, 3, 3, gl); P.ell(53, 5, 1, 1, '#ffffff');
+    [[46, 6], [62, 6], [54, 0]].forEach(([x, y]) => P.set(x, y, gl));
+  } else if (o.gear === 'cannon') {
+    P.rect(44, 30, 20, 6, M); P.line(44, 30, 63, 30, M2); P.rect(58, 29, 5, 8, M2); P.set(63, 32, gl); P.rect(46, 34, 8, 8, M);
+  }
+  if (o.drone) { P.ell(8, 12, 5, 3, o.drone); P.line(2, 9, 14, 9, dk(o.drone)); P.set(10, 13, gl); P.set(6, 13, gl); }
+  // --- tronco e ombros
+  const mech = o.head === 'mech', shW = mech ? 11 : 9;
+  P.poly([[3, 64], [6, 52], [13, 45], [24, 41], [40, 41], [51, 45], [58, 52], [61, 64]], x => x < 18 ? lt(o.A) : x > 46 ? dk(o.A) : o.A);
+  P.poly([[22, 45], [42, 45], [40, 57], [32, 62], [24, 57]], mech ? o.A2 : o.B);
+  P.line(24, 58, 32, 63, o.C); P.line(32, 63, 40, 58, o.C);
+  if (mech) {
+    P.ell(32, 52, 5, 5, dim); P.ell(32, 52, 3, 3, gl); P.set(31, 51, '#ffffff');
+    for (let y = 47; y < 60; y += 3) { P.line(25, y, 27, y, o.C); P.line(37, y, 39, y, o.C); }
+  } else {
+    P.line(26, 49, 32, 54, gl); P.line(32, 54, 38, 49, gl); P.set(32, 55, '#ffffff');
+    P.line(24, 59, 40, 59, o.acc || o.C);
+  }
+  for (const [cx, sgn] of [[13, -1], [51, 1]]) {
+    P.ell(cx, 48, shW, mech ? 8 : 6, sgn < 0 ? lt(o.B) : o.B);
+    P.ell(cx, 51, shW - 1, 3, o.A2);
+    P.line(cx - shW + 3, 43, cx + shW - 3, 42 + (mech ? -1 : 0), o.C);
+    if (mech) { P.line(cx - 4, 45, cx + 4, 45, o.gold || o.C); P.set(cx, 47, gl); }
+    else P.set(cx + sgn * 3, 46, o.acc || gl);
+  }
+  // --- pescoço e gola
+  P.rect(27, 33, 10, 8, o.head === 'hair' ? dk(o.skin) : o.A2);
+  P.rect(24, 38, 16, 5, o.A2); P.line(24, 38, 39, 38, o.C);
+  if (o.scarf) {
+    P.rect(22, 36, 20, 6, o.scarf); P.line(22, 41, 41, 41, dk(o.scarf));
+    P.poly([[23, 38], [12, 42], [4, 56], [10, 54], [16, 46], [24, 42]], (x, y) => ((x + y) >> 2) % 3 ? o.scarf : dk(o.scarf));
+  }
+  // --- cabeça
+  if (o.head === 'hair') {
+    const H = o.hair, H2 = dk(H);
+    if (o.hairStyle === 'long') { P.rect(18, 12, 7, 30, H2); P.rect(39, 12, 6, 26, H2); P.line(19, 42, 16, 48, H2, 3); }
+    P.poly([[22, 16], [42, 16], [42, 29], [37, 35], [27, 35], [22, 29]], (x) => x > 37 ? dk(o.skin) : o.skin);
+    P.set(33, 27, dk(o.skin)); P.set(33, 28, dk(o.skin));
+    P.line(29, 31, 35, 31, mix(o.skin, '#5a2020', .35));
+    if (o.goggles) {
+      P.rect(21, 20, 23, 7, '#3a3f5c'); P.rect(23, 21, 8, 5, gl); P.rect(33, 21, 8, 5, gl);
+      P.line(23, 21, 30, 21, mix(gl, '#ffffff', .6)); P.set(40, 22, '#ffffff');
+    } else if (o.band) {
+      P.rect(21, 21, 22, 4, o.A2); P.line(22, 22, 42, 22, gl); P.line(22, 23, 42, 23, dim);
+    } else {
+      for (const ex of [26, 35]) { P.rect(ex, 22, 4, 3, '#f4f4f8'); P.rect(ex + 1, 22, 2, 3, o.eyes === 'glow' ? gl : '#2a2030'); P.set(ex + 1, 22, '#ffffff'); }
+      P.line(25, 20, 30, 19, H2); P.line(34, 19, 40, 20, H2);
+    }
+    if (o.mask) P.poly([[22, 27], [42, 27], [42, 30], [37, 36], [27, 36], [22, 30]], o.mask);
+    // cabelo por cima
+    P.ell(32, 13, 13, 7, H); P.rect(19, 12, 5, 12, H); P.rect(41, 12, 4, 9, H);
+    P.poly([[20, 14], [44, 14], [40, 19], [34, 16], [28, 20], [24, 17], [21, 21]], H);
+    if (o.hairStyle === 'spiky') {
+      P.poly([[18, 12], [14, 2], [24, 8], [26, 0], [32, 6], [38, 0], [40, 8], [48, 4], [44, 14]], H);
+      P.line(20, 10, 16, 4, H2); P.line(30, 6, 26, 2, H2); P.line(40, 8, 44, 5, H2);
+    } else { P.line(22, 9, 40, 7, lt(H)); P.line(24, 11, 30, 10, lt(H)); }
+    P.line(28, 14, 34, 18, H2); P.line(36, 14, 40, 18, H2);
+    if (o.crest) P.line(18, 10, 30, 4, o.crest, 2);
+  } else if (o.head === 'helm') {
+    if (o.hood) { P.ell(32, 22, 17, 18, o.A2); P.poly([[15, 24], [49, 24], [54, 46], [10, 46]], o.A2); }
+    P.ell(32, 22, 13, 14, o.A); P.ell(29, 18, 8, 7, lt(o.A));
+    P.line(22, 9, 42, 9, o.B); P.line(21, 11, 43, 11, o.B);
+    P.poly([[20, 19], [44, 18], [43, 27], [21, 27]], dim);
+    P.poly([[21, 20], [43, 19], [42, 25], [22, 25]], gl);
+    P.line(22, 20, 32, 20, mix(gl, '#ffffff', .6)); P.set(40, 21, '#ffffff');
+    P.rect(24, 28, 16, 7, o.A2); for (let x = 26; x < 39; x += 3) P.line(x, 30, x, 33, dk(o.A2));
+    if (o.crest) { P.line(20, 8, 30, 2, o.crest, 2); P.line(24, 10, 36, 3, o.crest); }
+    if (o.headset) { P.rect(17, 18, 5, 10, o.A2); P.line(18, 27, 26, 33, M2); P.set(26, 33, o.acc || gl); }
+    else { P.line(44, 16, 50, 4, o.C || o.B); P.set(50, 3, gl); }
+    if (o.hood) { P.poly([[17, 20], [18, 10], [26, 4], [38, 4], [46, 10], [47, 20], [42, 17], [22, 17]], o.A2); P.line(22, 7, 30, 5, lt(o.A2)); }
+    if (o.cap) { P.ell(31, 11, 13, 6, o.A2); P.poly([[20, 14], [44, 12], [50, 16], [22, 17]], o.B); P.set(32, 8, o.acc || gl); }
+    if (o.horns) { P.poly([[22, 13], [14, 0], [28, 9]], o.A2); P.poly([[42, 13], [50, 0], [36, 9]], o.A2); P.line(16, 3, 22, 11, o.acc || gl); P.line(48, 3, 42, 11, o.acc || gl); }
+    if (o.gogHelm) { P.rect(19, 8, 26, 4, '#3a3f5c'); P.ell(27, 9, 4, 3, dim); P.ell(37, 9, 4, 3, dim); P.ell(27, 9, 2, 1, gl); P.ell(37, 9, 2, 1, gl); }
+  } else {
+    P.rect(19, 8, 26, 27, o.A); P.rect(19, 8, 12, 12, lt(o.A)); P.rect(21, 6, 22, 4, o.B);
+    P.rect(22, 16, 20, 11, o.A2);
+    if (o.visor === 'eyes') { P.rect(25, 19, 5, 3, gl); P.rect(34, 19, 5, 3, gl); P.set(26, 19, '#ffffff'); P.set(35, 19, '#ffffff'); }
+    else if (o.visor === 'dots') [[25, 19], [30, 19], [35, 19], [27, 22], [32, 22], [37, 22], [30, 25]].forEach(([x, y]) => P.rect(x, y, 2, 2, gl));
+    else { P.rect(23, 20, 18, 3, gl); P.line(24, 20, 34, 20, mix(gl, '#ffffff', .6)); P.line(32, 23, 32, 26, gl); }
+    for (let x = 24; x < 41; x += 3) P.line(x, 29, x, 33, o.A2);
+    P.line(17, 14, 17, 28, o.C, 2); P.line(46, 14, 46, 28, o.C, 2);
+    P.line(19, 8, 14, 0, o.C, 2); P.line(44, 8, 49, 0, o.C, 2); P.set(14, 0, gl); P.set(49, 0, gl);
+  }
+  // --- na frente: escudos
+  if (o.gear === 'hex') {
+    const cx = 52, cy = 54, r = 11, hex = Array.from({length: 6}, (_, i) => [cx + r * Math.cos(Math.PI / 3 * i + Math.PI / 6), cy + r * Math.sin(Math.PI / 3 * i + Math.PI / 6)]);
+    P.poly(hex, dim); hex.forEach((p, i) => { const q = hex[(i + 1) % 6]; P.line(p[0], p[1], q[0], q[1], gl); });
+    P.line(cx, cy - 4, cx, cy + 4, '#ffffff'); P.line(cx - 4, cy, cx + 4, cy, '#ffffff');
+  } else if (o.gear === 'tower') {
+    const sh = [[42, 40], [62, 42], [62, 64], [44, 64]];
+    P.poly(sh, o.shieldCol || o.B); sh.forEach((a, i) => { const b = sh[(i + 1) % 4]; P.line(a[0], a[1], b[0], b[1], o.C); });
+    P.line(52, 45, 52, 62, gl); P.line(46, 52, 60, 52, gl); P.line(46, 45, 46, 49, o.gold || o.C); P.line(58, 45, 58, 49, o.gold || o.C);
+  } else if (o.gear === 'cog') {
+    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; P.rect(52 + Math.cos(a) * 11 - 1, 54 + Math.sin(a) * 11 - 1, 3, 3, o.C); }
+    P.ell(52, 54, 10, 10, o.B); P.ell(52, 54, 6, 6, o.A2); P.ell(52, 54, 3, 3, gl);
+    if (o.blade) P.line(4, 64, 14, 40, o.blade, 3);
+  } else if (o.gear === 'bubble') {
+    for (let a = -80; a <= 80; a += 5) { const q = a * Math.PI / 180; P.set(48 + Math.cos(q) * 12, 52 + Math.sin(q) * 12, gl); }
+  }
+}
+const bustCache = {};
+// Cartão 128x128: fundo com grade e brilho na cor do tier, busto ampliado ×2, luz de borda.
+function bustOf(aid, tier = -1) {
+  const key = aid + '|' + tier;
+  if (bustCache[key]) return bustCache[key];
+  const art = HERO_ART[aid] || charOf(aid).art, gl = tier <= 0 ? art.base : RAR[tier].c, o = bustSpec(aid);
+  const P = Painter(64, 64);
+  paintBust(P, o, gl);
+  P.rim(gl, .45, 1, 0); P.rim('#ffffff', .12, -1, -1);
+  P.outline(o.line || '#05040b');
+  const src = P.canvas(false), c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const bg = g.createRadialGradient(64, 52, 6, 64, 64, 92);
+  bg.addColorStop(0, mix(gl, '#0b0a18', .45)); bg.addColorStop(.55, mix(gl, '#0b0a18', .82)); bg.addColorStop(1, '#07060f');
+  g.fillStyle = bg; g.fillRect(0, 0, 128, 128);
+  g.globalAlpha = .12; g.fillStyle = gl;
+  for (let y = 0; y < 128; y += 8) for (let x = (y / 8 % 2) * 8; x < 128; x += 16) g.fillRect(x, y, 1, 1);
+  for (let i = -128; i < 128; i += 12) { g.fillRect(i + 128 - 1, 0, 1, 1); }
+  g.globalAlpha = .18; g.strokeStyle = gl; g.lineWidth = 1;
+  g.beginPath(); g.arc(64, 44, 38, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.arc(64, 44, 30, Math.PI * .1, Math.PI * .9); g.stroke();
+  g.globalAlpha = 1; g.imageSmoothingEnabled = false;
+  g.drawImage(src, 0, 0, 128, 128);
+  g.fillStyle = 'rgba(0,0,0,.18)'; for (let y = 0; y < 128; y += 3) g.fillRect(0, y, 128, 1);
+  return bustCache[key] = c.toDataURL();
+}
+
 // ---------- data ----------
 const SECTORS = [
   {name:'C:\\TEMP', tint:'#5ce1e6'}, {name:'CACHE L2', tint:'#7aa2ff'},
@@ -844,8 +1043,8 @@ const HERO_DEF = [
   {id:'sc', name:'SCANNER',  role:'DPS · railgun', hp:55,  atk:10, range:110, cd:1.1, x:32, w:30},
   {id:'fw', name:'FIREWALL', role:'tanque · lâmina e escudo', hp:130, atk:5,  range:6,   cd:0.9, x:62, w:30},
 ];
-const SLOTS = [['fw', 'Tanque'], ['sc', 'DPS'], ['pt', 'Suporte']];
-const SLOTTAG = {fw:'TNK', sc:'DPS', pt:'SUP'};
+const SLOTS = [['fw', 'Tanque'], ['sc', 'Ataque'], ['pt', 'Suporte']];
+const SLOTTAG = {fw:'TNK', sc:'ATQ', pt:'SUP'};
 const TYPES = {
   bug:{hp:1, atk:1, rw:1, cd:1.2}, worm:{hp:1.5, atk:.8, rw:1.2, cd:1.0},
   trojan:{hp:2.3, atk:1.4, rw:1.8, cd:1.5}, boss:{hp:6, atk:1.6, rw:12, cd:1.6},
@@ -854,6 +1053,9 @@ const RAR = [
   {n:'Comum', c:'#9aa0b5', m:1, w:60}, {n:'Otimizado', c:'#6ee7a8', m:1.6, w:25},
   {n:'Criptografado', c:'#5ca8ff', m:2.5, w:10}, {n:'Zero-Day', c:'#c38cff', m:4, w:4},
   {n:'Quântico', c:'#ffb454', m:7, w:1},
+  // T6 Root: acesso total ao sistema. Só cai em fase de Chefão, não sai do Compilador e o jogador
+  // escolhe as 3 passivas uma única vez (depois disso o item fica assim pra sempre).
+  {n:'Root', c:'#d0304c', m:11, w:0},
 ];
 const GEAR = {
   fw:['Sandbox','Proxy Reverso','Honeypot','Firewall L7'],
@@ -871,10 +1073,11 @@ const CHIPS = [
 const UPBASE = {3:20, 4:30, 5:45}, UP_G = 1.06, UP_COST = 1.3;
 
 // Subclasses de DPS. Armas de DPS têm o mesmo tipo e dão ×1,5 de bônus quando combinam.
+// As três classes de ataque. Cada uma tem as próprias armas (arma da classe certa dá ×1,5 de ATK).
 const SUBS = {
-  area:   {n:'Área', c:'#ff8a3a', d:'Cada tiro respinga 30% do dano em todos os inimigos na tela.'},
-  single: {n:'Precisão', c:'#5ce1e6', d:'+35% de dano no alvo principal.'},
-  boss:   {n:'Caça-chefes', c:'#ff3d7f', d:'+80% de dano contra chefes e +40% contra blindados.'},
+  single: {n:'Rastreador', pl:'Rastreadores', c:'#5ce1e6', k:'precisão', d:'Precisão: +35% de dano no alvo principal. Brilha nos Blindados.'},
+  area:   {n:'Varredor', pl:'Varredores', c:'#ff8a3a', k:'área', d:'Área: cada tiro respinga 30% do dano em todos os vírus da tela. Brilha nas Hordas.'},
+  boss:   {n:'Caça-chefes', pl:'Caça-chefes', c:'#ff3d7f', k:'chefes', d:'Chefes: +80% de dano contra chefes e +40% contra blindados. Brilha no Chefão.'},
 };
 const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', pulse:'single', scanner:'single', ghost:'boss', infiltrator:'boss', blade:'boss'};
 GUNNERS.forEach(g => g.sub = SUBOF[g.id]);
@@ -911,13 +1114,13 @@ const TK = {   // efeito por nível, nível máximo e nome curto de cada tipo de
   hp:{v:.04, max:5, n:'HP'}, red:{v:.015, max:5, n:'Redução de dano'}, regen:{v:.004, max:3, n:'Regeneração'}, vac:{v:.06, max:5, n:'Eficácia de vacinas'},
   gold:{v:.05, max:5, n:'Créditos'}, drop:{v:.05, max:5, n:'Drop de itens'}, chip:{v:.05, max:5, n:'Sorte (itens T3+)'}, wdrop:{v:.08, max:5, n:'Drop de armas'}, def:{v:.06, max:5, n:'DEF ganho'},
   spd:{v:.02, max:5, n:'Vel. de ataque'}, inv:{v:1, max:2, n:'Espaço de inventário'}, off:{v:.1, max:5, n:'Ganho offline'},
-  exec:{n:'Execução'}, splash:{n:'Respingo do DPS'}, dodge:{n:'Bloqueio de ataques'},
+  exec:{n:'Execução'}, splash:{n:'Respingo do ataque'}, dodge:{n:'Bloqueio de ataques'},
 };
 // Nó-chave: efeito grande, às vezes uma mecânica nova (execução, respingo, bloqueio).
 const KS = (name, eff, desc) => ({key:true, k:Object.keys(eff)[0], eff, name, desc});
 const ARMS = [
   {br:0, dx:0, dy:-1, main:['dmg', 'crit', 'dmg', 'aoe', 'dmg', 'boss', 'dmg', 'crit'], sides:[
-    ['aoe', 'aoe', KS('Varredura total', {splash:.2, aoe:.25}, 'Todo tiro do DPS respinga 20% do dano em todos os vírus da tela. +25% de dano em área.')],
+    ['aoe', 'aoe', KS('Varredura total', {splash:.2, aoe:.25}, 'Todo tiro do agente de ataque respinga 20% do dano em todos os vírus da tela. +25% de dano em área.')],
     ['boss', 'boss', 'crit', KS('Caçador de rootkits', {boss:.5}, '+50% de dano contra chefes.')],
     ['dmg', 'spd', 'dmg', 'crit', KS('Execução em tempo real', {exec:.15, dmg:.1}, 'Vírus comuns com menos de 15% de vida são apagados na hora. +10% de dano.')]]},
   {br:1, dx:1, dy:0, main:['gold', 'drop', 'gold', 'chip', 'gold', 'wdrop', 'def', 'gold'], sides:[
@@ -954,7 +1157,7 @@ const nodeLv = id => id === 'core' ? 1 : S.tree[id] || 0;
 const nodeCost = n => Math.floor(n.base * 1.6 ** nodeLv(n.id));
 const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
 const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
-const tfmt = (k, v) => k === 'exec' ? `apaga vírus com menos de ${+(v * 100).toFixed(0)}% de vida` : k === 'dodge' ? `bloqueia ${+(v * 100).toFixed(0)}% dos ataques no agente da frente` : k === 'splash' ? `+${+(v * 100).toFixed(0)}% do dano do DPS em todos os vírus` : k === 'inv' ? `+${v} espaço${v > 1 ? 's' : ''} no inventário` : `${k === 'red' ? '-' : '+'}${+(v * 100).toFixed(1)}% ${k === 'red' ? 'de dano recebido' : TK[k].n.toLowerCase()}`;
+const tfmt = (k, v) => k === 'exec' ? `apaga vírus com menos de ${+(v * 100).toFixed(0)}% de vida` : k === 'dodge' ? `bloqueia ${+(v * 100).toFixed(0)}% dos ataques no agente da frente` : k === 'splash' ? `+${+(v * 100).toFixed(0)}% do dano do agente de ataque em todos os vírus` : k === 'inv' ? `+${v} espaço${v > 1 ? 's' : ''} no inventário` : `${k === 'red' ? '-' : '+'}${+(v * 100).toFixed(1)}% ${k === 'red' ? 'de dano recebido' : TK[k].n.toLowerCase()}`;
 // saves da árvore antiga (13 nós): devolve o DEF gasto
 const OLD_TREE = {dmg:10, crit:40, aoe:90, bossd:90, hp:10, red:40, regen:120, gold:10, drop:40, chip:100, spd:20, inv:60, off:50};
 const invCap = () => 24 + tv('inv');
@@ -972,7 +1175,7 @@ const AFFIX = {
   aoe:   {n:'dano em área', lo:1.5, hi:3},
   spd:   {n:'vel. de ataque', lo:.5, hi:1.5},
 };
-const AFFIX_N = [0, 1, 1, 2, 3];
+const AFFIX_N = [0, 1, 1, 2, 3, 3];
 // Conjuntos: peças com o mesmo nome de conjunto no mesmo personagem.
 const SETS = {
   sentinela: {n:'Sentinela', c:'#5ca8ff', b:[[2, {hp:10}], [4, {red:8}]]},
@@ -1017,7 +1220,7 @@ const glob = k => (bonuses().g[k] || 0) / 100;
 
 const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:{}, sc:{}, pt:{}},
   inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, tree:{}, def:0, autoUp:true, autoEq:true, autoAdv:true, autoComp:true, last:0,
-  tank:'firewall', gunner:'scanner', roster:{firewall:1, scanner:1}, pity:{fw:{}, sc:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}};
+  tank:'firewall', gunner:'scanner', roster:{firewall:1, scanner:1}, pity:{fw:{}, sc:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}, op:0, best:0};
 let S = load();
 function load() {
   try {
@@ -1030,6 +1233,7 @@ function load() {
       for (const c of ['fw', 'sc']) if (typeof st.pity[c] !== 'object') st.pity[c] = {};
       if (!st.ipity) st.ipity = {p4:0, p5:0};
       if (!st.upl) st.upl = {slots:[0, 0, 0, 0], steam:[]};
+      st.op = st.op || 0; st.best = st.best || 0;
       for (const id in OLD_TREE) if (st.tree[id]) { for (let l = 0; l < st.tree[id]; l++) st.def += Math.floor(OLD_TREE[id] * 1.6 ** l); delete st.tree[id]; }
       return st;
     }
@@ -1048,12 +1252,24 @@ const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * UP_COST ** lvOf(aid
 function applySlots() {
   for (const cls in CLASSES) {
     const C = CLASSES[cls], T = equipped(cls), d = HERO_DEF[C.idx];
-    d.name = T.name; d.role = (cls === 'sc' ? 'DPS ' + SUBS[T.sub].n : C.one) + ' · ' + T.role;
+    d.name = T.name; d.role = (cls === 'sc' ? SUBS[T.sub].n : C.one) + ' · ' + T.role;
     d.hp = C.stars[T.stars].hp; d.atk = C.stars[T.stars].atk;
   }
 }
-const maxHp = h => (h.def.hp + gearStat(h.def.id, 'hp')) * UP_G ** lvOf(slotAid(h.def.id)).h * (1 + (pT().teamHp || 0)) * (1 + tv('hp')) * (1 + wear(h.def.id, 'hp'));
-const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + wear(h.def.id, 'atk'));
+// Nível do operador: destino pros créditos no fim de jogo. Cada nível custa 12% a mais e dá +0,5% de
+// vida e dano pro esquadrão (aditivo). Vai pro ranking junto com o maior poder já alcançado.
+const OP = {base:1000, g:1.12, bonus:.005};
+const opCost = (l = S.op) => Math.floor(OP.base * OP.g ** l);
+const opMul = () => 1 + S.op * OP.bonus;
+function buyOp(n = 1) {
+  let k = 0;
+  while (k < n && S.data >= opCost()) { S.data -= opCost(); S.op++; k++; }
+  if (k) { say(`Operador subiu pro nível <span class="k">${S.op}</span>.`, true); bestPow(); renderPanel(); save(); }
+  return k;
+}
+const bestPow = () => { const p = power(); if (p > S.best) S.best = p; return S.best; };
+const maxHp = h => (h.def.hp + gearStat(h.def.id, 'hp')) * UP_G ** lvOf(slotAid(h.def.id)).h * (1 + (pT().teamHp || 0)) * (1 + tv('hp')) * (1 + wear(h.def.id, 'hp')) * opMul();
+const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + wear(h.def.id, 'atk')) * opMul();
 const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd')) / (1 + gearStat(h.def.id, 'spd') / 100 + wear(h.def.id, 'spd'));
 // Curvas de balanceamento (ajustadas com tools/balance-sim.cjs).
 const ENEMY = {hp:30, hpG:1.1, atk:4, atkG:1.095, djHp:2.5, djAtk:2};   // dj = salto por dificuldade
@@ -1168,7 +1384,7 @@ const INAMES = {
   pt:{helmet:'Tiara-visor', armor:'Manto de nanofibra', boots:'Sandálias antigravidade', weapon:'Cajado de nanobots'},
 };
 // Chance de tier por item: fase comum × fase de chefe. Garantias: T4+ a cada 150 itens sem T4+, T5 a cada 1000.
-const TIER_W = {n:[72, 22, 5.45, .5, .05], b:[55, 32, 10.75, 2, .25]};
+const TIER_W = {n:[72, 22, 5.45, .5, .05, 0], b:[55, 32, 10.72, 2, .25, .03]};
 const IPITY4 = 150, IPITY5 = 1000;
 const tierTxt = t => 'T' + (t + 1);
 function gearOf(cls) { return S.gear[cls] || (S.gear[cls] = {}); }
@@ -1252,6 +1468,7 @@ function itemIcon(it) {
     P.ell(12, 3, 2, 2, dk); P.ell(12, 3, 1, 1, c); P.set(12, 3, '#ffffff');
   }
   if (it.k !== 'chip' && it.t >= 3) { P.set(1, 1, lt); P.set(14, 1, lt); P.set(15, 14, lt); }
+  if (it.k !== 'chip' && it.t >= 5) { P.set(0, 0, c); P.set(15, 0, c); P.set(0, 15, c); P.set(15, 15, c); P.set(1, 14, lt); P.set(0, 8, c); P.set(15, 8, c); }
   P.outline('#05040b');
   return iconCache[key] = P.canvas(false).toDataURL();
 }
@@ -1284,14 +1501,31 @@ function buildItem(cls, type, wt, t, lv, set) {
   const vs = type === 'vaccine' ? pick(Object.keys(VIR)) : undefined;
   const base = type === 'vaccine' ? 'Vacina anti-' + VIR[vs] : wt ? pick(GEARW[wt]) : INAMES[cls][type];
   const keys = Object.keys(AFFIX), af = [];
+  // Root: passivas em branco, o jogador escolhe (ver configRoot)
+  if (t === 5) return {k:'gear', cls, type, wt, vs, t, lv, set, af, pick:AFFIX_N[5], q:1.15, name:`${base} Root Mk${lv}`};
   for (let i = 0; i < AFFIX_N[t]; i++) {
     const k = pick(keys.filter(x => !af.some(a => a.k === x))), A = AFFIX[k];
     af.push({k, v: +((A.lo + Math.random() * (A.hi - A.lo)) * RAR[t].m).toFixed(1)});
   }
   return {k:'gear', cls, type, wt, vs, t, lv, set, af, q:.85 + Math.random() * .3, name:`${base} ${SETS[set].n} Mk${lv}`};
 }
+// Root: o jogador escolhe as passivas uma vez, com o valor máximo da faixa. Depois fica fixo.
+function configRoot(it, keys) {
+  if (!it || !it.pick || keys.length !== it.pick || new Set(keys).size !== keys.length || keys.some(k => !AFFIX[k])) return false;
+  it.af = keys.map(k => ({k, v: +(AFFIX[k].hi * RAR[5].m).toFixed(1)}));
+  delete it.pick; bonusCache = null;
+  say(`${gearTag(it)} configurado: ${afTxt(it)}. Agora é permanente.`, true);
+  return true;
+}
 function dropGear(boss, forceType) {
   const it = makeItem(boss, forceType), G = gearOf(it.cls), cur = G[it.type];
+  if (it.t === 5) {   // Root nunca é equipado sozinho: vai pro inventário pra ser configurado
+    showBanner('ROOT T6!', RAR[5].c);
+    if (addItem(it)) say(`${gearTag(it)} caiu do chefe! Abra o inventário e escolha as passivas dele.`, true);
+    else { S.inv.push(it); say(`${gearTag(it)} caiu do chefe! Inventário cheio, mas o Root foi guardado mesmo assim.`, true); }
+    if (openP === 'agent') renderPanel();
+    return;
+  }
   if (S.autoEq && (!cur || itemScore(it) > itemScore(cur))) {
     G[it.type] = it; bonusCache = null;
     if (cur) S.data += gearVal(cur);
@@ -1338,7 +1572,7 @@ function unequip(cls, type) {
 function sellWorse() {
   let v = 0;
   S.inv = S.inv.filter(it => {
-    if (it.k !== 'gear') return true;
+    if (it.k !== 'gear' || it.t >= 5) return true;   // Root nunca é reciclado em massa
     const cur = gearOf(it.cls)[it.type];
     if (!cur || itemScore(it) > itemScore(cur)) return true;
     v += gearVal(it); return false;
@@ -1474,6 +1708,7 @@ function startStage(s, msg) {
 }
 function stageClear() {
   const s = S.stage;
+  bestPow();
   fails = 0;
   if (s === S.maxStage) { S.maxStage++; say(`Fase ${stageLabel(s)} concluída! <span class="k">${stageLabel(s + 1)}</span> desbloqueada.`, true); }
   else say(`Fase ${stageLabel(s)} limpa.`);
@@ -1777,16 +2012,28 @@ function equip(id) {
   S[CLASSES[cls].key] = id; applySlots();
   const h = heroOf(cls);
   if (!h.dead) h.hp = maxHp(h);
-  say(`${cls === 'sc' ? 'DPS' : 'Tanque'} ativo: ${charOf(id).name}`, true);
+  say(`${cls === 'sc' ? SUBS[charOf(id).sub].n : 'Tanque'} ativo: ${charOf(id).name}`, true);
   renderPanel(); save();
 }
 
 // ---------- painéis ----------
 let stDiff = null;
-let openP = null, selInv = -1, colCls = 'fw', agSel = 'fw';
-const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt'};
+let openP = null, selInv = -1, colCls = 'fw', colSub = 'single', agSel = 'fw';
+const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt', rank:'ranking de operadores', odds:'probabilidades publicadas'};
 const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
+// Seletor de passivas do Root: escolhe N passivas diferentes, confirma uma vez e fica pra sempre.
+let rootSel = [];
+function rootPicker(it) {
+  const opts = Object.entries(AFFIX).map(([k, A]) => {
+    const on = rootSel.includes(k);
+    return `<button type="button" class="rp${on ? ' on' : ''}" data-rpick="${k}" aria-pressed="${on}">${bonusTxt(k, A.hi * RAR[5].m)}</button>`;
+  }).join('');
+  return `<div class="root"><b style="color:${RAR[5].c}">Configurar Root</b> <span class="hint">escolha ${it.pick} passivas (${rootSel.length}/${it.pick}). Cada uma vem no valor máximo.</span>
+    <div class="rps">${opts}</div>
+    <div class="row"><button type="button" data-rgo="${selInv}" ${rootSel.length === it.pick ? '' : 'disabled'}>Gravar passivas (permanente)</button>
+    <span class="hint">Depois de gravar não dá pra mudar. Um Root sem passivas pode ir pro mercado assim, e quem comprar escolhe.</span></div></div>`;
+}
 function invItems() {
     const cells = Array.from({length: invCap()}, (_, i) => {
       const it = S.inv[i];
@@ -1801,18 +2048,18 @@ function invItems() {
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div>${gearTag(it)} · ${RAR[it.t].n}<br>
         <span class="hint">${ITYPES[it.type].n} de <b>${heroOf(it.cls).def.name}</b> (${SLOTTAG[it.cls]}) · Nv${it.lv}</span>${wtTag(it)}</div></div>
         <div>${statTxt(it)}</div>
-        ${it.af && it.af.length ? `<div>Passivas: ${afTxt(it)}</div>` : '<div class="hint">Sem passivas (T2 ou mais têm passivas).</div>'}
+        ${it.pick ? rootPicker(it) : it.af && it.af.length ? `<div>Passivas: ${afTxt(it)}</div>` : '<div class="hint">Sem passivas (T2 ou mais têm passivas).</div>'}
         ${it.set ? `<div class="sets">Conjunto ${setTxt(it.cls, it.set)} <span class="hint">(em ${heroOf(it.cls).def.name})</span></div>` : ''}
         <div class="hint">Equipado: ${cur ? `${cur.name} ${tierTxt(cur.t)} (${statTxt(cur)})` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? 'melhor' : 'pior'}</span></div>
         <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
     } else if (it) {
       const C = CHIPS[it.r];
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br><span class="hint">★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}</span></div></div>
-        <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar DPS</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
+        <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar ataque</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <table class="rates"><tr><td>Tier do item</td><td>fase comum</td><td>fase de chefe</td></tr>${RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td>${TIER_W.n[i]}%</td><td>${TIER_W.b[i]}%</td></tr>`).join('')}</table>
-      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
+      <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai em fase de Chefão</b> e não sai do Compilador.</p>
       <details class="setlist"><summary>Chances atuais (base → com seus bônus)</summary>
         <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
         <table class="rates">${[
@@ -1880,11 +2127,11 @@ function agentTop() {
       : `<div class="sock empty"><span class="ph">${ITYPES[ty].ab}</span><span class="sn">${ITYPES[ty].n}</span><span class="si">soquete vazio</span></div>`;
   }).join('');
   const setsOn = Object.keys(setCounts(k)).filter(x => setCounts(k)[x] >= 2);
-  const role = k === 'sc' ? `<span style="color:${SUBS[dpsSub()].c}">DPS · ${SUBS[dpsSub()].n}</span>` : SLOTS.find(x => x[0] === k)[1];
+  const role = k === 'sc' ? `<span style="color:${SUBS[dpsSub()].c}">${SUBS[dpsSub()].n} · ataque de ${SUBS[dpsSub()].k}</span>` : SLOTS.find(x => x[0] === k)[1];
   return `<div class="procs">${procs}</div>
   <div class="dx">
     <div class="scan">
-      <div class="chamber"><img src="${portrait(k)}" width="96" height="96" alt=""><span class="beam"></span></div>
+      <div class="chamber"><img src="${bustOf(slotAid(k), visTier(k))}" width="128" height="128" alt=""><span class="beam"></span></div>
       <b class="nm">${h.def.name}</b><span class="rl">${role}</span>
       <span class="stat ${h.dead ? 'bad' : 'ok'}">${h.dead ? '● REINICIANDO' : '● ÍNTEGRO'}</span>
     </div>
@@ -1904,7 +2151,7 @@ function agentTop() {
 
 // Regras de comércio no modelo do Task Bar Hero, com as proteções que eles tiveram que criar depois.
 // No protótipo a Steam é simulada; no lançamento a entrega passa pelo servidor + Steam Inventory Service.
-const TRADE = {slots:4, cooldownH:8, lockDays:7, minTier:3, lockedTiers:[4]};
+const TRADE = {slots:4, cooldownH:8, lockDays:7, minTier:3, lockedTiers:[4, 5]};
 function tradeInfo(it) {
   if (it.k === 'chip') return {ok:true};
   if (it.t < TRADE.minTier) return {ok:false, why:'só itens T4 ou superiores vão pro mercado'};
@@ -1934,6 +2181,57 @@ function downloadBack(j) {
   renderPanel(); save();
 }
 
+// ---------- ranking ----------
+// No protótipo os rivais são simulados (curva fixa de fases). No lançamento o ranking vem do servidor,
+// calculado a partir de progresso validado lá (nunca do número que o cliente manda).
+const RIVAL_N = ['kernel_kid', 'nullptr', 'MalwareMaeve', 'r00tbeer', 'quarentena', 'SysAdminSad', 'byte_me', 'CtrlAltDefeat', 'patchday', 'heuristico',
+  'zer0cool', 'Firewallace', 'daemonita', 'lagmaster', 'cachemiss', 'segfault_br', 'ping_pong', 'Honeypoti', 'sudo_rm', 'overclocker', 'regedit', 'bitflip',
+  'ransomNO', 'antiworm', 'trojanhunter', 'L33Tadmin', 'blue_screen', 'hexdump', 'deadlock', 'wormhole'];
+let rankTab = 'pow';
+const rivals = () => RIVAL_N.map((n, i) => {
+  // fases de 8 a ~260 (Kernel Panic 140), espalhadas; jitter fixo por nome
+  const st = Math.round(8 * 1.125 ** i), j = .85 + ((i * 7919) % 31) / 100;
+  return {n, pow: recPow(st) * j * 1.1, op: Math.max(1, Math.round((st * .62 - 8) * j)), st};
+});
+function rankView() {
+  const me = {n:'você', pow:bestPow(), op:S.op, st:S.maxStage, me:true};
+  const key = rankTab === 'pow' ? 'pow' : 'op';
+  const all = [...rivals(), me].sort((a, b) => b[key] - a[key]);
+  const pos = all.indexOf(me) + 1;
+  const rows = all.map((x, i) => `<tr class="${x.me ? 'me' : ''}"><td class="num">#${i + 1}</td><td>${x.me ? '<b>você</b>' : x.n}</td>
+    <td class="num">${key === 'pow' ? fmtN(x.pow) : 'nv ' + x.op}</td><td class="hint">${stageLabel(Math.min(x.st, 999))}</td></tr>`).join('');
+  const c1 = opCost(), c10 = Array.from({length:10}, (_, k) => opCost(S.op + k)).reduce((a, b) => a + b, 0);
+  return `<div class="opbox">
+      <div><p class="lbl">operador</p><b class="opl">nível ${S.op}</b><span class="hint">+${+(S.op * OP.bonus * 100).toFixed(1)}% de vida e dano no esquadrão</span></div>
+      <div class="row"><button type="button" data-op="1" ${S.data < c1 ? 'disabled' : ''}>Subir nível · <b><img src="${uiIcon('coin')}" width="10" height="10" alt=""> ${fmtNum(c1)}</b></button>
+      <button type="button" data-op="10" ${S.data < c1 ? 'disabled' : ''}>Até +10 · <b>${fmtNum(c10)}</b></button></div>
+    </div>
+    <p class="hint">O nível do operador é o destino dos créditos no fim de jogo: cada nível custa 12% a mais que o anterior, não tem teto e conta pro ranking.</p>
+    <div class="btabs"><button type="button" data-rkt="pow" aria-pressed="${key === 'pow'}">Poder da conta</button><button type="button" data-rkt="op" aria-pressed="${key === 'op'}">Nível do operador</button></div>
+    <p class="sub">Você está em <b class="k">#${pos}</b> de ${all.length} <small>${key === 'pow' ? 'maior poder já alcançado' : 'nível do operador'} · rivais simulados no protótipo</small></p>
+    <table class="rk">${rows}</table>`;
+}
+// Tudo que é sorteado no jogo, com os números reais do código (mesmas constantes que o sorteio usa).
+function oddsView() {
+  const tw = TIER_W, d = stagePos(S.stage).d;
+  const cur = tierWeights(), tot = cur.reduce((a, b) => a + b, 0);
+  const tiers = RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td class="num">${pct2(tw.n[i] / 100)}</td><td class="num">${pct2(tw.b[i] / 100)}</td><td class="num">${pct2(cur[i] / tot)}</td></tr>`).join('');
+  const packs = CHIPS.map(c => `<tr><td style="color:${c.c}">${c.n}</td><td class="num">${pct2(c.drop)}</td><td class="num">${pct2(c.boss)}</td><td class="num">${pct2(c.p5)}</td><td class="num">${pct2(c.p4)}</td>
+    <td>${[c.pity5 && `★5 em ${c.pity5}`, c.pity4 && `★4 em ${c.pity4}`, c.ten4 && '×10 garante ★4', c.min && 'nunca ★3'].filter(Boolean).join(' · ')}</td></tr>`).join('');
+  const comp = COMP_RATE.map((r, i) => `${tierTxt(i)}→${tierTxt(i + 1)} <b>${pct(r)}</b>`).join(' · ');
+  const aff = Object.values(AFFIX).map(A => `<tr><td>${A.n}</td>${RAR.map((r, t) => `<td class="num">${AFFIX_N[t] ? (t === 5 ? +(A.hi * r.m).toFixed(1) + '%' : `${+(A.lo * r.m).toFixed(1)}–${+(A.hi * r.m).toFixed(1)}%`) : '—'}</td>`).join('')}</tr>`).join('');
+  return `<p class="hint">Todas as chances do jogo, lidas das mesmas constantes que fazem o sorteio. Mudar qualquer uma delas depois do lançamento exige aviso prévio.</p>
+    <p class="sub">Pacotes de download <small>chance ao concluir uma fase · sem bônus</small></p>
+    <table class="rates"><tr><td>Pacote</td><td>fase comum</td><td>fase de chefe</td><td>★5</td><td>★4</td><td>garantias</td></tr>${packs}</table>
+    <p class="sub">Itens <small>chance por vírus: ${pct2(GEAR_N)} em fase comum, ${pct2(GEAR_B)} em fase de chefe</small></p>
+    <table class="rates"><tr><td>Tier</td><td>fase comum</td><td>fase de chefe</td><td>agora (${DIFFS[d].n}, sorte +${pct(luck())})</td></tr>${tiers}</table>
+    <p class="hint">T3 ou melhor: +25% por dificuldade acima de Normal e + sua sorte (máximo +50%). O chefe dá no mínimo T2. <b style="color:${RAR[5].c}">T6 Root</b> só cai em fase de Chefão e não sai do Compilador. Itens não têm garantia.</p>
+    <p class="sub">Compilador <small>5 itens do mesmo tier</small></p><p>${comp} · T5 e T6 não compilam. Se falhar, sai um item novo do mesmo tier.</p>
+    <p class="sub">Passivas dos itens <small>quantidade: ${AFFIX_N.map((n, t) => `${tierTxt(t)} ${n}`).join(' · ')}</small></p>
+    <div class="tbl"><table class="rates"><tr><td>Passiva</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${aff}</table></div>
+    <p class="hint">T2–T5 sorteiam passivas diferentes, com valor uniforme na faixa. Root: você escolhe as ${AFFIX_N[5]} e elas vêm no valor máximo.</p>`;
+}
+
 // Janela flutuante com os atributos do item sob o mouse.
 function itemTip(it, where) {
   if (it.k === 'chip') {
@@ -1947,7 +2245,7 @@ function itemTip(it, where) {
       <span class="hint">${tierTxt(it.t)} ${RAR[it.t].n} · ${ITYPES[it.type].n} · ${heroOf(it.cls).def.name} · Nv${it.lv}</span></div></div>
     <div class="tl">${statTxt(it)}</div>
     ${it.wt ? `<div class="tl">Tipo de arma: ${wtTag(it)}</div>` : ''}
-    ${it.af && it.af.length ? `<div class="tl">${afTxt(it)}</div>` : '<div class="tl hint">sem passivas</div>'}
+    ${it.pick ? `<div class="tl" style="color:${RAR[5].c}">${it.pick} passivas em branco: você escolhe uma vez, no valor máximo</div>` : it.af && it.af.length ? `<div class="tl">${afTxt(it)}${it.t === 5 ? ' <span class="hint">(gravadas)</span>' : ''}</div>` : '<div class="tl hint">sem passivas</div>'}
     ${it.set ? `<div class="tl sets">${setTxt(it.cls, it.set)}</div>` : ''}
     ${cmp ? `<div class="tl">vs. equipado (${cur.name}): <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? 'melhor' : 'pior'}</span></div>` : where === 'inv' && !cur ? '<div class="tl" style="color:var(--green)">soquete vazio: equipar é ganho certo</div>' : ''}
     <div class="tl">${tradeTag(it)}</div>
@@ -1988,37 +2286,43 @@ function uiIcon(k) {
   else if (k === 'coin') { P.ell(8, 8, 6, 6, '#b8741a'); P.ell(8, 8, 5, 5, '#ffb454'); P.rect(7, 4, 2, 8, '#b8741a'); P.line(5, 6, 10, 6, '#b8741a'); P.line(5, 10, 10, 10, '#b8741a'); }
   else if (k === 'defs') { P.rect(3, 1, 10, 14, '#1f5a60'); for (let y = 3; y < 14; y += 3) P.line(5, y, 11, y, '#5ce1e6'); P.set(11, 3, '#ffffff'); }
   else if (k === 'upload') { P.ell(8, 9, 6, 4, '#2a6f8f'); P.ell(5, 8, 3, 3, '#2a6f8f'); P.ell(10, 6, 4, 4, '#2a6f8f'); P.rect(7, 5, 2, 8, '#5ce1e6'); P.poly([[4, 8], [12, 8], [8, 3]], '#5ce1e6'); }
+  else if (k === 'rank') { P.rect(4, 2, 8, 6, A); P.ell(8, 7, 4, 3, A); P.rect(7, 10, 2, 3, mix(A, '#000000', .3)); P.rect(4, 13, 8, 2, M); P.line(1, 3, 3, 6, A); P.line(14, 3, 12, 6, A); P.set(7, 4, '#ffffff'); }
+  else if (k === 'odds') { P.rect(2, 2, 12, 12, D); P.rect(3, 3, 10, 10, '#e9ecf5'); [[5, 5], [10, 5], [8, 8], [5, 11], [10, 11]].forEach(([x, y]) => P.rect(x - 1, y - 1, 2, 2, '#131a28')); }
   else if (k === 'log') { P.rect(2, 1, 12, 14, M); for (let y = 4; y < 13; y += 3) P.line(4, y, 11, y, D); }
   P.outline('#05040b');
   return UIICON[k] = P.canvas(false).toDataURL();
 }
-const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['log', 'Log']];
+const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['rank', 'Ranking'], ['odds', 'Chances'], ['log', 'Log']];
 
 const RENDER = {
   agent: () => agentTop() + `<p class="sub">Inventário <small>${S.inv.length}/${invCap()}</small></p>` + invItems() + `
       <div class="opts">
         <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
         <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar itens melhores</label>
+        <button type="button" data-freeroot>protótipo: ganhar um Root</button>
       </div>
       <div class="prev">prévia (todos os itens no tier): ${[['real', -9], ...RAR.map((r, i) => [tierTxt(i), i])].map(([n, v]) =>
         `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
 
   col: () => {
-    const C = CLASSES[colCls];
-    const col = C.list.map(T => {
+    const C = CLASSES[colCls], list = colCls === 'sc' ? C.list.filter(T => T.sub === colSub) : C.list;
+    const col = list.map(T => {
       const own = T.id in S.roster, on = S[C.key] === T.id;
       return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
-        <img src="${portraitOf(T.id, -1)}" width="48" height="48" alt="">
+        <img class="bust" src="${bustOf(T.id)}" width="64" height="64" alt="">
         <span class="st${T.stars}">${stars(T.stars)}</span>
         <span class="nm">${own ? T.name : '???'}</span>
-        ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
+
         <span class="ps">${own ? T.ptxt : 'Ainda não baixado'}</span>
         <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'No esquadrão' : own ? 'Colocar' : 'Bloqueado'}</button>
       </div>`;
     }).join('');
-    return `<div class="btabs"><button type="button" data-colc="fw" aria-pressed="${colCls === 'fw'}">Tanques</button><button type="button" data-colc="sc" aria-pressed="${colCls === 'sc'}">DPS</button></div>
-      ${colCls === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
-      <p class="sub">${C.label} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length} · novos agentes vêm do Download</small></p>
+    const tabs = [['fw', 'Tanques', 'var(--text)'], ...Object.entries(SUBS).map(([k, x]) => ['sc:' + k, x.pl, x.c])].map(([v, n, c]) =>
+      `<button type="button" data-colc="${v}" aria-pressed="${v === 'fw' ? colCls === 'fw' : colCls === 'sc' && 'sc:' + colSub === v}" style="--rc:${c}">${n}</button>`).join('');
+    const X = SUBS[colSub];
+    return `<div class="btabs">${tabs}</div>
+      ${colCls === 'sc' ? `<p class="hint"><b style="color:${X.c}">${X.n}</b> · ${X.d} O esquadrão leva um agente de ataque; troque de classe conforme a fase.</p>` : ''}
+      <p class="sub">${colCls === 'sc' ? X.pl : C.label} <small>${list.filter(x => x.id in S.roster).length}/${list.length} · novos agentes vêm do Download</small></p>
       <div class="col">${col}</div>`;
   },
 
@@ -2026,13 +2330,13 @@ const RENDER = {
 
   gacha: () => {
     const res = lastPull && lastPull.cls === gBanner ? `<div class="res">${lastPull.out.map((o, i) => `
-      <div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" width="40" height="40" alt="">
+      <div class="card s${o.T.stars}" style="--i:${i}"><img class="bust" src="${bustOf(o.T.id)}" width="56" height="56" alt="">
       <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
       ${o.res === 'new' ? '<span class="tag new">NOVO</span>' : `<span class="tag dup">+${fmt(o.v)}</span>`}</div>`).join('')}</div>` : '';
     return `<p class="hint">Baixe novos agentes pro antivírus usando pacotes de download. Os agentes baixados ficam na Coleção.</p>
       <div class="btabs">
         <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
-        <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · DPS</button>
+        <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · Ataque</button>
       </div>
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
         <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}</span><small>★5 ${pct2(c.p5)} · ★4 ${pct2(c.p4)}${c.min ? ' · nunca ★3' : ''}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
@@ -2065,7 +2369,7 @@ const RENDER = {
       body = `<p class="hint">Fim de jogo sem fim: cada nível é mais difícil e tem drops melhores.</p><div class="sgrid">${Array.from({length: Math.min(40, last - CAMPAIGN + 1)}, (_, k) => cell(last - k)).reverse().join('')}</div>`;
     }
     const legend = Object.values(STYPES).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>');
-    return `<p>Seu poder: <b class="k">${fmtN(pw)}</b> · DPS <span style="color:${SUBS[dpsSub()].c}">${SUBS[dpsSub()].n}</span> · fase atual <b>${stageLabel(S.stage)}</b></p>
+    return `<p>Seu poder: <b class="k">${fmtN(pw)}</b> · ataque <span style="color:${SUBS[dpsSub()].c}">${SUBS[dpsSub()].n}</span> · fase atual <b>${stageLabel(S.stage)}</b></p>
       <div class="btabs dtabs">${tabs}</div>
       <p class="hint">3 atos × 10 fases em cada dificuldade. Terminar o Ato 3 libera a próxima dificuldade; dificuldades mais altas dão itens de tier mais alto. Depois do Zero-Day vem o Kernel Panic, sem fim.</p>
       ${body}
@@ -2119,7 +2423,7 @@ const RENDER = {
         <button type="button" data-upback="${j}">Trazer pro jogo</button></div>`).join('') : '<p class="hint">Vazio.</p>';
     return `<p>A Central de Upload envia itens do jogo pro <b>inventário da Steam</b>, onde podem ser vendidos no Mercado da Comunidade.</p>
       <div class="rules"><b>Regras (aprendendo com o Task Bar Hero)</b>
-        <div>· Negociáveis: pacotes de download e itens <b>T4+</b>. <b>T5 fica bloqueado</b> no lançamento, até a economia estabilizar.</div>
+        <div>· Negociáveis: pacotes de download e itens <b>T4+</b>. <b>T5 e T6 Root ficam bloqueados</b> no lançamento e são liberados depois, com os dados de oferta em mãos.</div>
         <div>· Itens <b>compilados</b> e itens equipados ficam vinculados à conta.</div>
         <div>· <b>${TRADE.slots} espaços de envio</b>, cada um com <b>${TRADE.cooldownH} h</b> de espera: no máximo ${TRADE.slots * 24 / TRADE.cooldownH} envios por dia.</div>
         <div>· Itens que voltam do mercado ficam <b>${TRADE.lockDays} dias</b> travados antes de poderem ser reenviados.</div>
@@ -2130,12 +2434,14 @@ const RENDER = {
       <p class="sub">Inventário da Steam <small>(simulado no protótipo)</small></p>${steam}`;
   },
 
+  rank: () => rankView(),
+  odds: () => oddsView(),
   log: () => `<ol class="log">${LOG.map(l => `<li class="${l.hl ? 'hl' : ''}"><time>${l.time}</time>${l.txt}</li>`).join('') || '<li>Nada ainda.</li>'}</ol>`,
 
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
-    <p>Um esquadrão de agentes digitais (tanque, DPS e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
-    <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra DPS de Área), Blindados (poucos e resistentes, bom pra Precisão) e Chefão (bom pra Caça-chefes).</p>
-    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) com tiers T1 a T5, e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e DPS; repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p>Um esquadrão de agentes digitais (tanque, ataque e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
+    <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra Varredor), Blindados (poucos e resistentes, bom pra Rastreador) e Chefão (bom pra Caça-chefes).</p>
+    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) com tiers T1 a T6 (Root, só de chefe), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
     <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
 };
 function renderPanel() {
@@ -2213,13 +2519,21 @@ $('#pBody').addEventListener('click', e => {
   const d = b.dataset;
   if (d.up) { const [k, u] = d.up.split(':'); if (buyUp(k, u)) livePanel(); }
   else if (d.uneq) { const [c, ty] = d.uneq.split(':'); unequip(c, ty); }
-  else if (d.swap) { colCls = d.swap; openPanel('col', true); }
+  else if (d.swap) { colCls = d.swap; if (d.swap === 'sc') colSub = dpsSub(); openPanel('col', true); }
   else if (d.ag) { agSel = d.ag; renderPanel(); }
   else if (d.agstep) { const ks = SLOTS.map(x => x[0]); agSel = ks[(ks.indexOf(agSel) + +d.agstep + ks.length) % ks.length]; renderPanel(); }
-  else if (d.colc) { colCls = d.colc; renderPanel(); }
+  else if (d.colc) { [colCls, colSub = colSub] = d.colc.split(':'); renderPanel(); }
   else if (d.gocol !== undefined) { colCls = gBanner; openPanel('col', true); }
   else if (d.prev !== undefined) { const v = +d.prev; previewTier = v < 0 ? null : v; renderPanel(); }
-  else if (d.cell !== undefined) { selInv = +d.cell; renderPanel(); }
+  else if (d.cell !== undefined) { if (selInv !== +d.cell) rootSel = []; selInv = +d.cell; renderPanel(); }
+  else if (d.rpick) { const it = S.inv[selInv], k = d.rpick; rootSel = rootSel.includes(k) ? rootSel.filter(x => x !== k) : it && rootSel.length < it.pick ? [...rootSel, k] : rootSel; renderPanel(); }
+  else if (d.rgo !== undefined) {
+    const it = S.inv[+d.rgo];
+    if (Date.now() - wipeArmed > 3000) { wipeArmed = Date.now(); b.textContent = 'Clique de novo: isso é permanente'; return; }
+    wipeArmed = 0;
+    if (configRoot(it, rootSel)) { rootSel = []; renderPanel(); save(); }
+  }
+  else if (d.freeroot !== undefined) { const it = buildItem(pick(['fw', 'sc', 'pt']), 'weapon', undefined, 5, S.maxStage + 1, pick(Object.keys(SETS))); if (it.cls === 'sc') { it.wt = dpsSub(); it.name = `${pick(GEARW[it.wt])} Root Mk${it.lv}`; } S.inv.push(it); showBanner('ROOT T6!', RAR[5].c); renderPanel(); save(); }
   else if (d.invtab) { invTab = d.invtab; renderPanel(); }
   else if (d.csel !== undefined) { const i = +d.csel; cSel = cSel.includes(i) ? cSel.filter(x => x !== i) : cSel.length < COMP_N ? [...cSel, i] : cSel; renderPanel(); }
   else if (d.cauto !== undefined) { const sel = autoPick(compAll); if (sel) cSel = sel; else say('Não há 5 itens do mesmo tier pra compilar.'); renderPanel(); }
@@ -2234,6 +2548,8 @@ $('#pBody').addEventListener('click', e => {
   else if (d.eq) equip(d.eq);
   else if (d.node) buyNode(d.node);
   else if (d.freedef !== undefined) { S.def += 500; renderPanel(); }
+  else if (d.op) buyOp(+d.op);
+  else if (d.rkt) { rankTab = d.rkt; renderPanel(); }
   else if (d.upsend !== undefined) uploadItem(+d.upsend);
   else if (d.upback !== undefined) downloadBack(+d.upback);
   else if (d.sdiff !== undefined) { stDiff = +d.sdiff; renderPanel(); }

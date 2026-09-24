@@ -23,6 +23,22 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.3: T6 Root, três classes de ataque, ranking e chances publicadas
+
+- **Retratos novos:** cada agente ganhou um busto 64×64 pintado por código, com rosto ou visor, ombreiras, arma e fundo na cor do tier. Aparece na tela de diagnóstico, na Coleção e no resultado do Download.
+- **T6 Root** (grená):
+  - Só cai em fase de **Chefão** (0,03% dos itens de fase de chefe) e não sai do Compilador (T5 e T6 não compilam).
+  - Chega com 3 passivas em branco. O jogador escolhe as 3 **uma única vez**, e elas vêm no valor máximo.
+  - Pode ir pro mercado configurado ou em branco (aí quem comprar escolhe).
+  - Nunca é equipado sozinho nem reciclado em massa.
+- **Três classes de ataque**, no lugar das subclasses de DPS: **Rastreador** (precisão), **Varredor** (área) e **Caça-chefes**. A Coleção tem uma aba pra cada classe, e a arma da classe certa dá ×1,5 de ATK. O esquadrão continua com tanque, ataque e suporte.
+- **Nível do operador e ranking:**
+  - Os créditos compram níveis do operador: 1000 × 1,12ⁿ cada, sem teto, com +0,5% de vida e dano por nível.
+  - O ranking tem duas abas: maior poder já alcançado e nível do operador. No protótipo os rivais são simulados; no lançamento o ranking vem do servidor.
+- **Painel Chances:** mostra todas as probabilidades lidas das mesmas constantes do sorteio: pacotes, garantias, tiers (base e valor atual), Compilador e faixas de passivas.
+- **Comércio:** T5 e T6 ficam bloqueados pra venda no lançamento.
+- `docs/plano-lancamento.html` agora cobre a porta pro Godot (servidor que decide os drops e Steam Inventory Service) e as travas contra bots e contas em massa.
+
 ## v1.2: progressão estilo TBH, taxas calibradas e Central de Upload
 
 **Progressão** (mesma estrutura do TBH): 5 dificuldades × 3 atos × 10 fases.
