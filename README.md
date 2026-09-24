@@ -23,6 +23,30 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v0.6: passivas e conjuntos
+
+**Passivas:** cada item sorteia passivas quando cai (T1 nenhuma, T2 1, T3 1, T4 2, T5 3). O valor é a faixa abaixo × o multiplicador do tier (T1 ×1 … T5 ×7). A velocidade de ataque vale só pra quem usa; o resto vale pro esquadrão todo.
+
+| Passiva | Faixa base |
+|---|---|
+| Chance de pacote de download | +1–2% |
+| Chance de drop de armas | +1,5–3% |
+| Chance de drop de itens | +1–2,5% |
+| Dados ganhos / DEF ganho | +1–3% |
+| Chance de crítico | +0,5–1% |
+| Dano contra chefes / dano em área | +1,5–3% |
+| Velocidade de ataque | +0,5–1,5% |
+
+**Conjuntos:** todo item pertence a um conjunto, que aparece no nome ("Elmo Sentinela Mk3"). As peças do mesmo conjunto equipadas no mesmo personagem ativam bônus:
+
+| Conjunto | 2 peças | 4 peças |
+|---|---|---|
+| Sentinela | +10% HP | -8% dano recebido |
+| Varredura | +10% ATK | +10% dano em área |
+| Rootkit | +12% dano contra chefes | +5% crítico |
+| Minerador | +10% dados | +15% chance de pacote de download |
+| Overclock | +6% velocidade de ataque | +10% ATK |
+
 ## v0.5: equipamentos com tier e Download
 
 **Equipamentos por classe:** capacete, armadura, botas e arma pra todos; escudo só pro tanque. A arma de DPS tem tipo (Área, Precisão, Caça-chefes). Cada item tem ícone próprio desenhado por código e aparece no personagem: capacete na cabeça, armadura nas ombreiras e botas nas solas, na cor do tier. A arma (no tanque, o escudo) define a cor das luzes.
