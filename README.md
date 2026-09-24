@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.5.3: Comuns dos Chefões vinculados e barra nova
+
+- **Pacotes Comuns que caem dos Chefões ficam vinculados à conta**: podem ser abertos no Download, mas não vão pro mercado. Os Raros e o Lendário garantidos dos Chefões continuam negociáveis, assim como todo pacote que cai nas fases. No inventário, a pilha vinculada fica separada, com a marca **V**. O Download gasta primeiro os pacotes vinculados, pra preservar os negociáveis.
+- **Barra do jogo refeita:**
+  - Mostra fase, progresso e tempo à esquerda, recursos em caixinhas com ícone e menus só com ícone (o nome aparece ao passar o mouse e, em telas com 1500 px ou mais, ao lado do ícone).
+  - Nada mais se sobrepõe. Em telas estreitas, os menus menos usados somem da barra, mas continuam no menu lateral do painel.
+
 ## v1.5.2: pacotes garantidos nos Chefões
 
 | Chefão | Pacotes garantidos | Itens |

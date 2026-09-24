@@ -30,24 +30,32 @@
   .wm b{font:400 12px var(--pix); color:#6b63a3}
 
   .dock{position:relative; background:var(--dock); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px)}
-  .hud{display:flex; align-items:center; gap:10px; height:28px; padding-inline:8px 6px; font:11px var(--mono); white-space:nowrap; overflow-x:auto; scrollbar-width:none}
-  .hud::-webkit-scrollbar{display:none}
-  .stg{font:400 11px var(--pix); color:var(--sec,var(--cyan)); background:none; border:0; box-shadow:none; padding:0 2px}
-  .prog{flex:0 0 60px; height:5px; border:1px solid var(--line); background:#0b0a16}
+  /* barra do jogo: fase | recursos | menus (só ícone; o nome aparece no hover e em telas largas) */
+  .hud{display:flex; align-items:center; gap:14px; height:32px; padding-inline:8px 6px; font:11px var(--mono); white-space:nowrap; overflow:hidden}
+  .hud > *{flex:none}
+  .hstage{display:flex; align-items:center; gap:8px; padding-right:14px; border-right:1px solid var(--line)}
+  .stg{font:400 11px var(--pix); color:var(--sec,var(--cyan)); background:none; border:0; box-shadow:none; padding:0}
+  .stg:hover:not(:disabled){text-decoration:underline; border:0}
+  .prog{width:64px; height:5px; border:1px solid var(--line); background:#0b0a16}
   .prog i{display:block; height:100%; width:0; background:var(--sec,var(--cyan))}
-  #secTxt{color:var(--mute); min-width:4ch; font-variant-numeric:tabular-nums}
-  .cur{display:flex; gap:4px; align-items:baseline}
-  .cur img{image-rendering:pixelated; align-self:center}
-  .cur em{font-style:normal; color:var(--mute); font-size:10px; letter-spacing:.06em}
-  .cur b{font:400 12px var(--pix); color:var(--amber); font-variant-numeric:tabular-nums}
-  .cur.pw b{color:var(--cyan)}
-  .tabs{display:flex; gap:2px; margin-left:auto}
-  .tabs button{display:flex; align-items:center; gap:4px; padding:2px 6px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
+  #secTxt{color:var(--mute); width:13ch; font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis}
+  .hcur{display:flex; gap:6px}
+  .cur{display:flex; gap:5px; align-items:center; height:22px; padding:0 7px; background:#0b0a16; border:1px solid #1d1a36; cursor:help}
+  .cur img{image-rendering:pixelated}
+  .cur b{font:400 12px var(--pix); color:var(--amber); font-variant-numeric:tabular-nums; min-width:3ch; text-align:right}
+  .cur.pw b{color:var(--cyan)} .cur.df b{color:#7fd6da}
+  .tabs{flex:1 1 auto !important; min-width:0; display:flex; justify-content:flex-end; gap:2px; overflow:hidden}
+  .tabs button{position:relative; display:flex; align-items:center; gap:5px; height:24px; padding:0 6px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
   .tabs button img{image-rendering:pixelated}
-  @media (max-width:900px){ .tabs button span{display:none} }
+  .tabs button span{display:none}
+  @media (min-width:1500px){ .tabs button span{display:inline} }
   .tabs button:hover{color:var(--text); border-color:var(--line)}
   .tabs button[aria-pressed="true"]{color:var(--amber); border-color:var(--amber); background:#12102a}
-  .tabs i{font-style:normal; color:var(--cyan)}
+  .tabs i{font-style:normal; font-size:9px; color:var(--cyan)}
+  #speed{height:24px}
+  @media (max-width:900px){ .hstage{padding-right:8px} .prog{display:none} .hcur .df{display:none} .tabs .opt{display:none} }
+  @media (max-width:600px){ .hcur .pw{display:none} #secTxt{width:auto} .tabs .opt2{display:none} }
+  .bnd{position:absolute; left:2px; top:2px; font:400 7px var(--pix); color:#1b1400; background:var(--amber); padding:0 2px; line-height:9px}
   #strip{display:block; image-rendering:pixelated; image-rendering:crisp-edges; border-top:1px solid #000}
   .taskbar{height:26px; display:flex; align-items:stretch; gap:2px; padding-inline:6px; background:var(--bar); border-top:1px solid #000; font:11px var(--mono); color:var(--mute); overflow:hidden; white-space:nowrap}
   .taskbar span{display:flex; align-items:center; padding-inline:9px}
@@ -326,7 +334,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.5.1</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.5.3</p>
 </main>
 
 <footer class="dock">
@@ -336,21 +344,25 @@
     <footer class="pstatus" id="pStatus"></footer>
   </section>
   <div class="hud">
-    <button class="stg" id="stgBtn" type="button" data-open="stages" title="Escolher fase"></button>
-    <div class="prog"><i id="secBar"></i></div><span id="secTxt"></span>
-    <span class="cur" title="Créditos: o dinheiro do jogo. Ganhe derrotando vírus; gaste pra aprimorar agentes."><img id="icCoin" width="12" height="12" alt=""><em>CRÉDITOS</em><b id="data"></b></span>
-    <span class="cur pw"><em>PODER</em><b id="pow"></b></span>
-    <span class="cur pw" title="Definições de vírus: caem de todo inimigo e compram atualizações no Núcleo do antivírus."><em>DEFINIÇÕES</em><b id="def"></b></span>
+    <div class="hstage">
+      <button class="stg" id="stgBtn" type="button" data-open="stages" title="Escolher fase"></button>
+      <div class="prog"><i id="secBar"></i></div><span id="secTxt"></span>
+    </div>
+    <div class="hcur">
+      <span class="cur" title="Créditos: o dinheiro do jogo. Ganhe derrotando vírus; gaste pra aprimorar agentes."><img id="icCoin" width="12" height="12" alt="Créditos"><b id="data"></b></span>
+      <span class="cur pw" title="Poder do esquadrão"><img id="icPow" width="12" height="12" alt="Poder"><b id="pow"></b></span>
+      <span class="cur df" title="Definições de vírus: caem de todo inimigo e compram atualizações no Núcleo do antivírus."><img id="icDef" width="12" height="12" alt="Definições"><b id="def"></b></span>
+    </div>
     <nav class="tabs">
-      <button type="button" data-open="agent" aria-pressed="false" title="Agentes e inventário"><span>Agentes</span> <i id="invN"></i></button>
-      <button type="button" data-open="comp" aria-pressed="false" title="Compilador"><span>Compilador</span></button>
-      <button type="button" data-open="gacha" aria-pressed="false" title="Download de agentes"><span>Download</span></button>
-      <button type="button" data-open="tree" aria-pressed="false" title="Antivírus"><span>Antivírus</span></button>
-      <button type="button" data-open="stages" aria-pressed="false" title="Fases"><span>Fases</span></button>
-      <button type="button" data-open="upload" aria-pressed="false" title="Central de Upload (Steam)"><span>Upload</span></button>
-      <button type="button" data-open="raid" aria-pressed="false" title="Chefões: malwares reais"><span>Chefões</span></button>
-      <button type="button" data-open="rank" aria-pressed="false" title="Ranking e nível do operador"><span>Ranking</span></button>
-      <button type="button" data-open="log" aria-pressed="false" title="Log"><span>Log</span></button>
+      <button type="button" data-open="agent" aria-pressed="false" title="Agentes e inventário" aria-label="Agentes"><span>Agentes</span> <i id="invN"></i></button>
+      <button type="button" data-open="gacha" aria-pressed="false" title="Download de agentes" aria-label="Download"><span>Download</span></button>
+      <button type="button" data-open="raid" aria-pressed="false" title="Chefões: malwares reais" aria-label="Chefões"><span>Chefões</span></button>
+      <button type="button" class="opt2" data-open="tree" aria-pressed="false" title="Antivírus" aria-label="Antivírus"><span>Antivírus</span></button>
+      <button type="button" class="opt2" data-open="stages" aria-pressed="false" title="Fases" aria-label="Fases"><span>Fases</span></button>
+      <button type="button" class="opt" data-open="comp" aria-pressed="false" title="Compilador" aria-label="Compilador"><span>Compilador</span></button>
+      <button type="button" class="opt" data-open="upload" aria-pressed="false" title="Central de Upload (Steam)" aria-label="Upload"><span>Upload</span></button>
+      <button type="button" class="opt" data-open="rank" aria-pressed="false" title="Ranking e nível do operador" aria-label="Ranking"><span>Ranking</span></button>
+      <button type="button" class="opt" data-open="log" aria-pressed="false" title="Log" aria-label="Log"><span>Log</span></button>
     </nav>
     <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
   </div>
@@ -1606,7 +1618,8 @@ const afTxt = it => (it.af || []).map(a => `<span class="af">${bonusTxt(a.k, a.v
 const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => k === 'atk' || k === 'hp' ? `+${fmtNum(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))} ${k === 'atk' ? 'ATK' : 'vida'}` : `+${+v.toFixed(1)}% ${k === 'vdmg' ? 'dano contra ' + VIR[it.vs] + ' (esquadrão)' : STATN[k]}`).join(' · ');
 const gearVal = it => rewardAt(it.lv - 1) * 6 * RAR[it.t].m;
 const chipVal = r => rewardAt(S.maxStage) * CHIPS[r].val * 3;
-const chipCount = r => (S.inv.find(x => x.k === 'chip' && x.r === r) || {n:0}).n;
+// Pacotes vêm em duas pilhas por raridade: negociável e vinculada à conta (b = Comuns dos Chefões).
+const chipCount = (r, b) => S.inv.filter(x => x.k === 'chip' && x.r === r && (b === undefined || !!x.b === b)).reduce((a, x) => a + x.n, 0);
 const itemColor = it => it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c;
 const gearTag = it => `<span style="color:${RAR[it.t].c}">${it.name} ${tierTxt(it.t)}</span>`;
 const wtTag = it => it && it.wt ? ` <span style="color:${SUBS[it.wt].c}">${SUBS[it.wt].n}${synergy(it) ? ' ✓ sinergia ×1,5' : ''}</span>` : '';
@@ -1669,7 +1682,7 @@ function itemIcon(it) {
 }
 
 function addItem(it) {
-  if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r); if (st) { st.n += it.n; return true; } }
+  if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r && !!x.b === !!it.b); if (st) { st.n += it.n; return true; } }
   if (S.inv.length >= invCap()) return false;
   S.inv.push(it); return true;
 }
@@ -1957,7 +1970,8 @@ function raidEnd(win, why) {
       if (tt >= 5) showBanner('ROOT T6!', RAR[5].c);
       if (addItem(it) || tt >= 5 && S.inv.push(it)) out.push(gearTag(it)); else { S.data += gearVal(it); out.push(gearTag(it) + ' (reciclado)'); }
     }
-    R.gp.forEach((n, r) => { if (!n) return; addItem({k:'chip', r, n}) ? out.push(`<span style="color:${CHIPS[r].c}">${n} pacote${n > 1 ? 's' : ''} ${CHIPS[r].n}</span>`) : (S.data += chipVal(r) * n); });
+    // Comuns dos Chefões são vinculados à conta (não vão pro mercado); Raros e Lendários são negociáveis.
+    R.gp.forEach((n, r) => { if (!n) return; const b = r === 0; addItem({k:'chip', r, n, b}) ? out.push(`<span style="color:${CHIPS[r].c}">${n} pacote${n > 1 ? 's' : ''} ${CHIPS[r].n}${b ? ' (vinculado)' : ''}</span>`) : (S.data += chipVal(r) * n); });
     const cr = rewardAt(Math.min(R.L, S.maxStage)) * R.cr * (1 + tv('gold') + glob('gold')), df = Math.round((20 + R.L) * (1 + glob('def') + tv('def')));
     S.data += cr; S.def += df;
     out.unshift(`+${fmt(cr)}`, `+${fmtNum(df)} definições`);
@@ -2256,9 +2270,14 @@ function pullOne(cls, chip, minStars) {
   return {T, res:'dup', v};
 }
 function summon(chip, n) {
-  const st = S.inv.find(x => x.k === 'chip' && x.r === chip);
-  if (!st || st.n < n) return;
-  st.n -= n; if (!st.n) S.inv.splice(S.inv.indexOf(st), 1);
+  if (chipCount(chip) < n) return;
+  let need = n;   // gasta primeiro os vinculados, pra preservar os negociáveis
+  for (const b of [true, false]) {
+    const st = S.inv.find(x => x.k === 'chip' && x.r === chip && !!x.b === b);
+    if (!st || !need) continue;
+    const k = Math.min(need, st.n); st.n -= k; need -= k;
+    if (!st.n) S.inv.splice(S.inv.indexOf(st), 1);
+  }
   const out = [];
   for (let i = 0; i < n; i++) {
     const needFour = CHIPS[chip].ten4 && n === 10 && i === n - 1 && !out.some(o => o.T.stars >= 4);
@@ -2305,7 +2324,7 @@ function invItems() {
       const it = S.inv[i];
       if (!it) return '<div class="cell empty"></div>';
       return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" data-tip="inv:${i}" style="--rc:${itemColor(it)}">
-        <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}" title="Conjunto ${SETS[it.set].n}"></span>` : ''}${it.af && it.af.length ? `<span class="afd">${'+'.repeat(it.af.length)}</span>` : ''}`}</button>`;
+        <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}" title="Conjunto ${SETS[it.set].n}"></span>` : ''}${it.af && it.af.length ? `<span class="afd">${'+'.repeat(it.af.length)}</span>` : ''}`}</button>`;
     }).join('');
     const it = S.inv[selInv];
     let det = '<p class="hint">Clique num item pra ver detalhes.</p>';
@@ -2321,7 +2340,7 @@ function invItems() {
         <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
     } else if (it) {
       const C = CHIPS[it.r];
-      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br><span class="hint">★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}</span></div></div>
+      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br><span class="hint">★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}</span><br>${tradeTag(it)}</div></div>
         <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar ataque</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
@@ -2353,7 +2372,7 @@ function compView() {
     if (!it) return '<div class="cell empty"></div>';
     const ok = it.k === 'gear' && it.t < 4 && (t0 === null || it.t === t0);
     return `<button type="button" class="cell${cSel.includes(i) ? ' sel' : ''}${ok ? '' : ' dim'}" data-csel="${i}" data-tip="inv:${i}" ${ok ? '' : 'disabled'} style="--rc:${itemColor(it)}">
-      <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}"></span>` : ''}`}</button>`;
+      <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}"></span>` : ''}`}</button>`;
   }).join('');
   const info = P
     ? `${tierTxt(P.t)} → <span style="color:${RAR[P.t + 1].c}">${tierTxt(P.t + 1)} ${RAR[P.t + 1].n}</span> com <b class="k">${pct(P.rate)}</b> de chance (se falhar, sai um ${tierTxt(P.t)} novo) · resultado Nv${P.lv}
@@ -2421,7 +2440,7 @@ function agentTop() {
 // No protótipo a Steam é simulada; no lançamento a entrega passa pelo servidor + Steam Inventory Service.
 const TRADE = {slots:4, cooldownH:8, lockDays:7, minTier:3, lockedTiers:[4, 5]};
 function tradeInfo(it) {
-  if (it.k === 'chip') return {ok:true};
+  if (it.k === 'chip') return it.b ? {ok:false, why:'pacote Comum de Chefão'} : {ok:true};
   if (it.t < TRADE.minTier) return {ok:false, why:'só itens T4 ou superiores vão pro mercado'};
   if (TRADE.lockedTiers.includes(it.t)) return {ok:false, why:`${tierTxt(it.t)} bloqueado pra venda no lançamento`};
   if (it.cp) return {ok:false, why:'itens compilados ficam vinculados à conta'};
@@ -2559,6 +2578,7 @@ function uiIcon(k) {
   else if (k === 'coin') { P.ell(8, 8, 6, 6, '#b8741a'); P.ell(8, 8, 5, 5, '#ffb454'); P.rect(7, 4, 2, 8, '#b8741a'); P.line(5, 6, 10, 6, '#b8741a'); P.line(5, 10, 10, 10, '#b8741a'); }
   else if (k === 'defs') { P.rect(3, 1, 10, 14, '#1f5a60'); for (let y = 3; y < 14; y += 3) P.line(5, y, 11, y, '#5ce1e6'); P.set(11, 3, '#ffffff'); }
   else if (k === 'upload') { P.ell(8, 9, 6, 4, '#2a6f8f'); P.ell(5, 8, 3, 3, '#2a6f8f'); P.ell(10, 6, 4, 4, '#2a6f8f'); P.rect(7, 5, 2, 8, '#5ce1e6'); P.poly([[4, 8], [12, 8], [8, 3]], '#5ce1e6'); }
+  else if (k === 'pow') { P.poly([[9, 0], [3, 9], [7, 9], [5, 15], [13, 6], [9, 6], [11, 0]], '#5ce1e6'); P.line(9, 1, 6, 7, '#d6fbff'); }
   else if (k === 'raid') { P.ell(8, 7, 6, 5, '#ff3d7f'); P.rect(4, 11, 8, 3, '#ff3d7f'); P.rect(5, 6, 2, 3, '#05040b'); P.rect(9, 6, 2, 3, '#05040b'); P.set(7, 12, '#05040b'); P.set(9, 12, '#05040b'); P.line(1, 2, 3, 4, '#ffb454'); P.line(15, 2, 13, 4, '#ffb454'); }
   else if (k === 'rank') { P.rect(4, 2, 8, 6, A); P.ell(8, 7, 4, 3, A); P.rect(7, 10, 2, 3, mix(A, '#000000', .3)); P.rect(4, 13, 8, 2, M); P.line(1, 3, 3, 6, A); P.line(14, 3, 12, 6, A); P.set(7, 4, '#ffffff'); }
   else if (k === 'odds') { P.rect(2, 2, 12, 12, D); P.rect(3, 3, 10, 10, '#e9ecf5'); [[5, 5], [10, 5], [8, 8], [5, 11], [10, 11]].forEach(([x, y]) => P.rect(x - 1, y - 1, 2, 2, '#131a28')); }
@@ -2614,7 +2634,7 @@ const RENDER = {
         <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · Ataque</button>
       </div>
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
-        <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}</span><small>★5 ${pct2(c.p5)} · ★4 ${pct2(c.p4)}${c.min ? ' · nunca ★3' : ''}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
+        <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}${chipCount(r, true) ? ` <small>(${chipCount(r, true)} vinculados)</small>` : ''}</span><small>★5 ${pct2(c.p5)} · ★4 ${pct2(c.p4)}${c.min ? ' · nunca ★3' : ''}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
         <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Baixar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
       <p class="pity">repetido vira créditos (★3 ${fmt(dupVal(3))}, ★4 ${fmt(dupVal(4))}, ★5 ${fmt(dupVal(5))})
         · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-gocol>ver coleção</button></p>
@@ -2699,7 +2719,7 @@ const RENDER = {
     return `<p>A Central de Upload envia itens do jogo pro <b>inventário da Steam</b>, onde podem ser vendidos no Mercado da Comunidade.</p>
       <div class="rules"><b>Regras (aprendendo com o Task Bar Hero)</b>
         <div>· Negociáveis: pacotes de download e itens <b>T4+</b>. <b>T5 e T6 Root ficam bloqueados</b> no lançamento e são liberados depois, com os dados de oferta em mãos.</div>
-        <div>· Itens <b>compilados</b> e itens equipados ficam vinculados à conta.</div>
+        <div>· Itens <b>compilados</b>, itens equipados e os <b>pacotes Comuns dos Chefões</b> ficam vinculados à conta. Pacotes Raros e Lendários dos Chefões são negociáveis.</div>
         <div>· <b>${TRADE.slots} espaços de envio</b>, cada um com <b>${TRADE.cooldownH} h</b> de espera: no máximo ${TRADE.slots * 24 / TRADE.cooldownH} envios por dia.</div>
         <div>· Itens que voltam do mercado ficam <b>${TRADE.lockDays} dias</b> travados antes de poderem ser reenviados.</div>
         <div>· Pacotes de download <b>não recebem bônus de drop</b>: a oferta é igual pra todo mundo.</div>
@@ -2787,7 +2807,7 @@ document.addEventListener('click', e => {
 $('#pClose').addEventListener('click', () => openPanel(null, true));
 $('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="20" height="20" alt=""><span>${n}</span></button>`).join('');
 $('#pLogo').src = treeIcon('core');
-$('#icCoin').src = uiIcon('coin');
+$('#icCoin').src = uiIcon('coin'); $('#icPow').src = uiIcon('pow'); $('#icDef').src = uiIcon('defs');
 document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });
 let wipeArmed = 0;
 $('#pBody').addEventListener('click', e => {
@@ -2857,7 +2877,8 @@ function renderHud() {
   bonusCache = null;
   const s = sec();
   document.querySelector('.dock').style.setProperty('--sec', s.tint);
-  $('#stgBtn').textContent = raid ? `CHEFÃO · ${raid.R.n} (${raid.R.y})` : stageLabel(S.stage) + ' · ' + s.name + ' · ' + ST().n.toUpperCase();
+  $('#stgBtn').textContent = raid ? `CHEFÃO · ${raid.R.n}` : stageLabel(S.stage) + ' · ' + ST().n.toUpperCase();
+  $('#stgBtn').title = raid ? `${raid.R.n} (${raid.R.y})` : `${stageLabel(S.stage)} · ${s.name} · ${ST().n}. Clique pra escolher a fase.`;
   $('#secBar').style.width = (bossUp ? 100 : S.kills / ST().count * 100) + '%';
   const left = Math.max(0, (raid ? RAID_TIME : STAGE_TIME) - stT);
   $('#secTxt').textContent = (raid ? raid.R.n : bossUp ? 'BOSS' : S.kills + '/' + ST().count) + ` · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
