@@ -1251,6 +1251,8 @@ const MUTS = [
 ];
 const mut = () => MUTS[weekIdx() % MUTS.length];
 const seasonIdx = () => Math.floor(weekIdx() / 4);
+// número da temporada contado a partir da semana de 21/09/2026 (Temporada 1)
+const SEASON0 = Math.floor(Math.floor((Math.floor(Date.UTC(2026, 8, 21) / DAY) + 3) / 7) / 4), seasonNo = id => id - SEASON0 + 1;
 
 // ---------- repetidos: versões, fragmentos e coleção ----------
 // Cada repetido é uma atualização do agente: v1.0 → v2.0 em 10 passos. ★3 caem muito, então pedem mais
@@ -2179,7 +2181,7 @@ function ctrSync() {
     if (S.season.id !== undefined && S.season.best > 0) {
       const pos = [...rivals().map(x => x.pow), S.season.best].sort((a, b) => b - a).indexOf(S.season.best) + 1;
       const f = pos === 1 ? 400 : pos <= 3 ? 250 : pos <= 10 ? 120 : pos <= 20 ? 60 : 30;
-      give({frag:f}, `Fim da temporada ${S.season.id + 1} (você ficou em #${pos})`);
+      give({frag:f}, `Fim da temporada ${seasonNo(S.season.id)} (você ficou em #${pos})`);
     }
     S.season = {id:si, best:0};
   }
@@ -2802,12 +2804,13 @@ const rivals = () => RIVAL_N.map((n, i) => {
 });
 function rankView() {
   const me = {n:'você', pow:bestPow(), op:S.op, st:S.maxStage, me:true};
-  const key = rankTab === 'op' ? 'op' : 'pow', sea = rankTab === 'season';
+  const key = rankTab === 'op' ? 'op' : rankTab === 'far' ? 'st' : 'pow', sea = rankTab === 'season';
   if (sea) me.pow = S.season.best || 0;
+  if (key === 'st') me.st = Math.max(S.peak || 0, S.maxStage);   // mais longe já chegou, mesmo depois de formatar
   const all = [...rivals(), me].sort((a, b) => b[key] - a[key]);
   const pos = all.indexOf(me) + 1;
   const rows = all.map((x, i) => `<tr class="${x.me ? 'me' : ''}"><td class="num">#${i + 1}</td><td>${x.me ? '<b>você</b>' : x.n}</td>
-    <td class="num">${key === 'pow' ? fmtN(x.pow) : 'nv ' + x.op}</td><td class="hint">${stageLabel(Math.min(x.st, 999))}</td></tr>`).join('');
+    <td class="num">${key === 'pow' ? fmtN(x.pow) : key === 'st' ? stageLabel(x.st) : 'nv ' + x.op}</td><td class="hint">${key === 'st' ? (x.me ? `${S.fmtN}× formatado` : '') : stageLabel(Math.min(x.st, 999))}</td></tr>`).join('');
   const c1 = opCost(), c10 = Array.from({length:10}, (_, k) => opCost(S.op + k)).reduce((a, b) => a + b, 0);
   return `<div class="opbox">
       <div><p class="lbl">operador</p><b class="opl">nível ${S.op}</b><span class="hint">+${+(S.op * OP.bonus * 100).toFixed(1)}% de vida e dano no esquadrão</span></div>
@@ -2815,9 +2818,10 @@ function rankView() {
       <button type="button" data-op="10" ${S.data < c1 ? 'disabled' : ''}>Até +10 · <b>${fmtNum(c10)}</b></button></div>
     </div>
     <p class="hint">O nível do operador é o destino dos créditos no fim de jogo: cada nível custa 12% a mais que o anterior, não tem teto e conta pro ranking.</p>
-    <div class="btabs"><button type="button" data-rkt="season" aria-pressed="${sea}">Temporada ${(S.season.id || 0) + 1}</button><button type="button" data-rkt="pow" aria-pressed="${rankTab === 'pow'}">Poder da conta</button><button type="button" data-rkt="op" aria-pressed="${key === 'op'}">Nível do operador</button></div>
+    <div class="btabs"><button type="button" data-rkt="season" aria-pressed="${sea}">Temporada ${seasonNo(S.season.id ?? seasonIdx())}</button><button type="button" data-rkt="far" aria-pressed="${key === 'st'}">Mais longe</button><button type="button" data-rkt="pow" aria-pressed="${rankTab === 'pow'}">Poder da conta</button><button type="button" data-rkt="op" aria-pressed="${key === 'op'}">Nível do operador</button></div>
+    ${key === 'st' ? '<p class="hint">A fase mais funda que você já alcançou, contando todas as formatações. Formatar não tira sua posição.</p>' : ''}
     ${sea ? `<p class="hint">Temporadas de 4 semanas: conta o maior poder alcançado dentro da temporada. No fim, fragmentos por posição: #1 400 · top 3 250 · top 10 120 · top 20 60 · demais 30.</p>` : ''}
-    <p class="sub">Você está em <b class="k">#${pos}</b> de ${all.length} <small>${key === 'pow' ? 'maior poder já alcançado' : 'nível do operador'} · rivais simulados no protótipo</small></p>
+    <p class="sub">Você está em <b class="k">#${pos}</b> de ${all.length} <small>${key === 'pow' ? (sea ? 'maior poder na temporada' : 'maior poder já alcançado') : key === 'st' ? 'fase mais funda já alcançada' : 'nível do operador'} · rivais simulados no protótipo</small></p>
     <table class="rk">${rows}</table>`;
 }
 // Tudo que é sorteado no jogo, com os números reais do código (mesmas constantes que o sorteio usa).

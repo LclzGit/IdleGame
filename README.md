@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.6.1: ranking "Mais longe"
+
+- Nova aba **Mais longe** no ranking: mostra a fase mais funda já alcançada, contando todas as formatações. Formatar não tira a posição.
+- As temporadas agora são contadas a partir da semana de 21/09/2026 (Temporada 1).
+
 ## v1.6: repetidos úteis, Formatar C:, contratos, temporadas, vírus dourado, bestiário e conquistas
 
 **Repetidos** (antes viravam poucos créditos):
