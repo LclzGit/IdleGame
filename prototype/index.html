@@ -397,6 +397,9 @@
   .fmt{padding:5px 8px} .mut{padding:5px 8px}
   .pres{gap:2px} .pd{padding:2px}
   .tip{width:240px; font-size:10px}
+  .packs{display:flex; flex-wrap:wrap; align-items:center; gap:3px; margin:0 0 6px; padding:4px 6px; background:#0b0a16; border:1px solid #1f5a60}
+  .packs .lbl{font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#3f8f94; margin-right:4px}
+  .cell.pk{width:40px; height:42px; aspect-ratio:auto}
   .socks{grid-template-columns:repeat(5, 36px); gap:3px; justify-content:start; align-content:start}
   .socks .lbl{grid-column:1 / -1; margin:2px 0 0}
   .sock, .sock.empty{display:grid; grid-template-columns:1fr; place-items:center; width:36px; height:36px; padding:0; border-left-width:1px; border-bottom:3px solid var(--rc, #2e2856)}
@@ -2290,9 +2293,17 @@ function itemIcon(it) {
   return iconCache[key] = P.canvas(false).toDataURL();
 }
 
+// Pacotes de download ficam num compartimento próprio: continuam em S.inv (mesmos índices), mas não ocupam espaço.
+const invUsed = () => S.inv.filter(x => x.k !== 'chip').length;
+const gearIdx = () => S.inv.map((x, i) => x.k !== 'chip' ? i : -1).filter(i => i >= 0);
+function packStrip(sel) {
+  const P = S.inv.map((x, i) => x.k === 'chip' ? i : -1).filter(i => i >= 0).sort((a, b) => S.inv[b].r - S.inv[a].r || !!S.inv[a].b - !!S.inv[b].b);
+  return `<div class="packs"><span class="lbl">pacotes</span>${P.length ? P.map(i => { const it = S.inv[i];
+    return `<button type="button" class="cell pk${i === sel ? ' sel' : ''}" data-cell="${i}" data-tip="inv:${i}" style="--rc:${itemColor(it)}"><img src="${itemIcon(it)}" width="22" height="22" alt=""><b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}</button>`; }).join('') : '<span class="hint">nenhum · guardados aqui sem ocupar o inventário</span>'}</div>`;
+}
 function addItem(it) {
-  if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r && !!x.b === !!it.b); if (st) { st.n += it.n; return true; } }
-  if (S.inv.length >= invCap()) return false;
+  if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r && !!x.b === !!it.b); if (st) st.n += it.n; else S.inv.push(it); return true; }   // pacotes nunca ficam sem espaço
+  if (invUsed() >= invCap()) return false;
   S.inv.push(it); return true;
 }
 // Sorte: bônus de árvore/passivas/conjunto que aumenta a chance de T3+ (máximo +50%).
@@ -3287,8 +3298,9 @@ function rootPicker(it) {
     <span class="hint">Depois de gravar não dá pra mudar. Um Root sem passivas pode ir pro mercado assim, e quem comprar escolhe.</span></div></div>`;
 }
 function invItems() {
-    const cells = Array.from({length: invCap()}, (_, i) => {
-      const it = S.inv[i];
+    const GI = gearIdx();
+    const cells = Array.from({length: invCap()}, (_, j) => {
+      const i = GI[j], it = S.inv[i];
       if (!it) return '<div class="cell empty"></div>';
       return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" data-tip="inv:${i}" style="--rc:${itemColor(it)}">
         <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>${it.b ? '<span class="bnd" title="Vinculado à conta">V</span>' : ''}` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}" title="Conjunto ${SETS[it.set].n}"></span>` : ''}${it.af && it.af.length ? `<span class="afd">${'+'.repeat(it.af.length)}</span>` : ''}`}</button>`;
@@ -3310,7 +3322,7 @@ function invItems() {
       det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br>${tradeTag(it)}</div></div>
         <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar ataque</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
-    return `<div class="inv">${cells}</div><div class="det">${det}</div>
+    return `${packStrip(selInv)}<div class="inv">${cells}</div><div class="det">${det}</div>
       <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Chances de drop e de tier no menu Chances. Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3 · T6 Root 3 escolhidas por você. <b style="color:#d0304c">T6 Root só cai dos Chefões</b> (CODE RED em diante) e não sai do Compilador.</p>
       <details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
       <div class="opts"><button type="button" data-sellworse>Reciclar itens piores que os equipados</button></div>`;
@@ -3323,8 +3335,9 @@ function compView() {
     const it = S.inv[cSel[n]];
     return it ? `<button type="button" class="cell" data-csel="${cSel[n]}" data-tip="inv:${cSel[n]}" style="--rc:${RAR[it.t].c}"><img src="${itemIcon(it)}" width="28" height="28" alt=""><b>${tierTxt(it.t)}</b></button>` : '<div class="cell empty"></div>';
   }).join('');
-  const cells = Array.from({length: invCap()}, (_, i) => {
-    const it = S.inv[i];
+  const GI = gearIdx();
+  const cells = Array.from({length: invCap()}, (_, j) => {
+    const i = GI[j], it = S.inv[i];
     if (!it) return '<div class="cell empty"></div>';
     const ok = it.k === 'gear' && it.t < 4 && (t0 === null || it.t === t0);
     return `<button type="button" class="cell${cSel.includes(i) ? ' sel' : ''}${ok ? '' : ' dim'}" data-csel="${i}" data-tip="inv:${i}" ${ok ? '' : 'disabled'} style="--rc:${itemColor(it)}">
@@ -3416,7 +3429,7 @@ function uploadItem(i) {
 }
 function downloadBack(j) {
   const it = S.upl.steam[j];
-  if (!it || S.inv.length >= invCap() && !(it.k === 'chip' && chipCount(it.r))) { say('Inventário cheio.'); return; }
+  if (!it || it.k !== 'chip' && invUsed() >= invCap()) { say('Inventário cheio.'); return; }
   S.upl.steam.splice(j, 1);
   if (it.k === 'gear') it.lock = nowMs() + TRADE.lockDays * 864e5;
   addItem(it);
@@ -3580,7 +3593,7 @@ function buyShop(id) {
 const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['raid', 'Chefões'], ['quest', 'Contratos'], ['codex', 'Bestiário'], ['rank', 'Ranking'], ['odds', 'Chances'], ['log', 'Log']];
 
 const RENDER = {
-  agent: () => agentTop() + `<p class="sub">Inventário <small>${S.inv.length}/${invCap()}</small></p>` + invItems() + `
+  agent: () => agentTop() + `<p class="sub">Inventário <small>${invUsed()}/${invCap()}</small></p>` + invItems() + `
       <div class="opts">
         <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
         <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar itens melhores</label>
@@ -3774,7 +3787,7 @@ function renderPanel() {
 }
 function livePanel() {
   $('#pCur').innerHTML = `<img src="${uiIcon('coin')}" width="12" height="12" alt=""> <b>${fmtNum(S.data)}</b> créditos · <img src="${uiIcon('defs')}" width="12" height="12" alt=""> <i>${fmtNum(S.def)}</i> definições`;
-  $('#pStatus').innerHTML = `<span class="ok">● PROTEÇÃO ATIVA</span><span>fase ${stageLabel(S.stage)} · ${ST().n}</span><span>${S.inv.length}/${invCap()} itens</span><span>poder ${fmtN(power())}</span><span>créditos: ${fmtNum(S.data)}</span><span>definições: ${fmtNum(S.def)}</span>`;
+  $('#pStatus').innerHTML = `<span class="ok">● PROTEÇÃO ATIVA</span><span>fase ${stageLabel(S.stage)} · ${ST().n}</span><span>${invUsed()}/${invCap()} itens</span><span>poder ${fmtN(power())}</span><span>créditos: ${fmtNum(S.data)}</span><span>definições: ${fmtNum(S.def)}</span>`;
   if (openP === 'agent') for (const [k] of SLOTS) {
     const h = heroOf(k), aid = slotAid(k), lv = lvOf(aid), el = $('#hp-' + k);
     if (!el) continue;
@@ -3894,7 +3907,7 @@ function renderHud() {
   $('#def').textContent = fmtN(S.def);
   $('#data').textContent = fmtNum(S.data);
   $('#pow').textContent = fmtN(power());
-  $('#invN').textContent = S.inv.length + '/' + invCap();
+  $('#invN').textContent = invUsed() + '/' + invCap();
 }
 function clock() { const d = new Date(); $('#clock').textContent = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
 

@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.11.1: compartimento de pacotes
+
+- Todos os pacotes de download (os garantidos, os das fases, os vinculados e os negociáveis) ficam num compartimento **Pacotes** acima do inventário. Não ocupam os 24 espaços e não têm limite, então dá pra guardar e abrir quando quiser.
+- Com o inventário cheio, os pacotes continuam entrando. Antes, o pacote era reciclado em créditos.
+
 ## v1.11: defesa do núcleo
 
 - Os agentes ficam parados em posição de defesa e os vírus avançam até eles. Acabou a caminhada dos agentes.
