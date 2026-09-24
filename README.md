@@ -23,6 +23,16 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v0.7: Compilador (síntese)
+
+Aba **Compilador** no Inventário: 5 itens do mesmo tier → 1 item.
+
+- Chance de subir de tier: T1→T2 100% · T2→T3 80% · T3→T4 50% · T4→T5 25%. Se falhar, sai um item novo do mesmo tier.
+- O resultado fica com o **maior nível** entre os usados e copia classe/tipo de um deles (5 do mesmo tipo garantem o tipo).
+- **3 ou mais peças do mesmo conjunto garantem o conjunto** no resultado.
+- **Preenchimento automático** escolhe o menor tier com 5 itens, priorizando o conjunto e o tipo mais comuns (por padrão, só itens piores que os equipados).
+- Opção **compilar sozinho quando o inventário encher**, em vez de reciclar o drop.
+
 ## v0.6: passivas e conjuntos
 
 **Passivas:** os bônus de drop são **relativos**: multiplicam a chance base (+10% sobre 0,1% vira 0,11%). O inventário mostra as chances atuais (base → com bônus). Cada item sorteia passivas quando cai (T1 nenhuma, T2 1, T3 1, T4 2, T5 3). O valor é a faixa abaixo × o multiplicador do tier (T1 ×1 … T5 ×7). A velocidade de ataque vale só pra quem usa; o resto vale pro esquadrão todo.
