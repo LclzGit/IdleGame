@@ -45,11 +45,12 @@
   .cur b{font:400 12px var(--pix); color:var(--amber); font-variant-numeric:tabular-nums; min-width:3ch; text-align:right}
   .cur.pw b{color:var(--cyan)} .cur.df b{color:#7fd6da}
   .tabs{flex:1 1 auto !important; min-width:0; display:flex; justify-content:flex-end; gap:2px; overflow:hidden}
-  .tabs button{position:relative; display:flex; align-items:center; gap:5px; height:24px; padding:0 6px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
+  .tabs button{position:relative; flex:0 0 auto; white-space:nowrap; display:flex; align-items:center; gap:5px; height:26px; padding:0 7px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
   .tabs button img{image-rendering:pixelated}
   .tabs button span{display:none}
   @media (min-width:1500px){ .tabs button span{display:inline} }
   .tabs button:hover{color:var(--text); border-color:var(--line)}
+  .tabs button.fit-off{display:none}
   .tabs button[aria-pressed="true"]{color:var(--amber); border-color:var(--amber); background:#12102a}
   .tabs i{font-style:normal; font-size:9px; color:var(--cyan)}
   #speed{height:24px}
@@ -374,7 +375,7 @@
   @media (max-width:560px){ .dx{grid-template-columns:1fr} .procs{grid-template-columns:1fr} .rd{grid-template-columns:1fr} .inv{grid-template-columns:repeat(6, minmax(0, 48px))} .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
   @media (prefers-reduced-motion:reduce){ .res .card{animation:none} }
   /* ===== modo compacto: janelas pequenas, como no Task Bar Hero (o jogo fica no canto da tela) ===== */
-  .panel{width:min(500px, calc(100% - 16px)); max-height:min(560px, calc(100vh - var(--dockH, 150px) - 16px)); left:auto; right:8px; transform:none}
+  .panel{width:min(500px, calc(100% - 16px)); height:min(560px, calc(100vh - var(--dockH, 150px) - 16px)); left:auto; right:8px; transform:none}
   .panel.wide{width:min(760px, calc(100% - 16px))}
   .pbar{padding:3px 4px 3px 6px; gap:6px}
   .ppath{font-size:11px} .ppath b{font-size:10px}
@@ -409,7 +410,7 @@
   .sgrid{gap:2px} .sc{padding:2px 1px}
   .tmap{height:min(380px, calc(100vh - 220px)); scrollbar-width:none; touch-action:none} .tmap::-webkit-scrollbar{display:none}
   .tside{scrollbar-width:thin; scrollbar-color:#1f5a60 transparent}
-  .tree2{grid-template-columns:1fr 200px}
+  .tree2{grid-template-columns:minmax(0, 1fr) 150px; height:100%} .tmap{height:100% !important} .tside{max-height:100% !important}
   button{padding:2px 6px}
   .opbox{padding:5px 8px} .opl{font-size:14px}
   .rates td{padding:0 6px 0 0}
@@ -425,7 +426,7 @@
   /* painel estreito (tela pequena ou zoom alto): nada some, tudo encolhe */
   .pcur span{display:inline-flex; align-items:center; gap:3px} .pcur span + span{margin-left:8px}
   .pbody{container-type:inline-size}
-  @container (max-width:400px){ .inv{grid-template-columns:repeat(6, 44px)} }
+  @container (max-width:400px){ .inv{grid-template-columns:repeat(6, 44px)} .tree2{grid-template-columns:1fr; grid-template-rows:minmax(0, 3fr) minmax(0, 2fr)} }
   .ivh{font-size:11px; margin-right:10px} .ivh small{color:var(--mute); font-weight:400}
   .sets:empty{display:none}
   .inv .cell{align-content:center; gap:0} .inv .cell img{width:26px; height:26px; image-rendering:pixelated; margin:0 auto}
@@ -445,7 +446,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.14</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.14.1</p>
 </main>
 
 <footer class="dock">
@@ -5019,7 +5020,6 @@ const RENDER = {
 function renderPanel() {
   if (!openP) return;
   $('#pTitle').textContent = PANELS[openP];
-  $('#panel').classList.toggle('wide', openP === 'tree');
   $('#panel').classList.toggle('nocur', openP === 'cfg' || openP === 'readme');
   const body = $('#pBody'), top = body.scrollTop;
   tipEl.hidden = true;
@@ -5088,6 +5088,17 @@ $('#pLogo').src = treeIcon('core');
 // o painel nunca passa do topo da tela: altura máxima = janela − barra do jogo
 const fitPanel = () => document.documentElement.style.setProperty('--dockH', document.querySelector('.dock').offsetHeight + 'px');
 addEventListener('resize', fitPanel); fitPanel();
+// abas do HUD nunca encolhem: se não couberem, as menos usadas somem daqui (continuam na coluna do painel)
+const TAB_DROP = ['log', 'rank', 'codex', 'upload', 'comp', 'stages', 'tree', 'quest', 'raid', 'gacha'];
+function fitTabs() {
+  const box = document.querySelector('.tabs'); if (!box) return;
+  box.querySelectorAll('.fit-off').forEach(b => b.classList.remove('fit-off'));
+  for (const k of TAB_DROP) {
+    if (box.scrollWidth <= box.clientWidth + 1) break;
+    const b = box.querySelector(`[data-open="${k}"]`); if (b) b.classList.add('fit-off');
+  }
+}
+addEventListener('resize', fitTabs); setTimeout(fitTabs, 0); if (document.fonts) document.fonts.ready.then(fitTabs);
 document.querySelectorAll('.taskbar [data-open]').forEach(b => b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(b.dataset.open)}" width="12" height="12" alt="">`));
 $('#icCoin').src = uiIcon('coin'); $('#icPow').src = uiIcon('pow'); $('#icDef').src = uiIcon('defs');
 document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="20" height="20" alt="">`); });
@@ -5252,6 +5263,7 @@ ctrSync();
 setInterval(metaSecond, 1000);
 setInterval(save, 5000);
 i18nStart();
+setInterval(fitTabs, 1000);
 setInterval(() => { renderHud(); livePanel(); if (livePanelQ && openP === 'quest') { livePanelQ = false; renderPanel(); } }, 250);
 setInterval(clock, 10000); clock();
 renderHud();

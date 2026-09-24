@@ -23,6 +23,14 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.14.1: menus do mesmo tamanho e HUD sem texto vazando
+
+- Todos os menus abrem com o tamanho do painel de Agentes (a árvore do antivírus não abre mais larga; o mapa ocupa a altura toda e o resumo fica ao lado).
+- Abas do HUD nunca encolhem: com espaço curto, as menos usadas (Log, Ranking, Bestiário, Upload, Compilador…) saem da fileira e continuam na coluna do painel. Era isso que fazia o "24/24" do inventário passar da borda.
+- Testes agora usam as fontes reais do jogo (`tools/fonts`, licença OFL, via `tools/test-fonts.cjs`). Antes o ambiente de teste caía numa fonte reserva mais estreita e a checagem passava aqui mas falhava na tela do jogador.
+- `tools/overflow-check.cjs` também confere HUD, abas, barra de tarefas e topo do painel, e acusa texto invadindo o padding (não só saindo da caixa). `INJECT_CSS` permite forçar um defeito pra provar que a checagem pega.
+- Rodado em 1366×768, 1280×720, 1024×700, 920×700, 752×775 e 600×560 nos 3 idiomas: nada vazando.
+
 ## v1.14: ícones novos
 
 - **Itens (24×24, um desenho por classe):**

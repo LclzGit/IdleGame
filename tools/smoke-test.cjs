@@ -2,6 +2,7 @@
 // e um save de fim de jogo) e passa por todos os painéis. Qualquer erro de JavaScript falha o teste.
 // Uso: node tools/smoke-test.cjs   (precisa do Playwright)
 const { chromium } = require('playwright');
+const { useRealFonts, fontsReady } = require('./test-fonts.cjs');
 const path = require('path');
 const it = (cls, type, t, x = {}) => ({k:'gear', cls, type, t, lv:40, set:'rootkit', af:[{k:'gold', v:3}], q:1, name:`${type} teste`, ...x});
 const loaded = {
@@ -26,7 +27,7 @@ const PANELS = ['agent', 'col', 'comp', 'gacha', 'upload', 'tree', 'stages', 'ra
 (async () => {
   const b = await chromium.launch(); let fail = 0;
   for (const [name, save] of Object.entries(SAVES)) {
-    const p = await b.newPage({viewport:{width:1280, height:900}}); const errs = [];
+    const p = await b.newPage({viewport:{width:1280, height:900}}); await useRealFonts(p); const errs = [];
     p.on('pageerror', e => errs.push(e.message));
     if (save) await p.addInitScript(s => localStorage.setItem('daemonbar.v2', s), JSON.stringify(save));
     await p.goto('file://' + path.join(__dirname, '../prototype/index.html')); await p.waitForTimeout(800);
