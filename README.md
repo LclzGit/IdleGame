@@ -23,6 +23,28 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.5: Chefões (malwares reais)
+
+Menu **Chefões**, fora da campanha, com 10 malwares famosos da vida real. A tentativa é gasta ao entrar na luta, mesmo em caso de derrota, e a espera corre em tempo real. O esquadrão tem 90 s pra vencer.
+
+| Chefão | Ano | Espera | Libera em | Itens | Destaque do drop |
+|---|---|---|---|---|---|
+| CREEPER | 1971 | 8 h | fase 1 | 1 | T2+ |
+| BRAIN | 1986 | 12 h | fase 13 | 1 | T4 13% |
+| MORRIS WORM | 1988 | 1 dia | fase 25 | 2 | T4 17% |
+| MELISSA | 1999 | 1 dia | fase 38 | 2 | T4 21% |
+| ILOVEYOU | 2000 | 2 dias | fase 51 | 2 | T3+, Lendário 0,2% |
+| CODE RED | 2001 | 3 dias | fase 65 | 3 | T6 0,5% |
+| MYDOOM | 2004 | 1 semana | fase 79 | 3 | T5 11% |
+| CONFICKER | 2008 | 1 semana | fase 93 | 3 | T5 14%, T6 2% |
+| STUXNET | 2010 | 2 semanas | fase 108 | 4 | T4+, T6 3% |
+| WANNACRY | 2017 | 1 mês | Kernel Panic 3 | 4 | T5 30%, T6 5%, Comum garantido |
+
+- Cada chefão libera 8 fases antes do nível dele, pra virar meta. Nas simulações, o esquadrão perde nas primeiras tentativas e começa a vencer algumas horas de progresso depois. O WANNACRY só cai com ~1 semana de jogo 24/7.
+- Os itens caem no nível da fase máxima do jogador, então não pulam a progressão.
+- **Impacto na economia** (tryhard com tudo liberado, por semana): ~7% a mais de pacotes Comuns, ~3% de Raros, ~7% de T4 e ~16% de T5 em relação às fases.
+- Todas as chances estão no card de cada chefão e no painel Chances. O protótipo tem um botão pra zerar as esperas.
+
 ## v1.4: nomes novos, 4 acessórios e IAs
 
 **Agentes renomeados** pra termos de antivírus e segurança. Os ids internos não mudaram, então os saves continuam valendo.
