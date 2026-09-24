@@ -23,10 +23,25 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.7: lançamentos de agentes, chefão convidado da semana e fim das temporadas
+
+- **Temporadas e modificadores semanais removidos.** Saíram a aba de temporada do ranking, os prêmios de fim de temporada e as regras da semana (Semana do Worm etc.). O ranking abre em **Mais longe**.
+- **Chefão convidado da semana:** a parte da rotação que ficou. Cada semana traz um malware real diferente, que gira entre SQL SLAMMER (2003), BLASTER (2003), ZEUS (2007), CRYPTOLOCKER (2013), MIRAI (2016) e NOTPETYA (2017).
+  - O nível acompanha a sua fase máxima, então ele é sempre um desafio justo.
+  - 1 tentativa por dia, e só naquela semana.
+  - Dá 2 itens (T3 a T6 Root, 0,5% de Root), 3 Comuns vinculados e +50% de créditos e definições.
+  - Aparece no topo do menu Chefões, no menu Contratos e no bestiário.
+- **Lançamentos de agentes:**
+  - Cada agente pode ter `rel:'AAAA-MM-DD'`. Antes da data ele não existe no jogo.
+  - Nas 2 primeiras semanas fica **em destaque** no Download dele: metade dos resultados ★5 (ou ★4) sai pra ele.
+  - Só entra na **loja de fragmentos 4 semanas depois do lançamento**. O primeiro mês é na sorte; depois disso qualquer um consegue.
+  - Sem lançamento recente, o destaque gira entre os agentes existentes a cada 2 semanas.
+  - A caixa "Em destaque" do Download mostra a data do próximo lançamento.
+  - Pra lançar um agente novo, basta criar ele em `art.js` com `rel` e o retrato.
+
 ## v1.6.1: ranking "Mais longe"
 
 - Nova aba **Mais longe** no ranking: mostra a fase mais funda já alcançada, contando todas as formatações. Formatar não tira a posição.
-- As temporadas agora são contadas a partir da semana de 21/09/2026 (Temporada 1).
 
 ## v1.6: repetidos úteis, Formatar C:, contratos, temporadas, vírus dourado, bestiário e conquistas
 
@@ -62,7 +77,7 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - 3 contratos por dia (2 Comuns + 10 fragmentos cada) e 3 por semana (1 Raro + 60 fragmentos cada).
 - Calendário de presença de 7 dias que **não zera se você faltar**.
 
-**Temporadas e modificador semanal:**
+**Temporadas e modificador semanal** (removidos na v1.7):
 - Cada semana tem um modificador, na ordem: Semana do Worm, Patch Tuesday, Semana do Loot, Semana Blindada, Semana dos Chefões, Semana das Definições.
 - Temporadas duram 4 semanas. O ranking tem a aba da temporada e dá fragmentos por posição no fim (#1 400 · top 3 250 · top 10 120 · top 20 60 · demais 30).
 

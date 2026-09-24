@@ -17,7 +17,7 @@ s = s.slice(0, i) + `window.__g = {
   S: () => S, power, stageLabel, recPow, verTotal, fmtGain, colMul, preMul,
   // chefões: o jogador tenta assim que a espera acaba e o poder chega a 90% do recomendado
   raidTick() {
-    for (const R of RAIDS) {
+    for (const R of [guestRaid(), ...RAIDS]) {
       if (!raidOpen(R) || !raidReady(R) || power() < raidPow(R) * .9) continue;
       lastRaid = null; startRaid(R.id);
       let ts = 0; while (raid && ts < RAID_TIME + 5) { update(.05); ts += .05; }
