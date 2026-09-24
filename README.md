@@ -23,6 +23,29 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.5.2: pacotes garantidos nos Chefões
+
+| Chefão | Pacotes garantidos | Itens |
+|---|---|---|
+| CREEPER, BRAIN | 5 Comuns | 1 |
+| MORRIS WORM, MELISSA, ILOVEYOU | 8 Comuns | 2 |
+| CODE RED | 10 Comuns | 2 |
+| MYDOOM, CONFICKER | 1 Raro | 3 |
+| STUXNET | 5 Raros | 4 |
+| WANNACRY | 1 Lendário | 4 |
+
+**Simulação de 168 h (jogador 24/7):** comparei um jogador que só farma fases com um que também enfrenta cada chefão quando a espera acaba e o poder chega a 90% do recomendado. Pra rodar: `node tools/balance-sim.cjs 168 raids`.
+
+| | Sem chefões | Com chefões |
+|---|---|---|
+| Fase máxima em 168 h | Kernel Panic 6 | Kernel Panic 11 |
+| Campanha concluída | ~120 h | ~120 h |
+| Pacotes Comuns | 133 | 163 + **339 dos chefões** (3,8×) |
+| Pacotes Raros | 46 | 60 + 6 |
+| Pacotes Lendários | 1 | 2 (nenhum do WANNACRY: não chegou no poder dele) |
+| Agentes ★4 baixados | 4 | 16 |
+| Itens T4 / T5 | 239 / 24 | 229 + 15 / 20 + 3 |
+
 ## v1.5.1: T6 só dos Chefões e aviso de erro
 
 - **T6 Root** agora cai **somente dos Chefões**, com estas chances por item: CODE RED 0,5%, MYDOOM 1%, CONFICKER 2%, STUXNET 3% e WANNACRY 5%. As fases de Chefão da campanha não dão mais T6. O sorteio também não cai mais num tier de peso zero por arredondamento.

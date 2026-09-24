@@ -1423,27 +1423,27 @@ const STAGE_TIME = 150, RAID_TIME = 90;
 // Chefões: malwares reais famosos, fora da campanha. A tentativa é gasta ao entrar e a espera corre em
 // tempo real (8 h no mais fraco, 1 mês no mais forte), então a recompensa total por semana é limitada
 // e não acelera a progressão. L = nível equivalente de fase; libera quando a fase máxima chega em L - 8 (vira meta antes de ser vencível).
-// w = pesos de tier dos itens (T1…T6); pk = chance de pacote Comum/Raro/Lendário; cr = créditos (× recompensa da fase L).
+// w = pesos de tier dos itens (T1…T6); gp = pacotes GARANTIDOS Comum/Raro/Lendário por vitória; cr = créditos (× recompensa da fase L).
 const RAIDS = [
-  {id:'creeper',   n:'CREEPER',     y:1971, L:8,   cd:8,   c:'#6ee7a8', items:1, w:[0, 55, 35, 9, 1, 0],     pk:[.1, 0, 0],       cr:40,
+  {id:'creeper',   n:'CREEPER',     y:1971, L:8,   cd:8,   c:'#6ee7a8', items:1, w:[0, 55, 35, 9, 1, 0],     gp:[5, 0, 0],       cr:40,
     d:'O avô de todos: um programa experimental que pulava entre computadores da ARPANET escrevendo "I\'M THE CREEPER: CATCH ME IF YOU CAN".'},
-  {id:'brain',     n:'BRAIN',       y:1986, L:20,  cd:12,  c:'#ff8ab8', items:1, w:[0, 40, 45, 13, 2, 0],    pk:[.15, .02, 0],    cr:50,
+  {id:'brain',     n:'BRAIN',       y:1986, L:20,  cd:12,  c:'#ff8ab8', items:1, w:[0, 40, 45, 13, 2, 0],    gp:[5, 0, 0],    cr:50,
     d:'Considerado o primeiro vírus de PC. Vinha em disquete de boot e foi escrito por dois irmãos no Paquistão.'},
-  {id:'morris',    n:'MORRIS WORM', y:1988, L:32,  cd:24,  c:'#c38cff', items:2, w:[0, 30, 50, 17, 3, 0],    pk:[.2, .03, 0],     cr:60,
+  {id:'morris',    n:'MORRIS WORM', y:1988, L:32,  cd:24,  c:'#c38cff', items:2, w:[0, 30, 50, 17, 3, 0],    gp:[8, 0, 0],     cr:60,
     d:'Um dos primeiros worms da internet. Um erro no código fez ele se copiar sem parar e travar boa parte da rede da época.'},
-  {id:'melissa',   n:'MELISSA',     y:1999, L:45,  cd:24,  c:'#5ca8ff', items:2, w:[0, 20, 55, 21, 4, 0],    pk:[.25, .04, 0],    cr:70,
+  {id:'melissa',   n:'MELISSA',     y:1999, L:45,  cd:24,  c:'#5ca8ff', items:2, w:[0, 20, 55, 21, 4, 0],    gp:[8, 0, 0],    cr:70,
     d:'Macro escondida num documento do Word que se mandava sozinha pros 50 primeiros contatos do Outlook.'},
-  {id:'iloveyou',  n:'ILOVEYOU',    y:2000, L:58,  cd:48,  c:'#ff3d7f', items:2, w:[0, 0, 70, 25, 5, 0],     pk:[.35, .06, .002], cr:80,
+  {id:'iloveyou',  n:'ILOVEYOU',    y:2000, L:58,  cd:48,  c:'#ff3d7f', items:2, w:[0, 0, 70, 25, 5, 0],     gp:[8, 0, 0], cr:80,
     d:'Uma "carta de amor" por e-mail com um anexo .vbs. Milhões de pessoas abriram.'},
-  {id:'codered',   n:'CODE RED',    y:2001, L:72,  cd:72,  c:'#ff5a2a', items:3, w:[0, 0, 62, 30, 7.5, .5],  pk:[.4, .08, .003],  cr:100,
+  {id:'codered',   n:'CODE RED',    y:2001, L:72,  cd:72,  c:'#ff5a2a', items:2, w:[0, 0, 62, 30, 7.5, .5],  gp:[10, 0, 0],  cr:100,
     d:'Worm que invadia servidores web IIS e pichava as páginas com "Hacked By Chinese!".'},
-  {id:'mydoom',    n:'MYDOOM',      y:2004, L:86,  cd:168, c:'#9aa0b5', items:3, w:[0, 0, 50, 38, 11, 1],    pk:[.5, .12, .005],  cr:130,
+  {id:'mydoom',    n:'MYDOOM',      y:2004, L:86,  cd:168, c:'#9aa0b5', items:3, w:[0, 0, 50, 38, 11, 1],    gp:[0, 1, 0],  cr:130,
     d:'Worm de e-mail que se espalhou mais rápido que qualquer outro até então e usava as vítimas pra derrubar sites.'},
-  {id:'conficker', n:'CONFICKER',   y:2008, L:100, cd:168, c:'#ffb454', items:3, w:[0, 0, 40, 44, 14, 2],    pk:[.6, .15, .008],  cr:160,
+  {id:'conficker', n:'CONFICKER',   y:2008, L:100, cd:168, c:'#ffb454', items:3, w:[0, 0, 40, 44, 14, 2],    gp:[0, 1, 0],  cr:160,
     d:'Infectou milhões de PCs com Windows e montou uma das maiores botnets da história.'},
-  {id:'stuxnet',   n:'STUXNET',     y:2010, L:115, cd:336, c:'#a6e22e', items:4, w:[0, 0, 0, 75, 22, 3],     pk:[.8, .25, .015],  cr:200,
+  {id:'stuxnet',   n:'STUXNET',     y:2010, L:115, cd:336, c:'#a6e22e', items:4, w:[0, 0, 0, 75, 22, 3],     gp:[0, 5, 0],  cr:200,
     d:'Arma digital que sabotou centrífugas de enriquecimento de urânio, mexendo no controle das máquinas sem ninguém perceber.'},
-  {id:'wannacry',  n:'WANNACRY',    y:2017, L:130, cd:720, c:'#ff3a3a', items:4, w:[0, 0, 0, 65, 30, 5],     pk:[1, .4, .03],     cr:260,
+  {id:'wannacry',  n:'WANNACRY',    y:2017, L:130, cd:720, c:'#ff3a3a', items:4, w:[0, 0, 0, 65, 30, 5],     gp:[0, 0, 1],     cr:260,
     d:'Ransomware que sequestrou arquivos em mais de 150 países e pediu resgate em bitcoin.'},
 ];
 const raidOf = id => RAIDS.find(x => x.id === id);
@@ -1957,7 +1957,7 @@ function raidEnd(win, why) {
       if (tt >= 5) showBanner('ROOT T6!', RAR[5].c);
       if (addItem(it) || tt >= 5 && S.inv.push(it)) out.push(gearTag(it)); else { S.data += gearVal(it); out.push(gearTag(it) + ' (reciclado)'); }
     }
-    R.pk.forEach((p, r) => { if (Math.random() < p) { if (addItem({k:'chip', r, n:1})) out.push(`<span style="color:${CHIPS[r].c}">pacote ${CHIPS[r].n}</span>`); else S.data += chipVal(r); } });
+    R.gp.forEach((n, r) => { if (!n) return; addItem({k:'chip', r, n}) ? out.push(`<span style="color:${CHIPS[r].c}">${n} pacote${n > 1 ? 's' : ''} ${CHIPS[r].n}</span>`) : (S.data += chipVal(r) * n); });
     const cr = rewardAt(Math.min(R.L, S.maxStage)) * R.cr * (1 + tv('gold') + glob('gold')), df = Math.round((20 + R.L) * (1 + glob('def') + tv('def')));
     S.data += cr; S.def += df;
     out.unshift(`+${fmt(cr)}`, `+${fmtNum(df)} definições`);
@@ -1979,7 +1979,7 @@ function raidView() {
     const open = raidOpen(R), ready = raidReady(R), rp = raidPow(R), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad';
     const tot = R.w.reduce((a, b) => a + b, 0);
     const tiers = R.w.map((w, t) => w ? `<span style="color:${RAR[t].c}">${tierTxt(t)} ${pct2(w / tot)}</span>` : '').filter(Boolean).join(' · ');
-    const pks = R.pk.map((p, r) => p ? `<span style="color:${CHIPS[r].c}">${CHIPS[r].n} ${pct2(p)}</span>` : '').filter(Boolean).join(' · ');
+    const pks = R.gp.map((n, r) => n ? `<span style="color:${CHIPS[r].c}">${n} ${CHIPS[r].n}</span>` : '').filter(Boolean).join(' · ') + ' garantido' + (R.gp.reduce((a, b) => a + b, 0) > 1 ? 's' : '');
     return `<div class="raid${open ? '' : ' lock'}" style="--rc:${R.c}">
       <img src="${raidIcon(R.id)}" width="56" height="56" alt="">
       <div class="ri"><b>${open ? R.n : '???'}</b> <small>${R.y} · dificuldade ${'◆'.repeat(i + 1)}</small>
@@ -2497,8 +2497,8 @@ function oddsView() {
     <p class="sub">Compilador <small>5 itens do mesmo tier</small></p><p>${comp} · T5 e T6 não compilam. Se falhar, sai um item novo do mesmo tier.</p>
     <p class="sub">Passivas dos itens <small>quantidade: ${AFFIX_N.map((n, t) => `${tierTxt(t)} ${n}`).join(' · ')}</small></p>
     <div class="tbl"><table class="rates"><tr><td>Passiva</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${aff}</table></div>
-    <p class="sub">Chefões <small>por vitória · a tentativa é gasta ao entrar</small></p>
-    <div class="tbl"><table class="rates"><tr><td>Chefão</td><td>espera</td><td>itens</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}${CHIPS.map(c => `<td style="color:${c.c}">${c.n}</td>`).join('')}</tr>${RAIDS.map(R => { const tot = R.w.reduce((a, b) => a + b, 0); return `<tr><td style="color:${R.c}">${R.n}</td><td>${R.cd < 24 ? R.cd + ' h' : R.cd / 24 + ' d'}</td><td class="num">${R.items}</td>${R.w.map(w => `<td class="num">${w ? pct2(w / tot) : '—'}</td>`).join('')}${R.pk.map(x => `<td class="num">${x ? pct2(x) : '—'}</td>`).join('')}</tr>`; }).join('')}</table></div>
+    <p class="sub">Chefões <small>por vitória · pacotes garantidos · a tentativa é gasta ao entrar</small></p>
+    <div class="tbl"><table class="rates"><tr><td>Chefão</td><td>espera</td><td>itens</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}${CHIPS.map(c => `<td style="color:${c.c}">${c.n}</td>`).join('')}</tr>${RAIDS.map(R => { const tot = R.w.reduce((a, b) => a + b, 0); return `<tr><td style="color:${R.c}">${R.n}</td><td>${R.cd < 24 ? R.cd + ' h' : R.cd / 24 + ' d'}</td><td class="num">${R.items}</td>${R.w.map(w => `<td class="num">${w ? pct2(w / tot) : '—'}</td>`).join('')}${R.gp.map(x => `<td class="num">${x || '—'}</td>`).join('')}</tr>`; }).join('')}</table></div>
     <p class="sub">IAs <small>acessório com efeito único; valor = base × multiplicador do tier (T1 ×1 … T6 ×${RAR[5].m}); todas têm a mesma chance</small></p>
     <div class="tbl"><table class="rates"><tr><td>IA</td><td>efeito</td>${RAR.map((r, t) => `<td style="color:${r.c}">${tierTxt(t)}</td>`).join('')}</tr>${Object.values(AIS).map(A => `<tr><td style="color:${A.c}">${A.n}</td><td>${BN[A.k]}</td>${RAR.map(r => `<td class="num">${+(A.v * r.m).toFixed(1)}%</td>`).join('')}</tr>`).join('')}</table></div>
     <p class="hint">T2–T5 sorteiam passivas diferentes, com valor uniforme na faixa. Root: você escolhe as ${AFFIX_N[5]} e elas vêm no valor máximo.</p>`;

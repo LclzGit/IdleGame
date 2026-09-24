@@ -8,11 +8,23 @@ rep("function kill(e) {", "function kill(e) {\n  window.__st.kills++; if (e.boss
 rep("  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }", "  window.__st.pulls[chip][st]++;\n  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }");
 rep("function compile(sel) {", "function compile(sel) {\n  window.__st.comp++;");
 rep("function rollback(why) {", "function rollback(why) {\n  window.__st.deaths++;");
-rep("<script>\n(() => {", "<script>\nwindow.__st = {items:[0,0,0,0,0,0], chips:[0,0,0], pulls:[{3:0,4:0,5:0},{3:0,4:0,5:0},{3:0,4:0,5:0}], kills:0, cred:0, comp:0, deaths:0};\n(() => {");
+rep("      if (tt >= 5) showBanner('ROOT T6!', RAR[5].c);", "      window.__st.ritems[tt]++; if (tt >= 5) showBanner('ROOT T6!', RAR[5].c);");
+rep("    R.gp.forEach((n, r) => { if (!n) return;", "    R.gp.forEach((n, r) => { if (!n) return; window.__st.rchips[r] += n;");
+rep("<script>\n(() => {", "<script>\nwindow.__st = {items:[0,0,0,0,0,0], chips:[0,0,0], rchips:[0,0,0], ritems:[0,0,0,0,0,0], raids:0, raidWins:0, pulls:[{3:0,4:0,5:0},{3:0,4:0,5:0},{3:0,4:0,5:0}], kills:0, cred:0, comp:0, deaths:0};\n(() => {");
 const i = s.lastIndexOf('})();');
 s = s.slice(0, i) + `window.__g = {
   step(n, dt) { for (let i = 0; i < n; i++) update(dt); },
   S: () => S, power, stageLabel, recPow,
+  // chefões: o jogador tenta assim que a espera acaba (em minutos de jogo) e o poder chega a 90% do recomendado
+  raidNext: {},
+  raidTick(min) {
+    for (const R of RAIDS) {
+      if (!raidOpen(R) || (this.raidNext[R.id] || 0) > min || power() < raidPow(R) * .9) continue;
+      S.raids = {}; lastRaid = null; startRaid(R.id);
+      let ts = 0; while (raid && ts < RAID_TIME + 5) { update(.05); ts += .05; }
+      this.raidNext[R.id] = min + R.cd * 60; window.__st.raids++; if (lastRaid && lastRaid.win) window.__st.raidWins++;
+    }
+  },
   player() {
     for (const cls of ['fw', 'sc']) {
       gBanner = cls;
