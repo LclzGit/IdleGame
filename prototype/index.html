@@ -125,6 +125,18 @@
 
   /* fases */
   .stl{list-style:none; margin:8px 0 0; padding:0; display:grid; gap:3px}
+  .tree{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin:8px 0}
+  .br{display:grid; gap:6px; align-content:start; justify-items:center; padding:6px 4px; border:1px solid var(--line); background:#0b0a16; font-size:11px}
+  .trow{display:flex; gap:6px; position:relative}
+  .trow + .trow::before{content:""; position:absolute; left:50%; top:-7px; height:6px; border-left:1px solid var(--line)}
+  .node{display:grid; place-items:center; width:40px; height:40px; padding:0; border:1px solid var(--line); background:var(--winhi); box-shadow:none; line-height:1.1}
+  .node span{font:400 10px var(--pix); color:var(--bc)}
+  .node small{font-size:9px; color:var(--mute)}
+  .node.has{border-color:var(--bc); box-shadow:inset 0 0 8px color-mix(in srgb, var(--bc) 35%, transparent)}
+  .node.closed{opacity:.35}
+  .node:disabled{cursor:default}
+  .node:disabled:not(.closed){opacity:1}
+  .tlist{margin:6px 0 0; padding-left:16px; font-size:11px; color:var(--text)}
   .stl li{display:grid; grid-template-columns:3.2em 1fr auto auto; gap:10px; align-items:center; padding:3px 6px; border:1px solid transparent}
   .stl li.cur{border-color:var(--amber); background:#0b0a16}
   .stl li.lock{opacity:.55}
@@ -144,7 +156,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.3</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.4</p>
 </main>
 
 <footer class="dock">
@@ -157,8 +169,10 @@
     <div class="prog"><i id="secBar"></i></div><span id="secTxt"></span>
     <span class="cur"><em>DADOS</em><b id="data"></b></span>
     <span class="cur pw"><em>PODER</em><b id="pow"></b></span>
+    <span class="cur pw"><em>DEF</em><b id="def"></b></span>
     <nav class="tabs">
       <button type="button" data-open="squad" aria-pressed="false">Esquadrão</button>
+      <button type="button" data-open="tree" aria-pressed="false">Antivírus</button>
       <button type="button" data-open="inv" aria-pressed="false">Inventário <i id="invN"></i></button>
       <button type="button" data-open="gacha" aria-pressed="false">Invocar</button>
       <button type="button" data-open="stages" aria-pressed="false">Fases</button>
@@ -662,8 +676,60 @@ const CHIPS = [
 ];
 const UPBASE = {3:30, 4:45, 5:70};
 
+// Subclasses de DPS. Armas de DPS têm o mesmo tipo e dão ×1,5 de bônus quando combinam.
+const SUBS = {
+  area:   {n:'Área', c:'#ff8a3a', d:'Cada tiro respinga 30% do dano em todos os inimigos na tela.'},
+  single: {n:'Precisão', c:'#5ce1e6', d:'+35% de dano no alvo principal.'},
+  boss:   {n:'Caça-chefes', c:'#ff3d7f', d:'+80% de dano contra chefes e +40% contra blindados.'},
+};
+const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', pulse:'single', scanner:'single', ghost:'boss', infiltrator:'boss', blade:'boss'};
+GUNNERS.forEach(g => g.sub = SUBOF[g.id]);
+const GEARW = {
+  area:['Lança-granadas', 'Canhão de plasma', 'Varredura em cone'],
+  single:['Mira de precisão', 'Regex Afiada', 'Sonda DPI'],
+  boss:['Munição perfurante', 'Exploit de kernel', 'Marcador de alvo'],
+};
+
+// Tipos de fase. A última fase de cada setor é sempre Chefão.
+const STYPES = {
+  horde: {n:'Horda', c:'#ff8a3a', count:18, hp:.45, rw:.6, max:6, gap:[.2, .45], sub:'area',
+    d:'Muitos vírus fracos chegando em bando.'},
+  armor: {n:'Blindados', c:'#c9cfe0', count:5, hp:3.2, rw:2.2, max:1, gap:[.4, .8], sub:'single', armored:true,
+    d:'Poucos vírus, um de cada vez, com muita vida. Dano em área causa só metade.'},
+  boss:  {n:'Chefão', c:'#ff3d7f', count:4, hp:1, rw:1, max:2, gap:[1, 1.8], sub:'boss', bossHp:18, bossAtk:1.3,
+    d:'Poucos vírus e um chefe enorme no final.'},
+};
+const stageType = s => s % PER === PER - 1 ? 'boss' : ['horde', 'armor'][(s + Math.floor(s / PER)) % 2];
+const ST = () => STYPES[stageType(S.stage)];
+
+// Árvore do antivírus: comprada com DEF (definições de vírus), que caem dos inimigos.
+const BRANCHES = [
+  {n:'Varredura', c:'#ff8a3a'}, {n:'Firewall', c:'#5ca8ff'},
+  {n:'Quarentena', c:'#6ee7a8'}, {n:'Kernel', c:'#c38cff'},
+];
+const TREE = [
+  {id:'dmg',   br:0, ab:'DMG', name:'Varredura profunda', d:'+5% de dano de todos os agentes', max:10, base:10, eff:{dmg:.05}},
+  {id:'crit',  br:0, ab:'CRT', req:'dmg', name:'Heurística', d:'+3% de chance de crítico pro DPS', max:5, base:40, eff:{crit:.03}},
+  {id:'aoe',   br:0, ab:'AOE', req:'crit', name:'Varredura em massa', d:'+10% de dano em área', max:5, base:90, eff:{aoe:.1}},
+  {id:'bossd', br:0, ab:'RKT', req:'crit', name:'Remoção de rootkit', d:'+10% de dano contra chefes', max:5, base:90, eff:{boss:.1}},
+  {id:'hp',    br:1, ab:'HP', name:'Firewall reforçado', d:'+6% de HP de todos os agentes', max:10, base:10, eff:{hp:.06}},
+  {id:'red',   br:1, ab:'SBX', req:'hp', name:'Sandbox', d:'-3% de dano recebido', max:5, base:40, eff:{red:.03}},
+  {id:'regen', br:1, ab:'REP', req:'red', name:'Autorreparo', d:'Esquadrão regenera +1% do HP por segundo em combate', max:3, base:120, eff:{regen:.01}},
+  {id:'gold',  br:2, ab:'ZIP', name:'Compressão', d:'+8% de dados ganhos', max:10, base:10, eff:{gold:.08}},
+  {id:'drop',  br:2, ab:'QTN', req:'gold', name:'Quarentena', d:'+10% de chance de módulo', max:5, base:40, eff:{drop:.1}},
+  {id:'chip',  br:2, ab:'REV', req:'drop', name:'Engenharia reversa', d:'+15% de chance de chip de invocação', max:5, base:100, eff:{chip:.15}},
+  {id:'spd',   br:3, ab:'THR', name:'Multithread', d:'+4% de velocidade de ataque', max:5, base:20, eff:{spd:.04}},
+  {id:'inv',   br:3, ab:'INV', req:'spd', name:'Armazenamento', d:'+2 espaços no inventário', max:4, base:60, eff:{inv:2}},
+  {id:'off',   br:3, ab:'BGS', req:'spd', name:'Serviço em segundo plano', d:'+20% de ganho offline', max:5, base:50, eff:{off:.2}},
+];
+const nodeLv = id => S.tree[id] || 0;
+const nodeCost = n => Math.floor(n.base * 1.6 ** nodeLv(n.id));
+const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
+const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
+const invCap = () => 12 + tv('inv');
+
 const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:null, sc:null, pt:null},
-  inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, autoUp:true, autoEq:true, autoAdv:true, last:0,
+  inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, tree:{}, def:0, autoUp:true, autoEq:true, autoAdv:true, last:0,
   tank:'firewall', gunner:'scanner', roster:{firewall:1, scanner:1}, pity:{fw:0, sc:0}};
 let S = load();
 function load() {
@@ -672,7 +738,9 @@ function load() {
 }
 function save() { S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
-const gm = id => 1 + (S.gear[id] ? S.gear[id].b / 100 : 0);
+const dpsSub = () => equipped('sc').sub;
+const synergy = g => !!(g && g.wt && g.wt === dpsSub());
+const gm = id => { const g = S.gear[id]; return g ? 1 + g.b / 100 * (id === 'sc' && synergy(g) ? 1.5 : 1) : 1; };
 const equipped = cls => charOf(S[CLASSES[cls].key]) || CLASSES[cls].list[0];
 const pT = () => equipped('fw').passive, pG = () => equipped('sc').passive;
 const lvOf = aid => S.lv[aid] || (S.lv[aid] = {a:0, h:0});
@@ -681,13 +749,13 @@ const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * 1.28 ** lvOf(aid)[k
 function applySlots() {
   for (const cls in CLASSES) {
     const C = CLASSES[cls], T = equipped(cls), d = HERO_DEF[C.idx];
-    d.name = T.name; d.role = (cls === 'sc' ? 'DPS' : C.one) + ' · ' + T.role;
+    d.name = T.name; d.role = (cls === 'sc' ? 'DPS ' + SUBS[T.sub].n : C.one) + ' · ' + T.role;
     d.hp = C.stars[T.stars].hp; d.atk = C.stars[T.stars].atk;
   }
 }
-const maxHp = h => h.def.hp * 1.12 ** lvOf(slotAid(h.def.id)).h * gm(h.def.id) * (1 + (pT().teamHp || 0));
-const atk = h => h.def.atk * 1.12 ** lvOf(slotAid(h.def.id)).a * gm(h.def.id) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0));
-const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1);
+const maxHp = h => h.def.hp * 1.12 ** lvOf(slotAid(h.def.id)).h * gm(h.def.id) * (1 + (pT().teamHp || 0)) * (1 + tv('hp'));
+const atk = h => h.def.atk * 1.12 ** lvOf(slotAid(h.def.id)).a * gm(h.def.id) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg'));
+const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd'));
 const rewardAt = L => 5 * 1.10 ** L;
 const power = () => heroes.reduce((a, h) => a + atk(h) / cdOf(h) * 4 + maxHp(h) * .5, 0);
 
@@ -719,17 +787,18 @@ function say(txt, hl) {
 function showBanner(text, color) { banner = {text, color: color || '#ffb454', life: 2.2}; }
 
 function spawn(boss) {
-  const L = S.stage * 10 + spawned, si = sec().idx;
+  const st = ST(), L = S.stage * 10 + (boss ? 10 : Math.floor(spawned * 10 / st.count)), si = sec().idx;
   const pool = si === 0 ? ['bug'] : si === 1 ? ['bug','worm'] : ['bug','worm','trojan'];
   const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
-  const T = TYPES[tn], s = boss ? 3 : 2;
+  const T = TYPES[tn], s = boss ? (st.bossHp ? 4 : 3) : 2;
+  const hpM = boss ? (st.bossHp || 6) / T.hp : st.hp, atkM = boss ? st.bossAtk || 1 : 1, rwM = boss ? (st.bossHp ? 2.5 : 1) : st.rw;
   const w = SPR[tn].width * s, h = SPR[tn].height * s;
   const last = enemies[enemies.length - 1];
   enemies.push({
     tn, boss, w, h, x: Math.max(W + 4, last ? last.x + last.w + 4 : 0),
-    hp: 20 * 1.09 ** L * T.hp, max: 20 * 1.09 ** L * T.hp,
-    atk: 3 * 1.085 ** L * T.atk, cd: T.cd, t: T.cd * .6,
-    reward: rewardAt(L) * T.rw, flash: 0, lunge: 0, atStop: false,
+    hp: 20 * 1.09 ** L * T.hp * hpM, max: 20 * 1.09 ** L * T.hp * hpM,
+    atk: 3 * 1.085 ** L * T.atk * atkM, cd: T.cd, t: T.cd * .6, armored: !!st.armored && !boss,
+    reward: rewardAt(L) * T.rw * rwM, flash: 0, lunge: 0, atStop: false,
   });
 }
 
@@ -743,12 +812,25 @@ function hit(e, d) {
   float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
   if (e.hp <= 0) kill(e);
 }
+// Todo dano dos agentes passa por aqui: área, chefes, blindados e subclasse do DPS.
+function deal(e, d, area, dps) {
+  if (area) d *= (1 + tv('aoe')) * (e.armored ? .5 : 1);
+  if (e.boss) d *= 1 + tv('boss');
+  if (dps) {
+    const sb = dpsSub();
+    if (sb === 'boss') d *= e.boss ? 1.8 : e.armored ? 1.4 : 1;
+    else if (sb === 'single' && !area) d *= 1.35;
+  }
+  hit(e, d);
+}
 function kill(e) {
   enemies.splice(enemies.indexOf(e), 1);
+  e.reward *= 1 + tv('gold');
   S.data += e.reward;
+  S.def += e.boss ? Math.round(15 * (1 + S.stage / 3)) : 1 + Math.floor(S.stage / 3);
   burst(e.x + e.w / 2, GROUND - e.h / 2, ART[e.tn][1].b, e.boss ? 40 : 12);
   float(e.x + e.w / 2, GROUND - e.h - 16, '+' + fmt(e.reward), '#ffb454');
-  if (e.boss || Math.random() < .08) dropGear(e.boss);
+  if (e.boss || Math.random() < .08 * (1 + tv('drop'))) dropGear(e.boss);
   dropChip(e);
   if (e.boss) stageClear(); else S.kills++;
 }
@@ -759,21 +841,23 @@ const chipVal = r => rewardAt(S.maxStage * 10) * CHIPS[r].val;
 const chipCount = r => (S.inv.find(x => x.k === 'chip' && x.r === r) || {n:0}).n;
 const itemColor = it => it.k === 'chip' ? CHIPS[it.r].c : RAR[it.r].c;
 const gearTag = it => `<span style="color:${RAR[it.r].c}">${it.name} [${RAR[it.r].n}]</span>`;
+const wtTag = g => g && g.wt ? ` <span style="color:${SUBS[g.wt].c}">${SUBS[g.wt].n}${synergy(g) ? ' ✓ sinergia ×1,5' : ''}</span>` : '';
 function addItem(it) {
   if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r); if (st) { st.n += it.n; return true; } }
-  if (S.inv.length >= 12) return false;
+  if (S.inv.length >= invCap()) return false;
   S.inv.push(it); return true;
 }
 function dropGear(boss) {
   let roll = Math.random() * 100, r = 0;
   for (; r < RAR.length - 1; r++) { roll -= RAR[r].w; if (roll < 0) break; }
   if (boss) r = Math.max(r, 1);
-  const slot = ['fw','sc','pt'][Math.random() * 3 | 0], names = GEAR[slot];
-  const it = {k:'gear', slot, r, s:S.stage,
+  const slot = ['fw','sc','pt'][Math.random() * 3 | 0];
+  const wt = slot === 'sc' ? ['area', 'single', 'boss'][Math.random() * 3 | 0] : undefined, names = wt ? GEARW[wt] : GEAR[slot];
+  const it = {k:'gear', slot, wt, r, s:S.stage,
     name: names[Math.random() * names.length | 0] + ' v' + (S.stage + 1) + '.' + (Math.random() * 10 | 0),
     b: Math.round(10 * RAR[r].m * 1.25 ** S.stage * (.8 + Math.random() * .4))};
-  const cur = S.gear[slot];
-  if (S.autoEq && (!cur || it.b > cur.b)) {
+  const cur = S.gear[slot], eff = g => g ? g.b * (slot === 'sc' && synergy(g) ? 1.5 : 1) : 0;
+  if (S.autoEq && eff(it) > eff(cur)) {
     S.gear[slot] = it;
     if (cur) S.data += gearVal(cur);
     say(`${heroOf(slot).def.name} instalou ${gearTag(it)} +${it.b}%${cur ? ' (antigo reciclado)' : ''}`, true);
@@ -784,7 +868,7 @@ function dropGear(boss) {
 }
 function dropChip(e) {
   for (let r = CHIPS.length - 1; r >= 0; r--) {
-    if (Math.random() >= (e.boss ? CHIPS[r].boss : CHIPS[r].drop)) continue;
+    if (Math.random() >= (e.boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + tv('chip'))) continue;
     const C = CHIPS[r];
     if (addItem({k:'chip', r, n:1})) {
       float(e.x + e.w / 2, GROUND - e.h - 26, 'CHIP ' + C.n.toUpperCase(), C.c);
@@ -836,11 +920,21 @@ function buyUp(slot, k) {
   return true;
 }
 
+function buyNode(id) {
+  const n = TREE.find(x => x.id === id);
+  if (!n || !nodeOpen(n) || nodeLv(id) >= n.max) return;
+  const c = nodeCost(n);
+  if (S.def < c) return;
+  S.def -= c; S.tree[id] = nodeLv(id) + 1;
+  say(`Antivírus atualizado: ${n.name} nv${S.tree[id]}`);
+  renderPanel(); save();
+}
+
 // ---------- fases ----------
 function startStage(s, msg) {
   S.stage = s; S.kills = 0; spawned = 0; bossUp = false; enemies = []; shots = []; spawnT = 1.5;
   heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
-  showBanner(msg || stageLabel(s) + ' ' + stageSec(s).name, stageSec(s).tint);
+  showBanner(msg || stageLabel(s) + ' ' + STYPES[stageType(s)].n.toUpperCase(), STYPES[stageType(s)].c);
   if (openP === 'stages') renderPanel();
   save();
 }
@@ -889,7 +983,7 @@ function update(dt) {
       continue;
     }
     if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
-    else if (h.def.id === 'fw' && pT().regen) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * pT().regen * dt);
+    else h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * ((h.def.id === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
     h.t -= dt;
     if (h.t > 0) continue;
     if (h.def.id === 'pt') {
@@ -907,11 +1001,11 @@ function update(dt) {
     if (!e || e.x > W - 6) continue;
     if (e.x - (h.def.x + h.def.w) > h.def.range) continue;
     h.t = cdOf(h); h.lunge = 1;
-    if (h.def.id === 'fw') { hit(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
+    if (h.def.id === 'fw') { deal(e, atk(h)); burst(e.x, GROUND - 5, '#9fd0ff', 4); }
     else if (h.def.id === 'sc') {
       const G = pG(), sh = equipped('sc').shot || {};
-      const crit = Math.random() < (G.crit || 0), d = atk(h) * (crit ? G.critX || 2 : 1);
-      const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc', visTier('sc')).glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0};
+      const crit = Math.random() < (G.crit || 0) + tv('crit'), d = atk(h) * (crit ? G.critX || 2 : 1);
+      const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc', visTier('sc')).glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0, dps: true};
       const obs = G.obs ? ++obsCount % G.obs === 0 : false;
       shots.push({...base, x: h.def.x + (sh.x || 27), dmg: d, crit, obs});
       for (let m = 1; m <= (G.multishot || 0); m++) shots.push({...base, x: h.def.x + 27 - m * 8, y: base.y + (m % 2 ? -3 : 3), dmg: d * .5});
@@ -927,17 +1021,19 @@ function update(dt) {
       shots.splice(i, 1);
       if (s.crit) float(e.x + e.w / 2, GROUND - e.h - 20, 'CRIT', '#ffb454');
       const behind = s.pierce ? enemies.slice(1, s.pierce >= 1 ? undefined : 2) : [];
-      hit(e, s.dmg);
-      behind.forEach(o => { if (enemies.includes(o)) hit(o, s.dmg * (s.pierce >= 1 ? .7 : s.pierce)); });
+      const others = enemies.filter(o => o !== e);
+      deal(e, s.dmg, false, s.dps);
+      behind.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * (s.pierce >= 1 ? .7 : s.pierce), true, s.dps); });
       if (s.splash) {
         burst(s.x, GROUND - 8, '#ffb454', 10);
-        enemies.slice().forEach(o => { if (o !== e && enemies.includes(o)) hit(o, s.dmg * s.splash); });
+        others.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * s.splash, true, s.dps); });
       }
+      if (s.dps && dpsSub() === 'area' && others.length) others.forEach(o => { if (enemies.includes(o)) deal(o, s.dmg * .3, true, true); });
       if (s.obs) {
         showBanner('ATAQUE ORBITAL', '#ff3a3a');
         enemies.slice().forEach(o => {
           for (let k = 0; k < 6; k++) parts.push({x: o.x + Math.random() * o.w, y: 0, vx: 0, vy: 140 + Math.random() * 60, life: .5, c: k % 2 ? '#ff3a3a' : '#ffb454'});
-          if (enemies.includes(o)) hit(o, s.dmg * 3);
+          if (enemies.includes(o)) deal(o, s.dmg * 3, true, true);
         });
       }
     }
@@ -948,7 +1044,7 @@ function update(dt) {
     e.t -= dt;
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
-      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1);
+      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red'));
       front.hp -= dmg; front.flash = .1;
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; }
@@ -958,8 +1054,9 @@ function update(dt) {
 
   spawnT -= dt;
   if (!bossUp) {
-    if (spawned < 10) {
-      if (spawnT <= 0 && enemies.length < 3) { spawn(false); spawned++; spawnT = 1.2 + Math.random() * 1.6; }
+    const st = ST();
+    if (spawned < st.count) {
+      if (spawnT <= 0 && enemies.length < st.max) { spawn(false); spawned++; spawnT = st.gap[0] + Math.random() * (st.gap[1] - st.gap[0]); }
     } else if (!enemies.length) {
       spawn(true); bossUp = true; showBanner('!! RANSOMWARE !!', '#ff3d7f');
     }
@@ -1068,7 +1165,8 @@ function draw() {
     ctx.drawImage(e.flash > 0 ? SPRW[e.tn] : SPR[e.tn], x, y, e.w, e.h);
     const p = Math.max(0, e.hp / e.max);
     ctx.fillStyle = '#000'; ctx.fillRect(x, y - 3, e.w, 2);
-    ctx.fillStyle = e.boss ? '#ffb454' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(e.w * p), 1);
+    ctx.fillStyle = e.boss ? '#ffb454' : e.armored ? '#c9cfe0' : '#ff3d7f'; ctx.fillRect(x, y - 3, Math.ceil(e.w * p), 1);
+    if (e.armored) { ctx.fillStyle = '#c9cfe0'; ctx.fillRect(x - 1, y - 4, 1, 4); ctx.fillRect(x + e.w, y - 4, 1, 4); }
   }
 
   for (const s of shots) {
@@ -1144,7 +1242,7 @@ function equip(id) {
 
 // ---------- painéis ----------
 let openP = null, selInv = -1;
-const PANELS = {squad:'Esquadrão', inv:'Inventário · 12 espaços', gacha:'Invocar', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
+const PANELS = {squad:'Esquadrão', tree:'Antivírus · árvore de atualizações', inv:'Inventário', gacha:'Invocar', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
 const pct = x => Math.round(x * 100) + '%';
 const RENDER = {
   squad: () => SLOTS.map(([k, lab]) => {
@@ -1152,10 +1250,10 @@ const RENDER = {
     return `<div class="hr">
       <img src="${portrait(k, visTier(k))}" width="48" height="48" alt="">
       <div>
-        <div class="hn"><b>${h.def.name}</b><span>${lab}</span></div>
+        <div class="hn"><b>${h.def.name}</b><span${k === 'sc' ? ` style="color:${SUBS[dpsSub()].c}"` : ''}>${k === 'sc' ? 'DPS · ' + SUBS[dpsSub()].n : lab}</span></div>
         <div class="hp"><i id="hp-${k}"></i></div>
         <div class="st" id="st-${k}"></div>
-        <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} +${g.b}%<button type="button" data-unequip="${k}">remover</button>` : 'sem módulo'}</div>
+        <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} +${g.b}%${wtTag(g)}<button type="button" data-unequip="${k}">remover</button>` : 'sem módulo'}</div>
       </div>
       <div class="hb">
         <button type="button" id="ua-${k}" data-up="${k}:a"></button>
@@ -1172,17 +1270,17 @@ const RENDER = {
       `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
 
   inv: () => {
-    const cells = Array.from({length: 12}, (_, i) => {
+    const cells = Array.from({length: invCap()}, (_, i) => {
       const it = S.inv[i];
       if (!it) return '<div class="cell empty"></div>';
       return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" style="--rc:${itemColor(it)}" title="${it.k === 'chip' ? 'Chip ' + CHIPS[it.r].n : it.name}">${
-        it.k === 'chip' ? `<span class="ct">CHIP</span><b>×${it.n}</b>` : `<span class="ct">${SLOTTAG[it.slot]}</span><b>+${it.b}%</b>`}</button>`;
+        it.k === 'chip' ? `<span class="ct">CHIP</span><b>×${it.n}</b>` : `<span class="ct"${it.wt ? ` style="color:${SUBS[it.wt].c}"` : ''}>${it.wt ? SUBS[it.wt].n.slice(0, 5).toUpperCase() : SLOTTAG[it.slot]}</span><b>+${it.b}%</b>`}</button>`;
     }).join('');
     const it = S.inv[selInv];
     let det = '<p class="hint">Clique num item. Módulos caem dos vírus (8%) e sempre do chefe; chips de invocação são raros.</p>';
     if (it && it.k === 'gear') {
       const cur = S.gear[it.slot], diff = it.b - (cur ? cur.b : 0);
-      det = `${gearTag(it)} · módulo de <b>${SLOTTAG[it.slot]}</b> · +${it.b}% de ATK e HP
+      det = `${gearTag(it)} · ${it.wt ? 'arma' : 'módulo'} de <b>${SLOTTAG[it.slot]}</b>${wtTag(it)} · +${it.b}% de ATK e HP
         <div class="hint">Equipado agora: ${cur ? `${cur.name} +${cur.b}%` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? '+' : ''}${diff}%</span></div>
         <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
     } else if (it) {
@@ -1206,6 +1304,7 @@ const RENDER = {
         <img src="${portraitOf(T.id, -1)}" width="40" height="40" alt="">
         <span class="st${T.stars}">${stars(T.stars)}</span>
         <span class="nm">${own ? T.name : '???'}</span>
+        ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
         <span class="ps">${own ? T.ptxt : 'Não invocado'}</span>
         <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'Equipado' : own ? 'Equipar' : 'Bloqueado'}</button>
       </div>`;
@@ -1220,6 +1319,7 @@ const RENDER = {
       <p class="pity">★5 garantido em ${50 - S.pity[gBanner]} invocações · ×10 garante ★4 · repetido vira dados (★3 ${fmt(dupVal(3))}, ★4 ${fmt(dupVal(4))}, ★5 ${fmt(dupVal(5))})
         · <button type="button" data-free>protótipo: +chips</button></p>
       ${res}
+      ${gBanner === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
       <p class="sub">Coleção de ${gBanner === 'sc' ? 'DPS' : 'tanques'} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length}</small></p>
       <div class="col">${col}</div>`;
   },
@@ -1228,20 +1328,42 @@ const RENDER = {
     const pw = power(), rows = [];
     for (let s = 0; s <= S.maxStage + 1; s++) {
       const sc = stageSec(s), rp = recPow(s), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad';
-      const lock = s > S.maxStage, cur = s === S.stage;
-      rows.push(`<li class="${cur ? 'cur' : lock ? 'lock' : ''}"><span class="lb">${stageLabel(s)}</span>
-        <span style="color:${sc.tint}">${sc.name}</span><span class="rp ${cls}">poder ${fmtN(rp)}</span>
+      const lock = s > S.maxStage, cur = s === S.stage, ty = STYPES[stageType(s)];
+      rows.push(`<li class="${cur ? 'cur' : lock ? 'lock' : ''}" title="${ty.d}"><span class="lb">${stageLabel(s)}</span>
+        <span><span style="color:${sc.tint}">${sc.name}</span> <span class="tag" style="color:${ty.c}">${ty.n.toUpperCase()} ${ty.count}${ty.bossHp ? '+CHEFE' : ''}</span>
+        <small class="hint">· DPS <span style="color:${SUBS[ty.sub].c}">${SUBS[ty.sub].n}</span></small></span>
+        <span class="rp ${cls}">poder ${fmtN(rp)}</span>
         <button type="button" data-stage="${s}" ${lock || cur ? 'disabled' : ''}>${cur ? 'atual' : lock ? 'bloqueada' : 'farmar'}</button></li>`);
     }
-    return `<p>Seu poder: <b class="k">${fmtN(pw)}</b>. Cada fase tem 10 vírus e um chefe. Vencer o chefe libera a próxima fase; fases mais altas dão mais dados e módulos melhores.</p>
+    const legend = Object.values(STYPES).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>');
+    return `<p>Seu poder: <b class="k">${fmtN(pw)}</b> · seu DPS é <span style="color:${SUBS[dpsSub()].c}">${SUBS[dpsSub()].n}</span>.</p><p class="hint">${legend}</p><p>Cada fase termina num chefe. Vencer o chefe libera a próxima fase; fases mais altas dão mais dados e módulos melhores.</p>
       <label><input type="checkbox" id="oAdv" ${S.autoAdv ? 'checked' : ''}> avançar sozinho (e recuar uma fase se o esquadrão cair 2 vezes)</label>
       <ol class="stl">${rows.reverse().join('')}</ol>`;
+  },
+
+  tree: () => {
+    const col = (b, i) => {
+      const nodes = TREE.filter(n => n.br === i), rows = [];
+      const depth = n => n.req ? 1 + depth(TREE.find(x => x.id === n.req)) : 0;
+      nodes.forEach(n => { (rows[depth(n)] = rows[depth(n)] || []).push(n); });
+      return `<div class="br"><b style="color:${b.c}">${b.n}</b>${rows.map(r => `<div class="trow">${r.map(n => {
+        const lv = nodeLv(n.id), open = nodeOpen(n), max = lv >= n.max;
+        return `<button type="button" class="node${lv ? ' has' : ''}${open ? '' : ' closed'}" data-node="${n.id}" style="--bc:${b.c}" ${open && !max ? '' : 'disabled'} title="${n.name}: ${n.d}">
+          <span>${n.ab}</span><small>${lv}/${n.max}</small></button>`; }).join('')}</div>`).join('')}</div>`;
+    };
+    const rowsTxt = TREE.filter(n => nodeOpen(n)).map(n => `<li><b style="color:${BRANCHES[n.br].c}">${n.ab}</b> ${n.name}: ${n.d} · nv ${nodeLv(n.id)}/${n.max}${nodeLv(n.id) < n.max ? ` · <span class="${S.def >= nodeCost(n) ? 'k' : 'hint'}">${fmtN(nodeCost(n))} DEF</span>` : ' · máx'}</li>`).join('');
+    return `<p>Você é o antivírus; os heróis são seus agentes. Gaste <b class="k">DEF</b> (definições de vírus, que caem de cada inimigo) pra atualizar o sistema. Clique num nó pra comprar um nível.</p>
+      <p>DEF disponível: <b class="k">${fmtN(S.def)}</b></p>
+      <div class="tree">${BRANCHES.map(col).join('')}</div>
+      <ul class="tlist">${rowsTxt}</ul>
+      <p class="opts"><button type="button" data-freedef>protótipo: +500 DEF</button></p>`;
   },
 
   log: () => `<ol class="log">${LOG.map(l => `<li class="${l.hl ? 'hl' : ''}"><time>${l.time}</time>${l.txt}</li>`).join('') || '<li>Nada ainda.</li>'}</ol>`,
 
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
     <p>Um esquadrão de agentes digitais (tanque, DPS e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">dados</span> (KB → MB → GB), o dinheiro do jogo.</p>
+    <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra DPS de Área), Blindados (poucos e resistentes, bom pra Precisão) e Chefão (bom pra Caça-chefes).</p>
     <p><b>Esquadrão:</b> gaste dados pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> 12 espaços pros módulos e chips que caem. <b>Invocar:</b> use chips Comum, Raro ou Lendário nos banners de tanques e DPS; repetidos viram dados. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
     <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
 };
@@ -1294,6 +1416,8 @@ $('#pBody').addEventListener('click', e => {
   else if (d.ban) { gBanner = d.ban; renderPanel(); }
   else if (d.pull) { const [r, n] = d.pull.split(':').map(Number); summon(r, n); }
   else if (d.eq) equip(d.eq);
+  else if (d.node) buyNode(d.node);
+  else if (d.freedef !== undefined) { S.def += 500; renderPanel(); }
   else if (d.stage !== undefined) { fails = 0; startStage(+d.stage); say(`Farmando ${stageLabel(+d.stage)}`); }
   else if (d.free !== undefined) { addItem({k:'chip', r:0, n:10}); addItem({k:'chip', r:1, n:3}); addItem({k:'chip', r:2, n:1}); renderPanel(); save(); }
   else if (b.id === 'wipe') {
@@ -1317,19 +1441,20 @@ $('#speed').addEventListener('click', e => {
 function renderHud() {
   const s = sec();
   document.querySelector('.dock').style.setProperty('--sec', s.tint);
-  $('#stgBtn').textContent = stageLabel(S.stage) + ' ' + s.name;
-  $('#secBar').style.width = (bossUp ? 100 : S.kills / 10 * 100) + '%';
-  $('#secTxt').textContent = bossUp ? 'BOSS' : S.kills + '/10';
+  $('#stgBtn').textContent = stageLabel(S.stage) + ' ' + s.name + ' · ' + ST().n.toUpperCase();
+  $('#secBar').style.width = (bossUp ? 100 : S.kills / ST().count * 100) + '%';
+  $('#secTxt').textContent = bossUp ? 'BOSS' : S.kills + '/' + ST().count;
+  $('#def').textContent = fmtN(S.def);
   $('#data').textContent = fmt(S.data);
   $('#pow').textContent = fmtN(power());
-  $('#invN').textContent = S.inv.length + '/12';
+  $('#invN').textContent = S.inv.length + '/' + invCap();
 }
 function clock() { const d = new Date(); $('#clock').textContent = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
 
 function offline(ms) {
   const sec_ = Math.min(ms / 1000, 8 * 3600);
   if (sec_ < 30) return;
-  const gain = sec_ * rewardAt(S.stage * 10 + 5) * .25;
+  const gain = sec_ * rewardAt(S.stage * 10 + 5) * .25 * (1 + tv('off'));
   S.data += gain;
   const chips = Math.floor(sec_ / 1800);
   if (chips) addItem({k:'chip', r:0, n:chips});

@@ -23,6 +23,26 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Chips de invocação:** Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v0.4: subclasses, tipos de fase e árvore do antivírus
+
+**Subclasses de DPS** (as armas de DPS têm os mesmos tipos; arma do mesmo tipo da subclasse dá ×1,5 de bônus):
+
+| Subclasse | Efeito | Personagens |
+|---|---|---|
+| Área | Cada tiro respinga 30% em todos os inimigos | LASER-T ★5, TANK-M-1 ★5, NIGHTHAWK ★4 |
+| Precisão | +35% no alvo principal | SENTINEL ARCHER ★5, PULSE-R ★3, SCANNER ★3 |
+| Caça-chefes | +80% contra chefes, +40% contra blindados | GHOST ★4, INFILTRATOR ★4, BLADE ★3 |
+
+**Tipos de fase** (a lista de fases mostra o tipo e a subclasse recomendada):
+
+| Tipo | Inimigos | Melhor subclasse |
+|---|---|---|
+| Horda | 18 vírus fracos, até 6 na tela | Área |
+| Blindados | 5 vírus com 3,2× de vida, um de cada vez; dano em área causa metade | Precisão |
+| Chefão (última fase de cada setor) | 4 vírus e um chefe com 18× de vida | Caça-chefes |
+
+**Árvore do antivírus**, paga com **DEF** (definições de vírus, que caem de todo inimigo e mais dos chefes). São 4 ramos: Varredura (dano, crítico, área, chefes), Firewall (HP, redução de dano, regeneração), Quarentena (dados, módulos, chips) e Kernel (velocidade, +2 espaços de inventário, ganho offline).
+
 ## Invocação (gacha)
 
 Em **Invocar** o jogador gasta chips de invocação para invocar personagens. Cada classe tem seu próprio banner e contador de garantia.
