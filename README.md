@@ -23,6 +23,20 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.12: configurações, som e idiomas
+
+- Barra de tarefas: **leia-me.txt** e **configurações** viraram abas na barra. Saíram o ícone da área de trabalho e a aba "Reunião 14h".
+- Menu de configurações (fica fora do save: apagar progresso não mexe nele):
+  - **Idioma:** Português (BR), English, Español.
+  - **Som:** volume da música e dos efeitos, e silenciar tudo.
+  - **Tela:** números de dano, efeitos visuais completos/reduzidos, limite de FPS 60/30 (economiza bateria), formato dos números curto/completo.
+  - **Avisos:** faixa na barra ao cair item raro, pacote ou chefão.
+  - **Progresso:** exportar/importar save em texto e apagar progresso (saiu do leia-me).
+  - **No jogo final (Steam), desligadas no protótipo:** iniciar com o Windows, sempre por cima, sumir com jogo em tela cheia, posição/monitor/transparência da barra.
+- Som sintetizado (Web Audio, sem arquivos): tiro, abate, bloqueio, agente caído, chefe chegando, fase limpa, drops por raridade, vírus dourado e clique de interface. Trilha calma em lá menor, pra tocar horas no fundo. Começa no primeiro clique (regra do navegador).
+- Idiomas: cada texto da tela (menus, dicas, log, canvas) passa por uma tabela pt | en | es. No Godot essa tabela vira o CSV de tradução com `tr()`. O que ainda não tem tradução continua em português: nomes de agentes, vírus e chefões (de propósito), descrições longas de chefões e agentes, e parte das dicas de itens e da árvore.
+- Leia-me reescrito, mais curto.
+
 ## v1.11.2: guarda, cenário parado e núcleo novo
 
 - Agentes esperam os vírus em posição de guarda (arma pronta, respiração e troca de peso), não mais em pé parados.

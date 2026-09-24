@@ -61,6 +61,22 @@
   .taskbar span{display:flex; align-items:center; padding-inline:9px}
   .start{color:var(--amber); font-size:14px}
   .task.on{color:var(--text); border-bottom:2px solid var(--amber); background:#12102a}
+  .taskbar .tb{display:flex; align-items:center; gap:5px; padding:0 9px; background:none; border:0; box-shadow:none; font:11px var(--mono); color:var(--mute); cursor:pointer}
+  .taskbar .tb:hover{color:var(--text); background:#12102a}
+  .taskbar .tb[aria-pressed="true"]{color:var(--text); border-bottom:2px solid var(--cyan); background:#12102a}
+  .taskbar .tb img{image-rendering:pixelated}
+  #panel.nocur .pcur{display:none}
+  .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
+  .cfg section:last-child{border-bottom:0}
+  .cfg h3{margin:0 0 4px; font:400 11px var(--pix); letter-spacing:.08em; color:var(--cyan)}
+  .cfg .cfr{display:flex; align-items:center; gap:8px; margin:3px 0; font-size:11px}
+  .cfg .cfr > span{min-width:130px; color:var(--mute)}
+  .cfg input[type=range]{flex:1; max-width:200px; accent-color:var(--cyan)}
+  .cfg .cfr b{width:28px; text-align:right; font-weight:400}
+  .cfg select{background:#0b0a16; color:var(--text); border:1px solid var(--line); font:11px var(--mono); padding:2px 4px}
+  .cfg textarea{width:100%; margin-top:6px; background:#0b0a16; color:var(--mute); border:1px solid var(--line); font:10px var(--mono); resize:vertical}
+  .cfg .off{opacity:.55}
+  .cfg .row{display:flex; flex-wrap:wrap; gap:6px}
   .clock{margin-left:auto; font-variant-numeric:tabular-nums}
 
   /* painel que abre acima da barra */
@@ -419,8 +435,7 @@
 </style>
 
 <main class="desk">
-  <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.11.2</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.12</p>
 </main>
 
 <footer class="dock">
@@ -458,8 +473,9 @@
   <div class="taskbar">
     <span class="start">▣</span>
     <span class="task opt">relatorio_q3.xlsx</span>
-    <span class="task opt">Reunião 14h</span>
     <span class="task on">daemon.exe</span>
+    <button type="button" class="task tb" data-open="readme" aria-pressed="false">leia-me.txt</button>
+    <button type="button" class="task tb" data-open="cfg" aria-pressed="false" title="Configurações">configurações</button>
     <span class="clock" id="clock"></span>
   </div>
 </footer>
@@ -1629,6 +1645,625 @@ function sceneOf(idx, tint, panic) {
   return sceneCache[k] = {far:bgCanvas(g => S_.far(g, panic ? '#ff5a2a' : tint)), near:bgCanvas(g => S_.near(g, panic ? '#ff5a2a' : tint))};
 }
 
+// ---------- configurações ----------
+// Ficam fora do save: "apagar progresso" não mexe em idioma, volume nem nas opções de tela.
+const CFG_KEY = 'daemonbar.cfg';
+const CFG0 = {lang:'pt', mus:35, sfx:60, mute:false, dmg:true, fx:'full', fps:60, num:'short', alert:true};
+const CFG = (() => { try { return Object.assign({}, CFG0, JSON.parse(localStorage.getItem(CFG_KEY)) || {}); } catch (e) { return Object.assign({}, CFG0); } })();
+function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); } catch (e) {} }
+
+// ---------- som ----------
+// Tudo sintetizado com Web Audio: nenhum arquivo de áudio. No Godot isso vira AudioStreamPlayer com os buses Música e Efeitos.
+const SND = (() => {
+  let ac = null, master, sfxG, musG, nextT = 0, step = 0;
+  const last = {};
+  function vol() {
+    if (!ac) return;
+    master.gain.value = CFG.mute ? 0 : 1;
+    sfxG.gain.value = (CFG.sfx / 100) ** 2 * .6;
+    musG.gain.value = (CFG.mus / 100) ** 2 * .4;
+  }
+  function init() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    const A = window.AudioContext || window.webkitAudioContext;
+    if (!A) return;
+    ac = new A();
+    master = ac.createGain(); master.connect(ac.destination);
+    sfxG = ac.createGain(); sfxG.connect(master);
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200; lp.connect(master);
+    musG = ac.createGain(); musG.connect(lp);
+    vol();
+    nextT = ac.currentTime + .1;
+    setInterval(music, 200);
+  }
+  function tone(f, dur, type, g, at, slide, out) {
+    const o = ac.createOscillator(), e = ac.createGain(), t0 = ac.currentTime + (at || 0);
+    o.type = type; o.frequency.setValueAtTime(f, t0);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
+    e.gain.setValueAtTime(0, t0); e.gain.linearRampToValueAtTime(g, t0 + .005); e.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(e); e.connect(out || sfxG); o.start(t0); o.stop(t0 + dur + .02);
+  }
+  function tone2(f, dur, type, g, t0, out) {   // versão com horário absoluto, pra música
+    const o = ac.createOscillator(), e = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t0);
+    e.gain.setValueAtTime(0, t0); e.gain.linearRampToValueAtTime(g, t0 + .01); e.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(e); e.connect(out); o.start(t0); o.stop(t0 + dur + .02);
+  }
+  let nbuf = null;
+  function noise(dur, g, at, hp, out, t0) {
+    if (!nbuf) { nbuf = ac.createBuffer(1, ac.sampleRate * .5, ac.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), e = ac.createGain(), t = t0 || ac.currentTime + (at || 0);
+    s.buffer = nbuf; f.type = 'highpass'; f.frequency.value = hp || 1000;
+    e.gain.setValueAtTime(g, t); e.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(e); e.connect(out || sfxG); s.start(t); s.stop(t + dur + .02);
+  }
+  const N = s => 440 * 2 ** ((s - 9) / 12);   // semitons a partir do dó central
+  const FX = {
+    shot: () => tone(1400, .035, 'square', .025, 0, 700),
+    kill: () => { noise(.05, .06, 0, 2500); tone(420, .07, 'square', .035, 0, 150); },
+    gold: () => [0, 7].forEach((s, i) => tone(N(24 + s), .09, 'square', .05, i * .05)),
+    drop: t => [0, 4, 7, 12, 16].slice(0, 2 + Math.min(3, t || 0)).forEach((s, i) => tone(N(12 + s), .14, 'triangle', .09, i * .055)),
+    boss: () => { tone(98, .7, 'sawtooth', .07, 0, 70); tone(104, .7, 'sawtooth', .06, 0, 74); noise(.3, .05, 0, 300); },
+    clear: () => [0, 4, 7, 12].forEach((s, i) => tone(N(7 + s), .16, 'square', .045, i * .075)),
+    down: () => { tone(330, .4, 'triangle', .1, 0, 90); noise(.2, .04, 0, 600); },
+    block: () => tone(700, .05, 'square', .035, 0, 900),
+    ui: () => tone(1100, .025, 'square', .02),
+  };
+  function play(k, a) {
+    if (!ac || CFG.mute || !CFG.sfx || !FX[k]) return;
+    const now = performance.now(), gap = {shot:90, kill:70, ui:30, block:120, gold:120}[k] || 0;
+    if (gap && now - (last[k] || 0) < gap) return;
+    last[k] = now; FX[k](a);
+  }
+  // trilha: lá menor, i–VI–III–VII, 96 bpm em colcheias, calma pra tocar horas no fundo
+  const CH = [[-3, 0, 4], [-7, -3, 0], [0, 4, 7], [-2, 2, 5]], BASS = [0, 3, 6, 10, 12];
+  function music() {
+    if (!ac || CFG.mute || !CFG.mus) { if (ac) nextT = ac.currentTime + .1; return; }
+    const beat = 60 / 96 / 2;
+    if (nextT < ac.currentTime) nextT = ac.currentTime + .05;
+    while (nextT < ac.currentTime + 1.2) {
+      const bar = Math.floor(step / 16) % 4, s = step % 16, ch = CH[bar];
+      if (BASS.includes(s)) tone2(N(ch[0] - 12), beat * (s === 12 ? 3.5 : 2.5), 'triangle', .22, nextT, musG);
+      const arp = [0, 1, 2, 1, 2, 0, 1, 2][s % 8] + (s >= 8 && step % 64 >= 32 ? 3 : 0);
+      const n = ch[arp % 3] + 12 * (arp >= 3 ? 1 : 0);
+      if (s % 2 === 0 || Math.random() < .35) tone2(N(n + 12), beat * 1.6, 'square', .035, nextT, musG);
+      if (s % 4 === 2) noise(.04, .025, 0, 6000, musG, nextT);
+      if (s === 0 && bar % 2 === 0) tone2(N(ch[2] + 24), beat * 6, 'sine', .04, nextT, musG);
+      nextT += beat; step++;
+    }
+  }
+  // o navegador só libera som depois de um clique
+  addEventListener('pointerdown', init);
+  addEventListener('keydown', init);
+  return {play, vol};
+})();
+
+// ---------- idiomas ----------
+// O protótipo é escrito em português; a tradução acontece na tela: cada texto que aparece (menus, dicas, log, canvas)
+// passa por L(). Ordem: frase exata → padrões com números → trechos conhecidos dentro de frases maiores.
+// No Godot isso vira um CSV de tradução (chave, pt_BR, en, es) com tr(); esta tabela já serve de ponto de partida.
+const LANGS = [['pt', 'Português (BR)'], ['en', 'English'], ['es', 'Español']];
+const I18N = new Map();
+// pt | en | es  (prefixo = no pt: só frase inteira, nunca trecho)
+`
+Agentes|Agents|Agentes
+Coleção|Collection|Colección
+Compilador|Compiler|Compilador
+Download|Download|Descarga
+Upload|Upload|Subida
+Antivírus|Antivirus|Antivirus
+Fases|Stages|Fases
+Chefões|Bosses|Jefes
+Contratos|Contracts|Contratos
+Bestiário|Bestiary|Bestiario
+Ranking|Ranking|Clasificación
+Chances|Odds|Probabilidades
+Log|Log|Registro
+Configurações|Settings|Ajustes
+Leia-me|Read me|Léeme
+leia-me.txt|readme.txt|leeme.txt
+configurações|settings|ajustes
+agentes|agents|agentes
+coleção|collection|colección
+compilador|compiler|compilador
+núcleo do antivírus|antivirus core|núcleo del antivirus
+Núcleo do antivírus|Antivirus core|Núcleo del antivirus
+central de upload|upload center|central de subida
+download de agentes|agent download|descarga de agentes
+fases|stages|fases
+log do sistema|system log|registro del sistema
+ranking de operadores|operator ranking|clasificación de operadores
+chefões · malwares reais|bosses · real malware|jefes · malware real
+contratos e presença|contracts & check-in|contratos y asistencia
+bestiário e conquistas|bestiary & achievements|bestiario y logros
+probabilidades publicadas|published odds|probabilidades publicadas
+Agentes e inventário|Agents and inventory|Agentes e inventario
+Download de agentes|Agent download|Descarga de agentes
+Chefões: malwares reais|Bosses: real malware|Jefes: malware real
+Contratos e presença|Contracts & check-in|Contratos y asistencia
+Central de Upload (Steam)|Upload Center (Steam)|Central de subida (Steam)
+Bestiário e conquistas|Bestiary & achievements|Bestiario y logros
+Ranking e nível do operador|Ranking & operator level|Clasificación y nivel de operador
+Escolher fase|Choose stage|Elegir fase
+Velocidade do protótipo|Prototype speed|Velocidad del prototipo
+Fechar painel|Close panel|Cerrar panel
+Poder do esquadrão|Squad power|Poder del escuadrón
+Créditos: o dinheiro do jogo. Ganhe derrotando vírus; gaste pra aprimorar agentes.|Credits: the game's money. Earn them by defeating viruses; spend them to upgrade agents.|Créditos: el dinero del juego. Gánalos derrotando virus; gástalos para mejorar agentes.
+Definições de vírus: caem de todo inimigo e compram atualizações no Núcleo do antivírus.|Virus definitions: dropped by every enemy, they buy upgrades in the Antivirus core.|Definiciones de virus: caen de todo enemigo y compran mejoras en el Núcleo del antivirus.
+Esquadrão lutando contra vírus|Squad fighting viruses|Escuadrón luchando contra virus
+créditos|credits|créditos
+créditos ·|credits ·|créditos ·
+definições|definitions|definiciones
+Créditos|Credits|Créditos
+Poder|Power|Poder
+Definições|Definitions|Definiciones
+relatorio_q3.xlsx|q3_report.xlsx|informe_t3.xlsx
+Tanque|Tank|Tanque
+Ataque|Attack|Ataque
+Suporte|Support|Soporte
+Tanques|Tanks|Tanques
+Suportes|Supports|Soportes
+Rastreador|Tracker|Rastreador
+Rastreadores|Trackers|Rastreadores
+Varredor|Sweeper|Barredor
+Varredores|Sweepers|Barredores
+Caça-chefes|Bosshunter|Cazajefes
+Arma|Weapon|Arma
+ARMA|WPN|ARMA
+Capacete|Helmet|Casco
+Armadura|Armor|Armadura
+Botas|Boots|Botas
+Escudo|Shield|Escudo
+Vacina|Vaccine|Vacuna
+IA|AI|IA
+IAs|AIs|IAs
+ESC|SHD|ESC
+CAP|HLM|CAS
+ARM|ARM|ARM
+BOT|BTS|BOT
+VAC|VAC|VAC
+Elmo|Helm|Yelmo
+Comum|Common|Común
+Raro|Rare|Raro
+Lendário|Legendary|Legendario
+Otimizado|Optimized|Optimizado
+Criptografado|Encrypted|Cifrado
+Quântico|Quantum|Cuántico
+T1 Comum|T1 Common|T1 Común
+T2 Otimizado|T2 Optimized|T2 Optimizado
+T3 Criptografado|T3 Encrypted|T3 Cifrado
+T5 Quântico|T5 Quantum|T5 Cuántico
+Pacote Comum|Common pack|Paquete común
+Pacote Raro|Rare pack|Paquete raro
+Pacote Lendário|Legendary pack|Paquete legendario
+Normal|Normal|Normal
+Avançado|Advanced|Avanzado
+Crítico|Critical|Crítico
+Crítico 🔒|Critical 🔒|Crítico 🔒
+Horda|Horde|Horda
+Blindados|Armored|Blindados
+Chefão|Boss|Jefe
+chefe|boss|jefe
+Vírus|Virus|Virus
+Itens|Items|Objetos
+itens|items|objetos
+Loja|Shop|Tienda
+Tier|Tier|Tier
+dano|damage|daño
+vida|HP|vida
+poder|power|poder
+fase|stage|fase
+você|you|tú
+real|real|real
+livre|free|libre
+espera|wait|espera
+efeito|effect|efecto
+agentes|agents|agentes
+pacotes|packs|paquetes
+coleção|collection|colección
+Limpar|Clear|Limpiar
+Vazio.|Empty.|Vacío.
+Colocar|Place|Colocar
+Compilar|Compile|Compilar
+Enfrentar|Fight|Enfrentar
+Bloqueado|Locked|Bloqueado
+Presença|Check-in|Asistencia
+Passivas|Passives|Pasivas
+Conjuntos|Sets|Conjuntos
+Sentinela|Sentinel|Centinela
+Varredura|Scan|Escaneo
+Quarentena|Quarantine|Cuarentena
+quarentena|quarantine|cuarentena
+Firewall|Firewall|Firewall
+Kernel|Kernel|Kernel
+Minerador|Miner|Minero
+Overclock|Overclock|Overclock
+Convidado|Guest|Invitado
+· convidado|· guest|· invitado
+operador|operator|operador
+fragmentos|fragments|fragmentos
+compilados|compiled|compilados
+acessórios|accessories|accesorios
+Inventário|Inventory|Inventario
+No esquadrão|In squad|En el escuadrón
+ver coleção|view collection|ver colección
+soquete vazio|empty socket|ranura vacía
+soquetes de equipamento|equipment sockets|ranuras de equipo
+Soquetes de equipamento|Equipment sockets|Ranuras de equipo
+Acessórios|Accessories|Accesorios
+● ÍNTEGRO|● INTACT|● ÍNTEGRO
+● PROTEÇÃO ATIVA|● PROTECTION ON|● PROTECCIÓN ACTIVA
+● FORA DO AR|● OFFLINE|● FUERA DE LÍNEA
+> dano|> damage|> daño
+> vida|> HP|> vida
+> nível|> level|> nivel
+> ataques/s|> attacks/s|> ataques/s
+> overclock|> overclock|> overclock
+> blindagem|> plating|> blindaje
+> trocar agente|> swap agent|> cambiar agente
+(+dano)|(+damage)|(+daño)
+(+vida)|(+HP)|(+vida)
+Subir nível ·|Level up ·|Subir nivel ·
+Baixar ×1|Download ×1|Descargar ×1
+Baixar ×10|Download ×10|Descargar ×10
+Baixar tanque|Download tank|Descargar tanque
+Baixar ataque|Download attack|Descargar ataque
+Equipar|Equip|Equipar
+Reciclar|Recycle|Reciclar
+Reciclar ·|Recycle ·|Reciclar ·
+Reciclar tudo ·|Recycle all ·|Reciclar todo ·
+Reciclar piores que os equipados|Recycle worse than equipped|Reciclar peores que los equipados
+auto-aprimorar|auto-upgrade|auto-mejorar
+auto-equipar itens melhores|auto-equip better items|auto-equipar objetos mejores
+compilar sozinho quando o inventário encher|auto-compile when the inventory is full|compilar solo cuando el inventario se llene
+avançar sozinho (e recuar uma fase se o esquadrão cair 2 vezes)|auto-advance (and step back a stage if the squad falls twice)|avanzar solo (y retroceder una fase si el escuadrón cae 2 veces)
+Preenchimento automático|Auto-fill|Relleno automático
+preenchimento inclui itens melhores que os equipados|auto-fill includes items better than the equipped ones|el relleno incluye objetos mejores que los equipados
+Pacotes de download|Download packs|Paquetes de descarga
+Pacote de download|Download pack|Paquete de descarga
+pacotes Comuns dos Chefões|Common packs from Bosses|paquetes comunes de los Jefes
+Vinculado à conta.|Account-bound.|Vinculado a la cuenta.
+Vinculado à conta|Account-bound|Vinculado a la cuenta
+Negociáveis no inventário|Tradable in the inventory|Intercambiables en el inventario
+Ainda não baixado|Not downloaded yet|Aún no descargado
+Download · Ataque|Download · Attack|Descarga · Ataque
+Download · Tanques|Download · Tanks|Descarga · Tanques
+Se já tiver, vira repetido.|If you already have it, it becomes a duplicate.|Si ya lo tienes, se vuelve repetido.
+★4 à escolha|★4 of your choice|★4 a elección
+★5 à escolha|★5 of your choice|★5 a elección
+nunca ★3|never ★3|nunca ★3
+★5 garantido em 500 · ★4 em 50|★5 guaranteed at 500 · ★4 at 50|★5 garantizado en 500 · ★4 en 50
+★5 garantido em 180 · ×10 garante ★4|★5 guaranteed at 180 · ×10 guarantees ★4|★5 garantizado en 180 · ×10 garantiza ★4
+Espaços de envio|Upload slots|Espacios de envío
+4 espaços de envio|4 upload slots|4 espacios de envío
+Enviar pra Steam|Send to Steam|Enviar a Steam
+Inventário da Steam|Steam inventory|Inventario de Steam
+inventário da Steam|Steam inventory|inventario de Steam
+(simulado no protótipo)|(simulated in the prototype)|(simulado en el prototipo)
+Bônus do sistema|System bonuses|Bonos del sistema
+defesa e vacinas|defense and vaccines|defensa y vacunas
+farm e drops|farming and drops|farmeo y botín
+velocidade e sistema|speed and system|velocidad y sistema
+· nada ainda|· nothing yet|· nada aún
+DEF disponível|DEF available|DEF disponible
+dano em área|area damage|daño en área
+vel. de ataque|attack speed|vel. de ataque
+chance de crítico|crit chance|prob. de crítico
+redução de dano|damage reduction|reducción de daño
+dano contra chefes|damage vs bosses|daño contra jefes
+créditos ganhos|credits earned|créditos ganados
+DEF ganho|DEF earned|DEF ganado
+sorte (itens T3+)|luck (T3+ items)|suerte (objetos T3+)
+chance de ataque duplo|double attack chance|prob. de ataque doble
+chance de drop de armas|weapon drop chance|prob. de botín de armas
+chance de drop de itens|item drop chance|prob. de botín de objetos
+desconto nos aprimoramentos|upgrade discount|descuento en mejoras
+ganho offline|offline gains|ganancia offline
+Contratos do dia|Daily contracts|Contratos del día
+Contratos da semana|Weekly contracts|Contratos de la semana
+Pegar recompensa de hoje|Claim today's reward|Recoger la recompensa de hoy
+0 dias no total · não zera se você faltar|0 days total · doesn't reset if you miss a day|0 días en total · no se reinicia si faltas
+Vença 2 Chefões|Defeat 2 Bosses|Vence a 2 Jefes
+Compile 8 vezes|Compile 8 times|Compila 8 veces
+Compile 150 vezes|Compile 150 times|Compila 150 veces
+Conclua 30 fases|Clear 30 stages|Completa 30 fases
+Consiga 15 itens T4 ou melhor|Get 15 T4-or-better items|Consigue 15 objetos T4 o mejores
+Tipos de fase|Stage types|Tipos de fase
+Você está em|You are at|Estás en
+· fase atual|· current stage|· fase actual
+Seu poder:|Your power:|Tu poder:
+Mais longe|Farthest|Más lejos
+Poder da conta|Account power|Poder de la cuenta
+Nível do operador|Operator level|Nivel de operador
+Conquistas|Achievements|Logros
+Ainda não encontrado.|Not found yet.|Aún no encontrado.
+ainda não eliminado|not eliminated yet|aún no eliminado
+Chefão convidado:|Guest boss:|Jefe invitado:
+Chefão disponível:|Boss available:|Jefe disponible:
+. Abra o menu Chefões.|. Open the Bosses menu.|. Abre el menú Jefes.
+Convidado de outra semana: ainda não apareceu pra você.|Guest from another week: hasn't shown up for you yet.|Invitado de otra semana: aún no apareció para ti.
+Entrar gasta a tentativa. 90 s pra vencer. Passe o mouse pra ver a história e os drops.|Entering spends the attempt. 90 s to win. Hover to see the story and drops.|Entrar gasta el intento. 90 s para ganar. Pasa el ratón para ver la historia y el botín.
+Vírus dourado|Golden virus|Virus dorado
+Créditos ×2|Credits ×2|Créditos ×2
+Definições ×2|Definitions ×2|Definiciones ×2
+Por 1 hora.|For 1 hour.|Durante 1 hora.
+Formatar C:|Format C:|Formatear C:
+recomeço com bônus permanente|restart with a permanent bonus|reinicio con bono permanente
+por vitória|per win|por victoria
+Nada ainda.|Nothing yet.|Nada aún.
+daemon.exe iniciado.|daemon.exe started.|daemon.exe iniciado.
+Progresso apagado.|Progress erased.|Progreso borrado.
+Inventário cheio.|Inventory full.|Inventario lleno.
+Clique num item pra ver detalhes.|Click an item to see details.|Haz clic en un objeto para ver detalles.
+Sem passivas (T2 ou mais têm passivas).|No passives (T2 and up have passives).|Sin pasivas (T2 o más tienen pasivas).
+Equipado:|Equipped:|Equipado:
+melhor|better|mejor
+pior|worse|peor
+nada|nothing|nada
+Passe o mouse num nó pra ver o efeito; clique pra instalar. Arraste o mapa pra navegar.|Hover a node to see its effect; click to install. Drag the map to move around.|Pasa el ratón por un nodo para ver el efecto; haz clic para instalar. Arrastra el mapa para moverte.
+O centro do sistema. Os 4 braços saem daqui: Varredura (cima), Quarentena (direita), Firewall (baixo) e Kernel (esquerda).|The heart of the system. The 4 branches start here: Scan (up), Quarantine (right), Firewall (down) and Kernel (left).|El centro del sistema. Las 4 ramas salen de aquí: Escaneo (arriba), Cuarentena (derecha), Firewall (abajo) y Kernel (izquierda).
+Junte 5 itens do mesmo tier pra tentar um tier acima. Chances de sucesso no menu Chances.|Combine 5 items of the same tier to try for one tier higher. Success odds in the Odds menu.|Junta 5 objetos del mismo tier para intentar uno superior. Probabilidades en el menú Probabilidades.
+prévia (todos os itens no tier):|preview (all items at that tier):|vista previa (todos los objetos del tier):
+Estas são as chances reais do jogo.|These are the game's real odds.|Estas son las probabilidades reales del juego.
+Tudo que vem de contratos e presença é vinculado à conta: não vai pro mercado.|Everything from contracts and check-in is account-bound: it can't go to the market.|Todo lo que viene de contratos y asistencia está vinculado a la cuenta: no va al mercado.
+A fase mais funda que você já alcançou, contando todas as formatações. Formatar não tira sua posição.|The deepest stage you've ever reached, across all formats. Formatting doesn't cost you your spot.|La fase más profunda que alcanzaste, contando todos los formateos. Formatear no te quita tu posición.
+fase mais funda já alcançada · rivais simulados no protótipo|deepest stage reached · rivals simulated in the prototype|fase más profunda alcanzada · rivales simulados en el prototipo
+O nível do operador é o destino dos créditos no fim de jogo: cada nível custa 12% a mais que o anterior, não tem teto e conta pro ranking.|Operator level is where endgame credits go: each level costs 12% more than the last, has no cap and counts toward the ranking.|El nivel de operador es el destino de los créditos al final del juego: cada nivel cuesta 12% más que el anterior, no tiene tope y cuenta para la clasificación.
+Libera ao chegar no Kernel Panic. Zera fase, créditos e aprimoramentos. Mantém agentes, versões, itens, árvore, operador e Chefões.|Unlocks at Kernel Panic. Resets stage, credits and upgrades. Keeps agents, versions, items, tree, operator and Bosses.|Se libera al llegar a Kernel Panic. Reinicia fase, créditos y mejoras. Mantiene agentes, versiones, objetos, árbol, operador y Jefes.
+3 atos × 10 fases em cada dificuldade. Terminar o Ato 3 libera a próxima dificuldade; dificuldades mais altas dão itens de tier mais alto. Depois do Zero-Day vem o Kernel Panic, sem fim.|3 acts × 10 stages per difficulty. Finishing Act 3 unlocks the next difficulty; higher difficulties drop higher-tier items. After Zero-Day comes Kernel Panic, endless.|3 actos × 10 fases en cada dificultad. Terminar el Acto 3 libera la siguiente dificultad; las más altas dan objetos de tier más alto. Después de Zero-Day viene Kernel Panic, sin fin.
+: Muitos vírus fracos chegando em bando.|: Lots of weak viruses arriving in a swarm.|: Muchos virus débiles llegando en manada.
+: Poucos vírus, um de cada vez, com muita vida. Dano em área causa só metade.|: Few viruses, one at a time, with lots of HP. Area damage deals only half.|: Pocos virus, uno a la vez, con mucha vida. El daño en área hace solo la mitad.
+: Poucos vírus e um chefe enorme no final. Fase de chefe: bem mais pacotes de download e itens de tier alto.|: Few viruses and a huge boss at the end. Boss stage: many more download packs and high-tier items.|: Pocos virus y un jefe enorme al final. Fase de jefe: muchos más paquetes de descarga y objetos de tier alto.
+Ato 1 · Sistema de arquivos|Act 1 · File system|Acto 1 · Sistema de archivos
+Ato 2 · Memória e kernel|Act 2 · Memory and kernel|Acto 2 · Memoria y kernel
+Ato 3 · Rede|Act 3 · Network|Acto 3 · Red
+Regras (aprendendo com o Task Bar Hero)|Rules (learning from Task Bar Hero)|Reglas (aprendiendo de Task Bar Hero)
+: a oferta é igual pra todo mundo.|: the supply is the same for everyone.|: la oferta es igual para todos.
+A Central de Upload envia itens do jogo pro|The Upload Center sends game items to your|La Central de subida envía objetos del juego a tu
+, onde podem ser vendidos no Mercado da Comunidade.|, where they can be sold on the Community Market.|, donde se pueden vender en el Mercado de la Comunidad.
+de espera: no máximo 12 envios por dia.|cooldown: at most 12 uploads per day.|de espera: como máximo 12 envíos por día.
+travados antes de poderem ser reenviados.|locked before they can be sent again.|bloqueados antes de poder reenviarse.
+· Negociáveis: pacotes de download e itens|· Tradable: download packs and items|· Intercambiables: paquetes de descarga y objetos
+· Itens que voltam do mercado ficam|· Items coming back from the market stay|· Los objetos que vuelven del mercado quedan
+ficam vinculados à conta. Pacotes Raros e Lendários dos Chefões são negociáveis.|are account-bound. Rare and Legendary packs from Bosses are tradable.|quedan vinculados a la cuenta. Los paquetes Raros y Legendarios de los Jefes son intercambiables.
+T5 e T6 Root ficam bloqueados|T5 and T6 Root stay locked|T5 y T6 Root quedan bloqueados
+no lançamento e são liberados depois, com os dados de oferta em mãos.|at launch and are released later, once we have supply data.|en el lanzamiento y se liberan después, con los datos de oferta en mano.
+No Download de lançamento, metade dos resultados da raridade do agente novo é dele.|In the launch Download, half of the results at the new agent's rarity are that agent.|En la Descarga de lanzamiento, la mitad de los resultados de la rareza del agente nuevo son de él.
+Repetido = versão nova do agente. Na v2.0 vira fragmento.|Duplicate = a new version of the agent. At v2.0 it becomes fragments.|Repetido = versión nueva del agente. En la v2.0 se vuelve fragmento.
+não recebem bônus de drop|don't get drop bonuses|no reciben bonos de botín
+Escolha 5 itens do mesmo tier (T1 a T4). Selecionados: 0/5.|Pick 5 items of the same tier (T1 to T4). Selected: 0/5.|Elige 5 objetos del mismo tier (T1 a T4). Seleccionados: 0/5.
+Núcleo de fusão: devolve 30% do dano recebido.|Fusion core: reflects 30% of damage taken.|Núcleo de fusión: devuelve el 30% del daño recibido.
+2.0: Sobrecarga: esquadrão causa +12% de dano.|2.0: Overload: squad deals +12% damage.|2.0: Sobrecarga: el escuadrón causa +12% de daño.
+2.0: Auto-reparo: regenera 1% do HP por segundo.|2.0: Self-repair: regenerates 1% HP per second.|2.0: Autorreparación: regenera 1% de vida por segundo.
+Drone de reconhecimento: esquadrão causa +10% de dano.|Recon drone: squad deals +10% damage.|Dron de reconocimiento: el escuadrón causa +10% de daño.
+2/6 · novos agentes vêm do Download|2/6 · new agents come from Download|2/6 · los agentes nuevos vienen de la Descarga
+protótipo: +pacotes|prototype: +packs|prototipo: +paquetes
+protótipo: +500 DEF|prototype: +500 DEF|prototipo: +500 DEF
+protótipo: zerar esperas|prototype: reset cooldowns|prototipo: reiniciar esperas
+protótipo: avançar 1 dia|prototype: skip 1 day|prototipo: avanzar 1 día
+avançar 1 semana|skip 1 week|avanzar 1 semana
+protótipo: ganhar um Root|prototype: get a Root|prototipo: obtener un Root
+protótipo: simular lançamento|prototype: simulate launch|prototipo: simular lanzamiento
+Apagar progresso|Erase progress|Borrar progreso
+Clique de novo pra confirmar|Click again to confirm|Haz clic de nuevo para confirmar
+Idioma|Language|Idioma
+Som|Sound|Sonido
+Música|Music|Música
+Efeitos|Effects|Efectos
+Silenciar tudo|Mute all|Silenciar todo
+Tela|Display|Pantalla
+Números de dano|Damage numbers|Números de daño
+Efeitos visuais|Visual effects|Efectos visuales
+completos|full|completos
+reduzidos|reduced|reducidos
+Limite de FPS|FPS limit|Límite de FPS
+30 (economiza bateria)|30 (saves battery)|30 (ahorra batería)
+Formato dos números|Number format|Formato de números
+curto (12,4 mil)|short (12.4K)|corto (12,4 mil)
+completo (12.400)|full (12,400)|completo (12.400)
+Avisos|Alerts|Avisos
+Faixa na barra ao cair item raro, pacote ou chefão|Banner on the bar for rare items, packs and bosses|Aviso en la barra al caer objeto raro, paquete o jefe
+Progresso|Progress|Progreso
+Exportar save|Export save|Exportar partida
+Importar save|Import save|Importar partida
+Save copiado. Guarde esse texto em lugar seguro.|Save copied. Keep this text somewhere safe.|Partida copiada. Guarda este texto en un lugar seguro.
+Cole aqui o texto do save:|Paste the save text here:|Pega aquí el texto de la partida:
+Save inválido.|Invalid save.|Partida inválida.
+No jogo final (Steam)|In the final game (Steam)|En el juego final (Steam)
+Iniciar junto com o Windows|Start with Windows|Iniciar con Windows
+Sempre por cima das janelas|Always on top|Siempre encima de las ventanas
+Barra em cima ou embaixo da tela|Bar at the top or bottom of the screen|Barra arriba o abajo de la pantalla
+Escolher monitor|Choose monitor|Elegir monitor
+Transparência da barra|Bar transparency|Transparencia de la barra
+Some quando um jogo em tela cheia abrir|Hide when a fullscreen game opens|Ocultar cuando se abra un juego a pantalla completa
+Essas opções dependem do app nativo (Godot) e ficam desligadas no protótipo.|These options need the native app (Godot) and are off in the prototype.|Estas opciones dependen de la app nativa (Godot) y están desactivadas en el prototipo.
+O idioma muda na hora; o jogo recarrega pra aplicar em tudo.|The language changes right away; the game reloads to apply it everywhere.|El idioma cambia al instante; el juego se recarga para aplicarlo en todo.
+Você não é um herói de fantasia. Você é o antivírus.|You're not a fantasy hero. You're the antivirus.|No eres un héroe de fantasía. Eres el antivirus.
+Um esquadrão de agentes (tanque, ataque e suporte) defende o núcleo do seu computador enquanto você trabalha. Os vírus vêm até eles; cada vírus apagado vira|A squad of agents (tank, attack and support) defends your computer's core while you work. The viruses come to them; every deleted virus becomes|Un escuadrón de agentes (tanque, ataque y soporte) defiende el núcleo de tu computadora mientras trabajas. Los virus vienen hacia ellos; cada virus borrado se vuelve
+, o dinheiro do jogo.|, the game's money.|, el dinero del juego.
+Esquadrão:|Squad:|Escuadrón:
+aprimore dano e vida com créditos e equipe itens (T1 a T6) e acessórios.|upgrade damage and HP with credits and equip items (T1 to T6) and accessories.|mejora daño y vida con créditos y equipa objetos (T1 a T6) y accesorios.
+Download:|Download:|Descarga:
+use pacotes pra baixar novos agentes; repetidos viram versões novas.|use packs to download new agents; duplicates become new versions.|usa paquetes para descargar agentes nuevos; los repetidos se vuelven versiones nuevas.
+Fases:|Stages:|Fases:
+Horda (muitos vírus), Blindados (poucos e resistentes) e Chefão. Escolha onde farmar; as mais altas pedem mais poder.|Horde (many viruses), Armored (few and tough) and Boss. Pick where to farm; higher ones need more power.|Horda (muchos virus), Blindados (pocos y resistentes) y Jefe. Elige dónde farmear; las más altas piden más poder.
+Antivírus:|Antivirus:|Antivirus:
+a árvore de atualizações, paga com DEF.|the upgrade tree, paid with DEF.|el árbol de mejoras, pagado con DEF.
+Chefões:|Bosses:|Jefes:
+malwares reais da história, com tentativa limitada e drops raros.|real malware from history, with limited attempts and rare drops.|malware real de la historia, con intentos limitados y botín raro.
+Contratos:|Contracts:|Contratos:
+metas diárias e semanais.|daily and weekly goals.|metas diarias y semanales.
+O jogo continua rodando com o painel fechado. Deixe na barra e volte quando quiser.|The game keeps running with the panel closed. Leave it on the bar and come back whenever.|El juego sigue corriendo con el panel cerrado. Déjalo en la barra y vuelve cuando quieras.
+Nenhum conjunto ativo: 2 peças do mesmo conjunto ativam o bônus.|No set active: 2 pieces of the same set activate the bonus.|Ningún conjunto activo: 2 piezas del mismo conjunto activan el bono.
+pacotes|packs|paquetes
+nenhum (não ocupam espaço)|none (they don't take space)|ninguno (no ocupan espacio)
+DELETADO|DELETED|BORRADO
+CRIT|CRIT|CRIT
+BLOQUEADO|BLOCKED|BLOQUEADO
+PEGOU!|GOT IT!|¡ATRAPADO!
+PACOTE COMUM|COMMON PACK|PAQUETE COMÚN
+PACOTE RARO|RARE PACK|PAQUETE RARO
+PACOTE LENDÁRIO|LEGENDARY PACK|PAQUETE LEGENDARIO
+PACOTE RARO!|RARE PACK!|¡PAQUETE RARO!
+PACOTE LENDÁRIO!|LEGENDARY PACK!|¡PAQUETE LEGENDARIO!
+ATAQUE ORBITAL|ORBITAL STRIKE|ATAQUE ORBITAL
+VÍRUS DOURADO! CLIQUE NELE|GOLDEN VIRUS! CLICK IT|¡VIRUS DORADO! HAZ CLIC
+ROOT T6!|ROOT T6!|¡ROOT T6!
+OFF|OFF|OFF
+DISPONÍVEL|AVAILABLE|DISPONIBLE
+ELIMINADO!|ELIMINATED!|¡ELIMINADO!
+ESCAPOU|ESCAPED|ESCAPÓ
+SETORES|SECTORS|SECTORES
+COMPILADO|COMPILED|COMPILADO
+CHEFÃO|BOSS|JEFE
+C:\\ FORMATADO|C:\\ FORMATTED|C:\\ FORMATEADO
+foi pro inventário|went to the inventory|fue al inventario
+caiu do chefe!|dropped from the boss!|¡cayó del jefe!
+Abra o inventário e escolha as passivas dele.|Open the inventory and pick its passives.|Abre el inventario y elige sus pasivas.
+Inventário cheio, mas o Root foi guardado mesmo assim.|Inventory full, but the Root was kept anyway.|Inventario lleno, pero el Root se guardó igual.
+Inventário cheio:|Inventory full:|Inventario lleno:
+reciclado|recycled|reciclado
+(antigo reciclado)|(old one recycled)|(el anterior reciclado)
+equipou|equipped|equipó
+encontrado!|found!|¡encontrado!
+Volta na próxima fase.|Back next stage.|Vuelve en la próxima fase.
+caiu.|fell.|cayó.
+desbloqueada.|unlocked.|desbloqueada.
+concluída!|cleared!|¡completada!
+limpa.|cleared.|limpia.
+Farmando|Farming|Farmeando
+Poder insuficiente em|Not enough power at|Poder insuficiente en
+antes de tentar de novo.|before trying again.|antes de intentarlo de nuevo.
+Antivírus atualizado:|Antivirus updated:|Antivirus actualizado:
+Operador subiu pro nível|Operator reached level|El operador subió al nivel
+Itens piores reciclados|Worse items recycled|Objetos peores reciclados
+Reciclado|Recycled|Reciclado
+eliminado!|eliminated!|¡eliminado!
+escapou|escaped|escapó
+tempo esgotado|time's up|tiempo agotado
+esquadrão derrubado|squad down|escuadrón derribado
+Tentativa gasta.|Attempt spent.|Intento gastado.
+iniciado.|started.|iniciado.
+Próxima tentativa em|Next attempt in|Próximo intento en
+Enquanto você estava fora|While you were away|Mientras no estabas
+Sistema formatado!|System formatted!|¡Sistema formateado!
+setores recuperados|sectors recovered|sectores recuperados
+comprado com fragmentos!|bought with fragments!|¡comprado con fragmentos!
+baixado!|downloaded!|¡descargado!
+atualizado pra|updated to|actualizado a
+recebeu uma atualização|got an update|recibió una actualización
+segunda passiva liberada!|second passive unlocked!|¡segunda pasiva liberada!
+passiva +50%|passive +50%|pasiva +50%
+fragmentos de código|code fragments|fragmentos de código
+Repetidos de agentes na v2.0|Agent duplicates at v2.0|Repetidos de agentes en v2.0
+Agora é permanente.|It's permanent now.|Ahora es permanente.
+configurado:|configured:|configurado:
+ativo:|active:|activo:
+Enviado pra Steam:|Sent to Steam:|Enviado a Steam:
+Espaço de envio livre de novo em|Upload slot free again in|Espacio de envío libre de nuevo en
+Item trazido de volta da Steam (simulado).|Item brought back from Steam (simulated).|Objeto traído de vuelta de Steam (simulado).
+Não há 5 itens do mesmo tier pra compilar.|There aren't 5 items of the same tier to compile.|No hay 5 objetos del mismo tier para compilar.
+libere um espaço antes de remover o item.|free a slot before removing the item.|libera un espacio antes de quitar el objeto.
+peças|pieces|piezas
+a cada|every|cada
+por dia|per day|por día
+por semana|per week|por semana
+por mês|per month|por mes
+dias|days|días
+semanas|weeks|semanas
+no máximo|at most|como máximo
+`.trim().split('\n').forEach(l => { const p = l.split('|'); if (p.length >= 2) I18N.set(p[0], [p[1], p[2] || p[1]]); });
+
+const DIFF_TR = {'Normal': ['Normal', 'Normal'], 'Avançado': ['Advanced', 'Avanzado'], 'Crítico': ['Critical', 'Crítico'], 'Zero-Day': ['Zero-Day', 'Zero-Day'], 'Kernel Panic': ['Kernel Panic', 'Kernel Panic']};
+const li_ = () => CFG.lang === 'en' ? 0 : 1;
+const w_ = (en, es) => li_() ? es : en;
+// padrões com números (a parte variável é preservada)
+const TR_RX = [
+  [/^(Normal|Avançado|Crítico|Zero-Day|Kernel Panic) (\d+(?:-\d+)?)( 🔒)?$/, m => DIFF_TR[m[1]][li_()] + ' ' + m[2] + (m[3] || '')],
+  [/^(Normal|Avançado|Crítico|Zero-Day|Kernel Panic) (\d+-\d+) · (.+)$/, m => DIFF_TR[m[1]][li_()] + ' ' + m[2] + ' · ' + L(m[3][0] + m[3].slice(1).toLowerCase()).toUpperCase()],
+  [/^fase (Normal|Avançado|Crítico|Zero-Day|Kernel Panic) (\d+-\d+) · (.+)$/, m => w_('stage ', 'fase ') + DIFF_TR[m[1]][li_()] + ' ' + m[2] + ' · ' + L(m[3])],
+  [/^(Normal|Avançado|Crítico) (\d+)-(\d+)$/, m => DIFF_TR[m[1]][li_()] + ' ' + m[2] + '-' + m[3]],
+  [/^poder (\d+)$/, m => w_('power ', 'poder ') + m[1]],
+  [/^Nv(\d+)$/, m => w_('Lv', 'Nv') + m[1]],
+  [/^nv(\d+)$/, m => w_('lv', 'nv') + m[1]],
+  [/^nível (\d+)$/, m => w_('level ', 'nivel ') + m[1]],
+  [/^dia (\d+)$/, m => w_('day ', 'día ') + m[1]],
+  [/^(\d+) dias$/, m => m[1] + w_(' days', ' días')],
+  [/^renovam em (.+)$/, m => w_('renew in ', 'se renuevan en ') + m[1]],
+  [/^(\d+)\/(\d+) itens$/, m => m[1] + '/' + m[2] + w_(' items', ' objetos')],
+  [/^(\d+) frag\.$/, m => m[1] + ' frag.'],
+  [/^(\d+) fragmentos$/, m => m[1] + w_(' fragments', ' fragmentos')],
+  [/^(\d+)\/(\d+) repetidos$/, m => m[1] + '/' + m[2] + w_(' duplicates', ' repetidos')],
+  [/^(\d+)× formatado$/, m => m[1] + w_('× formatted', '× formateado')],
+  [/^Conquistas (\d+\/\d+)$/, m => w_('Achievements ', 'Logros ') + m[1]],
+  [/^Apague ([\d.,]+) vírus$/, m => w_('Delete ', 'Borra ') + m[1] + ' virus'],
+  [/^Envio (\d+)$/, m => w_('Slot ', 'Envío ') + m[1]],
+  [/^· 0\/(\d+) nós$/, m => '· 0/' + m[1] + w_(' nodes', ' nodos')],
+  [/^(\d+) (Comum|Raro|Lendário)$/, m => m[1] + ' ' + L(m[2])],
+  [/^(.+) \(novo\)$/, m => m[1] + w_(' (new)', ' (nuevo)')],
+  [/^(.+) DISPONÍVEL$/, m => m[1] + w_(' AVAILABLE', ' DISPONIBLE')],
+  [/^(.+) ELIMINADO!$/, m => m[1] + w_(' ELIMINATED!', ' ¡ELIMINADO!')],
+  [/^(.+) ESCAPOU$/, m => m[1] + w_(' ESCAPED', ' ESCAPÓ')],
+  [/^(COMUM|OTIMIZADO|CRIPTOGRAFADO|ZERO-DAY|QUÂNTICO) (T\d)!$/, m => L(m[1][0] + m[1].slice(1).toLowerCase()).toUpperCase() + ' ' + m[2] + '!'],
+  [/^\+(\d+) SETORES$/, m => '+' + m[1] + w_(' SECTORS', ' SECTORES')],
+  [/^PID (\d+) · (Tanque|Ataque|Suporte)$/, m => 'PID ' + m[1] + ' · ' + L(m[2])],
+];
+// trechos conhecidos dentro de frases maiores (mensagens do log, dicas com números)
+let FRAG_RX = null;
+function fragRx() {
+  if (FRAG_RX) return FRAG_RX;
+  const keys = [...I18N.keys()].filter(k => k.length >= 4 && !/^[A-Z0-9 !]+$/.test(k)).sort((a, b) => b.length - a.length);
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  FRAG_RX = new RegExp(`(?<![\\p{L}])(${keys.map(esc).join('|')})(?![\\p{L}])`, 'gu');
+  return FRAG_RX;
+}
+const L_CACHE = new Map();
+function L(s) {
+  if (CFG.lang === 'pt' || !s || typeof s !== 'string') return s;
+  const k = s.trim();
+  if (!k || !/\p{L}/u.test(k)) return s;
+  const ck = CFG.lang + '\u0000' + s;
+  if (L_CACHE.has(ck)) return L_CACHE.get(ck);
+  let out;
+  const hit = I18N.get(k);
+  if (hit) out = s.replace(k, hit[li_()]);
+  else {
+    for (const [rx, f] of TR_RX) { const m = k.match(rx); if (m) { out = s.replace(k, f(m)); break; } }
+    if (out === undefined) out = s.replace(fragRx(), x => I18N.get(x)[li_()]);
+  }
+  if (L_CACHE.size > 4000) L_CACHE.clear();
+  L_CACHE.set(ck, out);
+  return out;
+}
+// aplica L() em tudo que aparece na página: textos e dicas (title/aria-label)
+const TR_ATTR = ['title', 'aria-label', 'placeholder'];
+function trNode(n) {
+  if (n.nodeType === 3) {
+    const p = n.parentElement;
+    if (!p || p.closest('script,style,.notr')) return;
+    const v = n.nodeValue, o = L(v);
+    if (o !== v) n.nodeValue = o;
+    return;
+  }
+  if (n.nodeType !== 1 || n.closest('script,style,.notr')) return;
+  const els = [n, ...n.querySelectorAll('*')];
+  for (const el of els) for (const a of TR_ATTR) if (el.hasAttribute(a)) { const v = el.getAttribute(a), o = L(v); if (o !== v) el.setAttribute(a, o); }
+  const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+  let t; while ((t = w.nextNode())) trNode(t);
+}
+function i18nStart() {
+  document.documentElement.lang = {pt: 'pt-BR', en: 'en', es: 'es'}[CFG.lang];
+  if (CFG.lang === 'pt') return;
+  trNode(document.body);
+  new MutationObserver(ms => {
+    for (const m of ms) {
+      if (m.type === 'childList') m.addedNodes.forEach(trNode);
+      else if (m.type === 'characterData') trNode(m.target);
+      else if (m.type === 'attributes') { const v = m.target.getAttribute(m.attributeName), o = L(v); if (v && o !== v) m.target.setAttribute(m.attributeName, o); }
+    }
+  }).observe(document.body, {childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTR});
+}
+
 // ---------- data ----------
 const SECTORS = [
   {name:'C:\\TEMP', tint:'#5ce1e6'}, {name:'CACHE L2', tint:'#7aa2ff'},
@@ -1982,7 +2617,8 @@ function load() {
   } catch (e) {}
   return structuredClone(S0);
 }
-function save() { S.last = nowMs(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+let noSave = false;   // ligado ao importar um save, pra o autosave não sobrescrever antes de recarregar
+function save() { if (noSave) return; S.last = nowMs(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const dpsSub = () => equipped('sc').sub;
 
@@ -2019,10 +2655,13 @@ const rewardAt = L => 3 * 1.08 ** L;
 const power = () => heroes.reduce((a, h) => a + atk(h) / cdOf(h) * 4 + maxHp(h) * .5, 0);
 
 // Créditos: o dinheiro do jogo, escrito como a gente fala (12,4 mil · 3,1 mi · 2 bi).
+const NUM_U = {pt: [[1e15, ' qa'], [1e12, ' tri'], [1e9, ' bi'], [1e6, ' mi'], [1e3, ' mil']], en: [[1e15, 'Q'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']], es: [[1e15, ' mil B'], [1e12, ' B'], [1e9, ' mil M'], [1e6, ' M'], [1e3, ' mil']]};
+const NUM_LOC = {pt: 'pt-BR', en: 'en-US', es: 'es-ES'};
 function fmtNum(n) {
-  const u = [[1e15, 'qa'], [1e12, 'tri'], [1e9, 'bi'], [1e6, 'mi'], [1e3, 'mil']];
-  for (const [v, s_] of u) if (n >= v) return (n / v).toLocaleString('pt-BR', {maximumFractionDigits: n / v < 10 ? 1 : 0}) + ' ' + s_;
-  return Math.floor(n).toLocaleString('pt-BR');
+  const loc = NUM_LOC[CFG.lang] || 'pt-BR';
+  if (CFG.num === 'full' && n < 1e15) return Math.floor(n).toLocaleString(loc);
+  for (const [v, s_] of NUM_U[CFG.lang] || NUM_U.pt) if (n >= v) return (n / v).toLocaleString(loc, {maximumFractionDigits: n / v < 10 ? 1 : 0}) + s_;
+  return Math.floor(n).toLocaleString(loc);
 }
 const fmt = n => fmtNum(n) + ' cr';
 const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e4 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toString();
@@ -2098,6 +2737,7 @@ function say(txt, hl) {
   if (openP === 'log') renderPanel();
 }
 function showBanner(text, color) { banner = {text, color: color || '#ffb454', life: 2.2}; }
+function lootBanner(text, color) { if (CFG.alert) showBanner(text, color); }
 
 function spawn(boss) {
   const st = ST(), L = S.stage + (boss ? 1 : spawned / st.count), si = sec().idx;
@@ -2116,13 +2756,14 @@ function spawn(boss) {
 }
 
 function burst(x, y, c, n) {
+  if (CFG.fx === 'low') n = Math.ceil(n / 3);
   for (let i = 0; i < n; i++) parts.push({x, y, vx:(Math.random()-.5)*60, vy:-Math.random()*50-10, life:.5+Math.random()*.4, c});
 }
 function float(x, y, txt, c) { floats.push({x, y: Math.max(2, y), txt, c, life: 1}); }
 
 function hit(e, d) {
   e.hp -= d; e.flash = .08;
-  float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
+  if (CFG.dmg) float(e.x + e.w / 2, GROUND - e.h - 8, fmtN(d), '#e7e3ff');
   if (e.hp > 0 && !e.boss && tv('exec') && e.hp / e.max < tv('exec')) { e.hp = 0; float(e.x + e.w / 2, GROUND - e.h - 18, 'DELETADO', '#ff8a3a'); }
   if (e.hp <= 0) kill(e);
 }
@@ -2142,7 +2783,7 @@ function kill(e) {
   enemies.splice(enemies.indexOf(e), 1);
   if (e.raid) { burst(e.x + e.w / 2, GROUND - e.h / 2, raid.R.c, 60); raidEnd(true); return; }
   e.reward *= (1 + tv('gold') + glob('gold')) * (buffOn('cr') ? 2 : 1) * preCred();
-  S.kc[e.tn] = (S.kc[e.tn] || 0) + 1; ev('kill');
+  S.kc[e.tn] = (S.kc[e.tn] || 0) + 1; ev('kill'); SND.play(e.boss ? 'clear' : 'kill');
   S.data += e.reward;
   S.def += Math.round((e.boss ? 5 + Math.floor(S.stage / 2) : 1 + Math.floor(S.stage / 15)) * (1 + glob('def') + tv('def')) * (buffOn('def') ? 2 : 1));
   burst(e.x + e.w / 2, GROUND - e.h / 2, VCOL[e.tn] || '#ff3d7f', e.boss ? 40 : 12);
@@ -2359,8 +3000,9 @@ function configRoot(it, keys) {
 function dropGear(boss, forceType) {
   const it = makeItem(boss, forceType), G = gearOf(it.cls), cur = G[it.type];
   if (it.t >= 2) ev('t3'); if (it.t >= 3) ev('t4'); S.seenT = Math.max(S.seenT, it.t);
+  if (it.t >= 2) SND.play('drop', it.t - 1);
   if (it.t === 5) {   // Root nunca é equipado sozinho: vai pro inventário pra ser configurado
-    showBanner('ROOT T6!', RAR[5].c);
+    lootBanner('ROOT T6!', RAR[5].c);
     if (addItem(it)) say(`${gearTag(it)} caiu do chefe! Abra o inventário e escolha as passivas dele.`, true);
     else { S.inv.push(it); say(`${gearTag(it)} caiu do chefe! Inventário cheio, mas o Root foi guardado mesmo assim.`, true); }
     if (openP === 'agent') renderPanel();
@@ -2370,7 +3012,7 @@ function dropGear(boss, forceType) {
     G[it.type] = it; bonusCache = null;
     if (cur) S.data += gearVal(cur);
     say(`${heroOf(it.cls).def.name} equipou ${gearTag(it)}${cur ? ' (antigo reciclado)' : ''}`, true);
-    if (it.t >= 3) showBanner(RAR[it.t].n.toUpperCase() + ' ' + tierTxt(it.t) + '!', RAR[it.t].c);
+    if (it.t >= 3) lootBanner(RAR[it.t].n.toUpperCase() + ' ' + tierTxt(it.t) + '!', RAR[it.t].c);
   } else if (addItem(it)) say(`${gearTag(it)} foi pro inventário`);
   else if (S.autoComp && autoCompile() && addItem(it)) say(`${gearTag(it)} foi pro inventário`);
   else { S.data += gearVal(it); say(`Inventário cheio: ${gearTag(it)} reciclado → +${fmt(gearVal(it))}`); }
@@ -2383,7 +3025,8 @@ function dropChip(e) {
     if (addItem({k:'chip', r, n:1})) {
       float(e.x + e.w / 2, GROUND - e.h - 26, 'PACOTE ' + C.n.toUpperCase(), C.c);
       say(`Pacote de download <span style="color:${C.c}">${C.n}</span> encontrado!`, true);
-      if (r >= 1) showBanner('PACOTE ' + C.n.toUpperCase() + '!', C.c);
+      SND.play('drop', r + 1);
+      if (r >= 1) lootBanner('PACOTE ' + C.n.toUpperCase() + '!', C.c);
     } else { S.data += chipVal(r); say(`Inventário cheio: pacote ${C.n} reciclado → +${fmt(chipVal(r))}`); }
     if (openP === 'agent' || openP === 'gacha') renderPanel();
     return;
@@ -2758,7 +3401,7 @@ function catchGold() {
   for (const o of GOLD_RW) { if (r < o.p) { k = o.k; break; } r -= o.p; }
   const rw = k === 'cr' ? {cr: rewardAt(S.stage) * 300 * preCred()} : k === 'def' ? {def: 30 + S.stage} : k === 'comum' ? {comum:1} : {frag:10};
   burst(gold.x, gold.y, '#ffd84a', 24);
-  float(gold.x, gold.y - 4, 'PEGOU!', '#ffd84a');
+  float(gold.x, gold.y - 4, 'PEGOU!', '#ffd84a'); SND.play('gold');
   give(rw, 'Vírus dourado capturado');
   gold = null; goldT = 300 + Math.random() * 420; ev('gold'); save();
 }
@@ -2902,7 +3545,7 @@ function update(dt) {
       const crit = Math.random() < (G.crit || 0) + tv('crit') + glob('crit'), d = atk(h) * (crit ? G.critX || 2 : 1);
       const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc').glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0, dps: true};
       const obs = G.obs ? ++obsCount % G.obs === 0 : false;
-      shots.push({...base, x: h.def.x + (sh.x || 27), dmg: d, crit, obs});
+      shots.push({...base, x: h.def.x + (sh.x || 27), dmg: d, crit, obs}); SND.play('shot');
       for (let m = 1; m <= (G.multishot || 0); m++) shots.push({...base, x: h.def.x + 27 - m * 8, y: base.y + (m % 2 ? -3 : 3), dmg: d * .5});
     }
     else shots.push({x: h.def.x + 25, y: GROUND - 28, dmg: atk(h), c: '#6ee7a8'});
@@ -2941,12 +3584,12 @@ function update(dt) {
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
       const dodged = tv('dodge') && Math.random() < tv('dodge');
-      if (dodged) float(front.def.x + 15, GROUND - 40, 'BLOQUEADO', '#5ca8ff');
+      if (dodged) { float(front.def.x + 15, GROUND - 40, 'BLOQUEADO', '#5ca8ff'); SND.play('block'); }
       const isTank = front.def.id === 'fw', dmg = e.atk * (1 - KC_RED * kcLv(e.tn)) * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
       if (!dodged) { front.hp -= dmg; front.flash = .1; }
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front !== line) espits.push({x:e.x, tx:front.def.x + front.def.w - 2, y:GROUND - e.h * .6, t:0});   // tanque caído: o vírus cospe à distância
-      if (front.hp <= 0) { front.dead = true; front.hp = 0; say(`${front.def.name} caiu. Volta na próxima fase.`); }
+      if (front.hp <= 0) { front.dead = true; front.hp = 0; SND.play('down'); say(`${front.def.name} caiu. Volta na próxima fase.`); }
       if (isTank && pT().reflect) hit(e, dmg * pT().reflect);
     }
   }
@@ -2957,13 +3600,13 @@ function update(dt) {
     if (spawned < st.count) {
       if (spawnT <= 0 && enemies.length < st.max) { spawn(false); spawned++; spawnT = st.gap[0] + Math.random() * (st.gap[1] - st.gap[0]); }
     } else if (!enemies.length) {
-      spawn(true); bossUp = true; const bt = SEC_BOSS[sec().idx % SEC_BOSS.length]; showBanner(`!! ${BOSS_N[bt]} !!`, VCOL[bt]);
+      spawn(true); bossUp = true; SND.play('boss'); const bt = SEC_BOSS[sec().idx % SEC_BOSS.length]; showBanner(`!! ${BOSS_N[bt]} !!`, VCOL[bt]);
     }
   }
 
   for (const h of heroes) {
     const vt = visTier(h.def.id);
-    if (h.dead || vt < 3 || Math.random() > dt * (vt === 4 ? 14 : 7)) continue;
+    if (h.dead || vt < 3 || CFG.fx === 'low' || Math.random() > dt * (vt === 4 ? 14 : 7)) continue;
     parts.push({x: h.def.x + Math.random() * h.def.w, y: GROUND - Math.random() * 28, vx: 0, vy: -10 - Math.random() * 8, life: .7, c: RAR[vt].c, up: true});
   }
   for (let i = parts.length - 1; i >= 0; i--) {
@@ -2997,6 +3640,7 @@ function rgba(hex, a) {
 }
 const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 function text(str, x, y, c, center) {
+  str = L(str);
   ctx.font = '8px Silkscreen, monospace';
   ctx.textBaseline = 'top';
   const w = ctx.measureText(str).width;
@@ -3342,7 +3986,7 @@ function equip(id) {
 // ---------- painéis ----------
 let stDiff = null;
 let openP = null, selInv = -1, colCls = 'fw', colSub = 'single', agSel = 'fw';
-const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt', rank:'ranking de operadores', raid:'chefões · malwares reais', quest:'contratos e presença', codex:'bestiário e conquistas', odds:'probabilidades publicadas'};
+const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt', cfg:'configurações', rank:'ranking de operadores', raid:'chefões · malwares reais', quest:'contratos e presença', codex:'bestiário e conquistas', odds:'probabilidades publicadas'};
 const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
 // Seletor de passivas do Root: escolhe N passivas diferentes, confirma uma vez e fica pra sempre.
@@ -3600,7 +4244,9 @@ const UIICON = {};
 function uiIcon(k) {
   if (UIICON[k]) return UIICON[k];
   const P = Painter(16, 16), A = '#ffb454', C = '#5ce1e6', M = '#9aa1bd', D = '#3a3f5c';
-  if (k === 'agent') { P.ell(8, 5, 3, 3, M); P.rect(6, 4, 5, 2, C); P.poly([[2, 15], [4, 10], [8, 9], [12, 10], [14, 15]], D); P.line(6, 11, 10, 11, A); }
+  if (k === 'cfg') { P.ell(8, 8, 6, 6, M); for (let a = 0; a < 8; a++) { const an = a * Math.PI / 4; P.rect(Math.round(8 + Math.cos(an) * 6.5) - 1, Math.round(8 + Math.sin(an) * 6.5) - 1, 2, 2, M); } P.ell(8, 8, 2, 2, '#0b0a16'); }
+  else if (k === 'readme') { P.poly([[3, 1], [11, 1], [13, 3], [13, 15], [3, 15]], '#dfe4ee'); for (let y = 5; y < 14; y += 2) P.line(5, y, 11, y, D); }
+  else if (k === 'agent') { P.ell(8, 5, 3, 3, M); P.rect(6, 4, 5, 2, C); P.poly([[2, 15], [4, 10], [8, 9], [12, 10], [14, 15]], D); P.line(6, 11, 10, 11, A); }
   else if (k === 'col') { P.rect(1, 5, 7, 10, D); P.rect(4, 3, 7, 10, M); P.rect(8, 1, 7, 10, '#c38cff'); P.rect(10, 4, 3, 3, '#ffffff'); }
   else if (k === 'comp') { P.poly([[8, 1], [15, 5], [8, 9], [1, 5]], A); P.poly([[1, 5], [8, 9], [8, 15], [1, 11]], mix(A, '#000000', .35)); P.poly([[15, 5], [8, 9], [8, 15], [15, 11]], mix(A, '#000000', .55)); }
   else if (k === 'gacha') { P.rect(6, 1, 4, 7, C); P.poly([[2, 7], [14, 7], [8, 13]], C); P.rect(1, 14, 14, 2, M); }
@@ -3802,15 +4448,47 @@ const RENDER = {
   log: () => `<ol class="log">${LOG.map(l => `<li class="${l.hl ? 'hl' : ''}"><time>${l.time}</time>${l.txt}</li>`).join('') || '<li>Nada ainda.</li>'}</ol>`,
 
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
-    <p>Um esquadrão de agentes digitais (tanque, ataque e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
-    <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra Varredor), Blindados (poucos e resistentes, bom pra Rastreador) e Chefão (bom pra Caça-chefes).</p>
-    <p><b>Esquadrão:</b> gaste créditos pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) e 4 acessórios (Vacina, IA, Driver e Token) com tiers T1 a T6 (Root, só dos Chefões), e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e agentes de ataque (Rastreador, Varredor e Caça-chefes); repetidos viram créditos. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
-    <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
+    <p>Um esquadrão de agentes (tanque, ataque e suporte) defende o núcleo do seu computador enquanto você trabalha. Os vírus vêm até eles; cada vírus apagado vira <span class="k">créditos</span>, o dinheiro do jogo.</p>
+    <p><b>Esquadrão:</b> aprimore dano e vida com créditos e equipe itens (T1 a T6) e acessórios.</p>
+    <p><b>Download:</b> use pacotes pra baixar novos agentes; repetidos viram versões novas.</p>
+    <p><b>Fases:</b> Horda (muitos vírus), Blindados (poucos e resistentes) e Chefão. Escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p><b>Antivírus:</b> a árvore de atualizações, paga com DEF.</p>
+    <p><b>Chefões:</b> malwares reais da história, com tentativa limitada e drops raros.</p>
+    <p><b>Contratos:</b> metas diárias e semanais.</p>
+    <p class="hint">O jogo continua rodando com o painel fechado. Deixe na barra e volte quando quiser.</p>`,
+  cfg: () => {
+    const sel = (id, opts, v) => `<select id="${id}">${opts.map(([k, n]) => `<option value="${k}"${String(k) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
+    const chk = (id, v, n) => `<label class="cfr"><input type="checkbox" id="${id}"${v ? ' checked' : ''}> ${n}</label>`;
+    return `<div class="cfg">
+      <section><h3>Idioma</h3><div class="notr">${sel('cLang', LANGS, CFG.lang)}</div><p class="hint">O idioma muda na hora; o jogo recarrega pra aplicar em tudo.</p></section>
+      <section><h3>Som</h3>
+        <label class="cfr"><span>Música</span><input type="range" id="cMus" min="0" max="100" step="5" value="${CFG.mus}"><b id="cMusV">${CFG.mus}</b></label>
+        <label class="cfr"><span>Efeitos</span><input type="range" id="cSfx" min="0" max="100" step="5" value="${CFG.sfx}"><b id="cSfxV">${CFG.sfx}</b></label>
+        ${chk('cMute', CFG.mute, 'Silenciar tudo')}</section>
+      <section><h3>Tela</h3>
+        ${chk('cDmg', CFG.dmg, 'Números de dano')}
+        <label class="cfr"><span>Efeitos visuais</span>${sel('cFx', [['full', 'completos'], ['low', 'reduzidos']], CFG.fx)}</label>
+        <label class="cfr"><span>Limite de FPS</span>${sel('cFps', [[60, '60'], [30, '30 (economiza bateria)']], CFG.fps)}</label>
+        <label class="cfr"><span>Formato dos números</span>${sel('cNum', [['short', 'curto (12,4 mil)'], ['full', 'completo (12.400)']], CFG.num)}</label></section>
+      <section><h3>Avisos</h3>${chk('cAlert', CFG.alert, 'Faixa na barra ao cair item raro, pacote ou chefão')}</section>
+      <section><h3>Progresso</h3>
+        <div class="row"><button type="button" id="cExp">Exportar save</button><button type="button" id="cImp">Importar save</button><button type="button" id="wipe">Apagar progresso</button></div>
+        <textarea id="cSave" class="notr" rows="2" spellcheck="false" placeholder="Cole aqui o texto do save:"></textarea><p class="hint" id="cSaveMsg"></p></section>
+      <section class="off"><h3>No jogo final (Steam)</h3>
+        ${chk('', false, 'Iniciar junto com o Windows').replace('<input', '<input disabled')}
+        ${chk('', false, 'Sempre por cima das janelas').replace('<input', '<input disabled')}
+        ${chk('', false, 'Some quando um jogo em tela cheia abrir').replace('<input', '<input disabled')}
+        <p class="hint">Barra em cima ou embaixo da tela · Escolher monitor · Transparência da barra</p>
+        <p class="hint">Essas opções dependem do app nativo (Godot) e ficam desligadas no protótipo.</p></section>
+    </div>`;
+  },
+
 };
 function renderPanel() {
   if (!openP) return;
   $('#pTitle').textContent = PANELS[openP];
   $('#panel').classList.toggle('wide', openP === 'tree');
+  $('#panel').classList.toggle('nocur', openP === 'cfg' || openP === 'readme');
   const body = $('#pBody'), top = body.scrollTop;
   tipEl.hidden = true;
   body.innerHTML = RENDER[openP]();
@@ -3864,7 +4542,7 @@ function livePanel() {
 function openPanel(k, force) {
   openP = !force && openP === k ? null : k;
   $('#panel').hidden = !openP;
-  document.querySelectorAll('.tabs [data-open], #pNav [data-open]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.open === openP)));
+  document.querySelectorAll('.tabs [data-open], #pNav [data-open], .taskbar [data-open]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.open === openP)));
   if (openP) renderPanel();
 }
 document.addEventListener('click', e => {
@@ -3874,6 +4552,7 @@ document.addEventListener('click', e => {
 $('#pClose').addEventListener('click', () => openPanel(null, true));
 $('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="20" height="20" alt=""><span>${n}</span></button>`).join('');
 $('#pLogo').src = treeIcon('core');
+document.querySelectorAll('.taskbar [data-open]').forEach(b => b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(b.dataset.open)}" width="12" height="12" alt="">`));
 $('#icCoin').src = uiIcon('coin'); $('#icPow').src = uiIcon('pow'); $('#icDef').src = uiIcon('defs');
 document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });
 let wipeArmed = 0;
@@ -3940,7 +4619,10 @@ $('#pBody').addEventListener('click', e => {
   }
 });
 $('#pBody').addEventListener('change', e => {
-  const id = e.target.id;
+  const id = e.target.id, v = e.target.value, ck = e.target.checked;
+  const CF = {cMute: ['mute', ck], cDmg: ['dmg', ck], cAlert: ['alert', ck], cFx: ['fx', v], cFps: ['fps', +v], cNum: ['num', v]};
+  if (CF[id]) { CFG[CF[id][0]] = CF[id][1]; saveCfg(); SND.vol(); if (id === 'cNum') renderHud(); return; }
+  if (id === 'cLang') { CFG.lang = v; saveCfg(); save(); location.reload(); return; }
   if (id === 'oUp') S.autoUp = e.target.checked;
   if (id === 'oEq') S.autoEq = e.target.checked;
   if (id === 'oComp') S.autoComp = e.target.checked;
@@ -3949,6 +4631,27 @@ $('#pBody').addEventListener('change', e => {
   if (e.target.dataset.shopsel) { shopPick[e.target.dataset.shopsel] = e.target.value; return; }
   save();
 });
+$('#pBody').addEventListener('input', e => {
+  const id = e.target.id;
+  if (id !== 'cMus' && id !== 'cSfx') return;
+  CFG[id === 'cMus' ? 'mus' : 'sfx'] = +e.target.value; $('#' + id + 'V').textContent = e.target.value; saveCfg(); SND.vol();
+});
+$('#pBody').addEventListener('click', e => {
+  const id = e.target.id, ta = $('#cSave'), msg = $('#cSaveMsg');
+  if (id === 'cExp') {
+    save(); ta.value = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); ta.select();
+    try { navigator.clipboard.writeText(ta.value); } catch (er) {}
+    msg.textContent = L('Save copiado. Guarde esse texto em lugar seguro.');
+  } else if (id === 'cImp') {
+    try {
+      const o = JSON.parse(decodeURIComponent(escape(atob(ta.value.trim()))));
+      if (!o || typeof o !== 'object' || typeof o.stage !== 'number') throw 0;
+      noSave = true; localStorage.setItem(KEY, JSON.stringify(o)); location.reload();
+    } catch (er) { msg.textContent = L('Save inválido.'); }
+  }
+});
+// clique de interface faz um tique baixinho
+document.addEventListener('click', e => { if (e.target.closest('button, [data-open], select, input')) SND.play('ui'); });
 $('#speed').addEventListener('click', e => {
   speed = speed === 1 ? 3 : speed === 3 ? 10 : 1;
   e.target.textContent = speed + '×';
@@ -4012,12 +4715,14 @@ document.addEventListener('visibilitychange', () => {
 ctrSync();
 setInterval(metaSecond, 1000);
 setInterval(save, 5000);
+i18nStart();
 setInterval(() => { renderHud(); livePanel(); if (livePanelQ && openP === 'quest') { livePanelQ = false; renderPanel(); } }, 250);
 setInterval(clock, 10000); clock();
 renderHud();
 
 let lastT = performance.now();
 function frame(now) {
+  if (CFG.fps < 60 && now - lastT < 1000 / CFG.fps - 4) { requestAnimationFrame(frame); return; }
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   for (let i = 0; i < speed; i++) update(dt);
   draw();
