@@ -23,6 +23,21 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.8.1: animação dos personagens e dos vírus
+
+- **Agentes com ficha:**
+  - Até 2 quadros de caminhada e 2 de ataque (mira e disparo), recortados das fichas na mesma escala. As coordenadas ficam em `tools/extract-sprites.cjs`.
+  - Andando: alterna os passos, sobe a cada passo, amassa quando o pé bate no chão e inclina pra frente com balanço.
+  - Atacando: entra na pose de ataque assim que o inimigo entra no alcance, mostra o quadro de disparo a cada tiro, com recuo, e respira entre um tiro e outro.
+  - Parado: respiração leve.
+  - Sombra nos pés.
+- **Vírus:**
+  - O bug anda pulando e amassa ao tocar o chão.
+  - O worm estica e encolhe.
+  - O trojan trota.
+  - O ransomware pulsa.
+  - Todos avançam e esticam ao atacar e têm sombra no chão.
+
 ## v1.8: arte nova em batalha e menu Chances enxuto
 
 - **Personagens em batalha:** os 13 agentes que têm ficha usam os sprites recortados das próprias fichas (fundo removido automaticamente), em 2 poses: andando e atacando. O tier do equipamento aparece como aura colorida em volta do agente.

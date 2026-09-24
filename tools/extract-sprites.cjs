@@ -1,28 +1,29 @@
 // Recorta poses das fichas, remove o fundo claro (flood fill a partir das bordas) e reduz pra altura alvo.
 const { chromium } = require('playwright');const fs=require('fs');
 const H=72; // altura em pixels de tela (36 lógicos no canvas 2x)
+// w = quadros de caminhada, a = [mira, disparo]. A escala do personagem vem do 1º quadro de caminhada.
 const C={
- bulwark7:['ref04.jpeg',[385,520,470,665],[800,520,945,665]],
- sentinel:['ref05.jpeg',[385,545,472,645],[280,880,475,1003]],
- valkyrie:['ref06.jpeg',[628,403,708,494],[338,404,470,494]],
- aura2:['ref07.jpeg',[628,403,708,494],[5,712,195,835]],
- x1:['ref08.jpeg',[636,406,708,494],[5,712,190,835]],
- infiltrator:['ref09.jpeg',[228,530,300,670],[180,720,310,845]],
- ghost:['ref10.jpeg',[335,530,490,670],[180,720,330,845]],
- archer:['ref11.jpeg',[340,530,420,670],[485,520,610,670]],
- pulse:['ref12.jpeg',[20,530,128,670],[20,705,185,845]],
- blade:['ref12.jpeg',[340,530,470,670],[330,885,475,1015]],
- nighthawk:['ref12.jpeg',[490,530,610,670],[485,700,615,845]],
- lasert:['ref13.jpeg',[340,530,460,670],[185,705,335,845]],
- tankm1:['ref14.jpeg',[318,728,462,835],[468,722,620,835]],
+ bulwark7:['ref04.jpeg',{w:[[270,520,347,665],[385,520,470,665]],a:[[800,520,945,665]]}],
+ sentinel:['ref05.jpeg',{w:[[275,545,352,645],[385,545,472,645]],a:[[280,880,475,1003,.98]]}],
+ valkyrie:['ref06.jpeg',{w:[[628,403,708,494],[265,403,335,494]],a:[[338,404,470,494]]}],
+ aura2:['ref07.jpeg',{w:[[628,403,708,494],[268,403,332,494]],a:[[5,712,195,835,.95]]}],
+ x1:['ref08.jpeg',{w:[[636,406,708,494],[268,406,332,494]],a:[[5,712,190,835,.95]]}],
+ infiltrator:['ref09.jpeg',{w:[[228,530,300,670]],a:[[180,720,310,845]]}],
+ ghost:['ref10.jpeg',{w:[[230,530,305,670]],a:[[335,530,490,670],[180,720,330,845]]}],
+ archer:['ref11.jpeg',{w:[[230,530,300,670],[340,530,420,670]],a:[[485,520,610,670],[185,715,315,850]]}],
+ pulse:['ref12.jpeg',{w:[[20,705,185,845]],a:[[20,705,185,845],[20,895,160,1015]]}],
+ blade:['ref12.jpeg',{w:[[340,530,470,670],[330,885,475,1015]],a:[[340,530,470,670]]}],
+ nighthawk:['ref12.jpeg',{w:[[490,870,610,1015],[490,530,610,670]],a:[[490,530,610,670],[485,700,615,845]]}],
+ lasert:['ref13.jpeg',{w:[[230,530,300,670],[190,870,300,1015]],a:[[340,530,460,670],[185,705,335,845]]}],
+ tankm1:['ref14.jpeg',{w:[[318,728,462,835]],a:[[318,728,462,835],[468,722,620,835]]}],
 };
 (async()=>{const b=await chromium.launch();const p=await b.newPage();const out={};let sheet='';
-for(const [id,[f,...boxes]] of Object.entries(C)){
+for(const [id,[f,set]] of Object.entries(C)){const boxes=[...set.w,...set.a],nW=set.w.length;
  const src='data:image/jpeg;base64,'+fs.readFileSync(f).toString('base64');
  out[id]=await p.evaluate(async([src,boxes,H])=>{
   const im=new Image();im.src=src;await im.decode();
   const res=[];
-  for(let [x0,y0,x1,y1] of boxes){x0-=6;y0-=6;x1+=6;y1+=6;const T1=46;
+  for(let [x0,y0,x1,y1,hn] of boxes){x0-=6;y0-=6;x1+=6;y1+=6;const T1=46;
    const w=x1-x0,h=y1-y0,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.drawImage(im,x0,y0,w,h,0,0,w,h);
    const d=g.getImageData(0,0,w,h),a=d.data;
    // fundo = as 2 cores mais comuns da borda (fundo liso + linhas da grade)
@@ -56,13 +57,18 @@ for(const [id,[f,...boxes]] of Object.entries(C)){
    g.putImageData(d,0,0);
    // recorta a caixa útil
    let mx=w,my=h,Mx=0,My=0;for(let k=0;k<w*h;k++)if(a[k*4+3]){const x=k%w,y=(k/w)|0;mx=Math.min(mx,x);my=Math.min(my,y);Mx=Math.max(Mx,x);My=Math.max(My,y);}
-   const cw=Mx-mx+1,ch=My-my+1,sc=H/ch,tw=Math.round(cw*sc);
-   const o=document.createElement('canvas');o.width=tw;o.height=H;const og=o.getContext('2d');og.imageSmoothingQuality='high';og.drawImage(c,mx,my,cw,ch,0,0,tw,H);
-   res.push({u:o.toDataURL('image/webp',.9),w:tw,h:H});
+   const cw=Mx-mx+1,ch=My-my+1;
+   // centro dos pés: média x dos pixels opacos nos 12% de baixo
+   let fs=0,fn=0;for(let y=My-Math.max(2,Math.round(ch*.12));y<=My;y++)for(let x=mx;x<=Mx;x++)if(a[(y*w+x)*4+3]){fs+=x-mx;fn++;}
+   res.push({c,mx,my,cw,ch,fx:fn?fs/fn:cw/2,hn});
   }
-  return res;},[src,boxes,H]);
- sheet+=`<div style="display:inline-block;margin:4px;color:#aaa;font:11px sans-serif">${id}<br>${out[id].map(r=>`<img src="${r.u}" style="background:#0e0c1d;image-rendering:pixelated" width="${r.w*2}" height="${r.h*2}">`).join('')}</div>`;
+  const sc=H/res[0].ch;
+  return res.map(r=>{const k=r.hn?H*r.hn/r.ch:sc;const tw=Math.max(1,Math.round(r.cw*k)),th=Math.max(1,Math.round(r.ch*k));const o=document.createElement('canvas');o.width=tw;o.height=th;const og=o.getContext('2d');og.imageSmoothingQuality='high';og.drawImage(r.c,r.mx,r.my,r.cw,r.ch,0,0,tw,th);return {u:o.toDataURL('image/webp',.9),w:tw,h:th,fx:Math.round(r.fx*k)};});
+  },[src,boxes,H]);
+ const fr=out[id]; out[id]={w:fr.slice(0,nW),a:fr.slice(nW)};
+
+ sheet+=`<div style="display:inline-block;margin:4px;color:#aaa;font:11px sans-serif">${id}<br>${[...out[id].w,...out[id].a].map(r=>`<img src="${r.u}" style="background:#0e0c1d;image-rendering:pixelated" width="${r.w*2}" height="${r.h*2}">`).join('')}</div>`;
 }
-fs.writeFileSync('../sprites.js','\n// ---------- sprites de batalha (recortados das fichas; 0 = andando, 1 = atacando) ----------\nconst SHEET_SPR = '+JSON.stringify(Object.fromEntries(Object.entries(out).map(([k,v])=>[k,v.map(r=>[r.u,r.w,r.h])])))+';\n');
+fs.writeFileSync('../sprites.js','\n// ---------- sprites de batalha recortados das fichas: w = caminhada, a = [mira, disparo]; [imagem, largura, altura, x dos pés] ----------\nconst SHEET_SPR = '+JSON.stringify(Object.fromEntries(Object.entries(out).map(([k,v])=>[k,{w:v.w.map(r=>[r.u,r.w,r.h,r.fx]),a:v.a.map(r=>[r.u,r.w,r.h,r.fx])}])))+';\n');
 await p.setViewportSize({width:1400,height:900});await p.setContent('<body style="background:#222;margin:0">'+sheet+'</body>');await p.waitForTimeout(400);await p.screenshot({path:'../sprsheet.png',fullPage:true});
 await b.close();})();
