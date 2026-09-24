@@ -1,0 +1,123 @@
+<title>Plano de Lançamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=Silkscreen&display=swap">
+<style>
+  :root{
+    --bg:#f3f5f8; --surface:#ffffff; --ink:#131a28; --ink2:#3d4658; --muted:#667085; --line:#d9dee7;
+    --accent:#0e7480; --accent-soft:#e2f2f3; --crit:#b4233a; --crit-soft:#fbe9ec; --warn:#9a5a06; --warn-soft:#fdf1df; --ok:#1d7446; --ok-soft:#e5f4ea;
+    --grid:#e6e9ef;
+    --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; --pix:"Silkscreen",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){color-scheme:dark;
+      --bg:#0e0d1c; --surface:#16142a; --ink:#ebe8ff; --ink2:#c3bfe3; --muted:#9591bd; --line:#2e2a52;
+      --accent:#5ce1e6; --accent-soft:#11303a; --crit:#ff6b81; --crit-soft:#3a1522; --warn:#ffb454; --warn-soft:#3a2a12; --ok:#6ee7a8; --ok-soft:#123224; --grid:#25224a;}
+  }
+  :root[data-theme="dark"]{color-scheme:dark;
+    --bg:#0e0d1c; --surface:#16142a; --ink:#ebe8ff; --ink2:#c3bfe3; --muted:#9591bd; --line:#2e2a52;
+    --accent:#5ce1e6; --accent-soft:#11303a; --crit:#ff6b81; --crit-soft:#3a1522; --warn:#ffb454; --warn-soft:#3a2a12; --ok:#6ee7a8; --ok-soft:#123224; --grid:#25224a;}
+  body{background:var(--bg); color:var(--ink); font:15px/1.6 var(--sans)}
+  .wrap{max-width:780px; margin:0 auto; padding-inline:16px; padding-block:40px 64px}
+  .eyebrow{font:400 12px var(--pix); letter-spacing:.08em; color:var(--accent)}
+  h1{font-size:clamp(26px, 5vw, 36px); line-height:1.15; margin:8px 0 12px; text-wrap:balance; letter-spacing:-.01em}
+  h2{font-size:20px; margin:44px 0 10px; text-wrap:balance}
+  h3{font-size:15px; margin:0 0 4px}
+  p{margin:0 0 12px; max-width:68ch; color:var(--ink2)}
+  .lede{font-size:17px; color:var(--ink)}
+  .verdict{display:flex; gap:12px; align-items:flex-start; padding:14px 16px; margin:20px 0; background:var(--crit-soft); border-left:4px solid var(--crit)}
+  .verdict b{color:var(--crit)}
+  .verdict p{margin:0; color:var(--ink)}
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin:16px 0}
+  .tile{background:var(--surface); border:1px solid var(--line); padding:12px 14px}
+  .tile .n{font:600 26px var(--mono); color:var(--ink); font-variant-numeric:tabular-nums}
+  .tile .l{font-size:13px; color:var(--muted)}
+  figure{margin:16px 0; background:var(--surface); border:1px solid var(--line); padding:14px 14px 8px}
+  figcaption{font-size:13px; color:var(--muted); margin-top:4px}
+  .chart{position:relative}
+  .chart svg{display:block; width:100%; height:auto; overflow:visible}
+  .tipbox{position:absolute; pointer-events:none; background:var(--ink); color:var(--bg); font:12px/1.4 var(--mono); padding:6px 8px; white-space:nowrap; transform:translate(-50%, -110%)}
+  .tbl{overflow-x:auto; margin:12px 0}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:var(--surface); border:1px solid var(--line)}
+  th,td{padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+  th{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  td.num{font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .find{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; padding:14px 0; border-top:1px solid var(--line)}
+  .pill{font:600 11px var(--mono); letter-spacing:.04em; padding:2px 8px; align-self:start; white-space:nowrap}
+  .crit{background:var(--crit-soft); color:var(--crit)} .warn{background:var(--warn-soft); color:var(--warn)} .ok{background:var(--ok-soft); color:var(--ok)}
+  .find p{margin:4px 0 0}
+  .fix{margin-top:6px; padding:8px 12px; background:var(--accent-soft); font-size:14px; color:var(--ink)}
+  .fix b{color:var(--accent)}
+  ol.q{padding-left:20px} ol.q li{margin:8px 0; color:var(--ink2)} ol.q b{color:var(--ink)}
+  code{font:13px var(--mono); background:var(--surface); border:1px solid var(--line); padding:1px 5px}
+  .small{font-size:13px; color:var(--muted)}
+</style>
+<body><div class="wrap">
+<div class="eyebrow">DAEMON BAR · PLANO DE LANÇAMENTO</div>
+<h1>Itens na Steam, progressão e como evitar os problemas de economia</h1>
+<p class="lede">Adotamos o modelo de itens e a progressão do TBH, que já funcionam. Este plano separa o que fica só no jogo do que pode ir pro mercado e lista as proteções que precisam estar prontas antes de abrir o comércio.</p>
+<p class="small">Os tempos vêm da simulação de 168 h (<code>tools/balance-sim.cjs</code>), com um jogador idle que avança sozinho. São estimativas, não medidas com jogadores reais.</p>
+
+<div class="tiles">
+<div class="tile"><div class="n">~120 h</div><div class="l">pra concluir as 4 dificuldades (120 fases)</div></div>
+<div class="tile"><div class="n">~24 dias</div><div class="l">pra garantia ★5 do Raro jogando 24/7</div></div>
+<div class="tile"><div class="n">~0,3/h</div><div class="l">pacotes Raros por hora</div></div>
+<div class="tile"><div class="n">4 × 8 h</div><div class="l">espaços de envio pra Steam</div></div>
+</div>
+
+<h2>1. Modelo de itens: o que vai pro mercado</h2>
+<div class="tbl"><table>
+<tr><th>Coisa</th><th>Negociável?</th><th>Por quê</th></tr>
+<tr><td>Pacotes de download (Comum, Raro, Lendário)</td><td><span class="pill ok">SIM</span></td><td>É o produto principal do mercado. As taxas de drop não recebem bônus de sorte, então todo mundo tem a mesma chance.</td></tr>
+<tr><td>Itens T4 Zero-Day</td><td><span class="pill ok">SIM</span></td><td>São raros o bastante pra ter valor, mas caem o suficiente pra ter oferta.</td></tr>
+<tr><td>Itens T5 Quântico</td><td><span class="pill warn">DEPOIS</span></td><td>Ficam bloqueados no lançamento. Só liberamos depois de ver quanto T5 entra por semana com jogadores reais.</td></tr>
+<tr><td>Itens T1–T3</td><td><span class="pill crit">NÃO</span></td><td>Existem demais. Iriam inundar o mercado e virar lixo de R$ 0,03.</td></tr>
+<tr><td>Itens saídos do Compilador</td><td><span class="pill crit">NÃO</span></td><td>O Compilador transforma itens abundantes em raros. Se o resultado fosse negociável, ele viraria uma máquina de fabricar T4/T5 pro mercado.</td></tr>
+<tr><td>Agentes, níveis, árvore, créditos</td><td><span class="pill crit">NÃO</span></td><td>É progresso da conta. Vender progresso vira pay-to-win.</td></tr>
+</table></div>
+
+<h3>Central de Upload (a ponte com a Steam)</h3>
+<ul>
+<li><b>4 espaços de envio.</b> Cada um fica ocupado por <b>8 h</b> depois de usado, o que dá no máximo 12 envios por dia por conta. Esse teto limita o que uma conta farmada por bot consegue despejar no mercado.</li>
+<li><b>Trava de 7 dias</b> pro item que volta da Steam pro jogo. Isso impede ficar trocando itens entre contas pra contornar os limites.</li>
+<li>A tooltip de cada item diz se ele é negociável ou o motivo de estar vinculado.</li>
+</ul>
+
+<h2>2. Progressão (copiada do TBH)</h2>
+<ul>
+<li>5 dificuldades × 3 atos × 10 fases: Normal, Avançado, Crítico, Zero-Day e, depois, a torre infinita <b>Kernel Panic</b>.</li>
+<li>Em cada ato, a 5ª e a 10ª fase são Chefão. As outras alternam entre Horda e Blindados.</li>
+<li>Cada dificuldade aumenta a chance de T3+ em 25%. Isso dá um motivo pra subir, e não só farmar o começo.</li>
+<li>Cada fase tem 150 s de limite. Se o esquadrão não aguenta, recua, farma e tenta de novo, que é o ciclo de "parede" do TBH.</li>
+</ul>
+<div class="tbl"><table>
+<tr><th>Perfil</th><th>Tempo por dia</th><th>Onde está em 1 mês</th><th>Pacotes Raros por mês</th></tr>
+<tr><td>Tryhard (PC ligado 24/7)</td><td class="num">24 h</td><td>Kernel Panic desde o 5º dia</td><td class="num">~210</td></tr>
+<tr><td>Médio (expediente de trabalho)</td><td class="num">8 h</td><td>Kernel Panic</td><td class="num">~70</td></tr>
+<tr><td>Casual</td><td class="num">3 h</td><td>Zero-Day</td><td class="num">~27</td></tr>
+</table></div>
+<p>O casual não chega na garantia de 180 do Raro em um mês. Três coisas seguram ele no jogo:</p>
+<ul>
+<li>A chance base de ★5 no Raro é 2%, então ele tira ~1 ★5 por sorte, antes da garantia.</li>
+<li>A garantia fica guardada e não expira.</li>
+<li>Ele pode <b>comprar pacotes no mercado</b> dos tryhards. É isso que faz o mercado funcionar pros dois lados.</li>
+</ul>
+
+<h2>3. Riscos e proteções</h2>
+<div class="find"><span class="pill crit">CRÍTICO</span><div><h3>Drop decidido no cliente = item falso no mercado</h3><p>Se o jogo decide o drop no PC do jogador, qualquer um edita o save ou a memória e gera pacotes à vontade. No protótipo tudo é local.</p><div class="fix"><b>Proteção:</b> itens negociáveis só existem quando o servidor concede, pelo <b>Steam Inventory Service</b> (itemdefs + regras de drop no servidor), com um servidor próprio validando o ritmo de fases e o tempo decorrido. O save local serve só pra progresso.</div></div></div>
+<div class="find"><span class="pill crit">CRÍTICO</span><div><h3>Bots e contas em massa</h3><p>Um jogo idle é fácil de rodar em 100 máquinas virtuais. Cada conta farmando 24/7 é pura oferta no mercado.</p><div class="fix"><b>Proteção:</b> o jogo é pago (sem conta grátis). Os 4 espaços × 8 h limitam cada conta. O drop por hora tem teto no servidor. Cada conta tem uma quantidade mínima de horas antes de liberar o Upload. Detectamos padrões anormais, como muitas contas no mesmo IP ou hardware.</div></div></div>
+<div class="find"><span class="pill warn">ALTO</span><div><h3>Inflação: itens demais, preço caindo pra zero</h3><p>Todo item negociável que entra e nunca sai derruba o preço com o tempo.</p><div class="fix"><b>Proteção:</b> sumidouros de itens. Abrir um pacote consome o pacote. O Compilador consome 5 itens e o resultado não volta pro mercado. T1–T3 nunca entram. T5 só é liberado quando os dados mostrarem que dá.</div></div></div>
+<div class="find"><span class="pill warn">ALTO</span><div><h3>Mudar taxas depois do lançamento</h3><p>Mexer nas taxas de drop com itens já à venda quebra a confiança de quem comprou.</p><div class="fix"><b>Proteção:</b> fechar as taxas num beta fechado, sem mercado, e publicar as probabilidades no jogo. Depois do lançamento, só adicionar coisas novas (pacotes e itens novos), nunca piorar o que já existe.</div></div></div>
+<div class="find"><span class="pill warn">ALTO</span><div><h3>Aceleração de tempo e relógio</h3><p>O protótipo tem um botão de velocidade de teste, e o cálculo offline confia no relógio do PC.</p><div class="fix"><b>Proteção:</b> remover o botão na versão final e calcular o tempo offline pelo relógio do servidor, com teto (por exemplo, 12 h).</div></div></div>
+<div class="find"><span class="pill ok">MÉDIO</span><div><h3>Regras da Valve e jurídico</h3><p>Caixas pagas com item aleatório têm restrição em alguns países.</p><div class="fix"><b>Proteção:</b> pacotes só caem jogando e nunca são vendidos por dinheiro direto pelo jogo. Mostrar as probabilidades. Consultar um advogado antes de abrir o mercado.</div></div></div>
+
+<h2>4. Cronograma</h2>
+<ol class="q">
+<li><b>Agora: protótipo (v1.2).</b> Balanceamento simulado, Central de Upload simulada, taxas definidas.</li>
+<li><b>Jogo de verdade.</b> Portar pra um app de janela fixa na barra de tarefas (Electron/Tauri ou Godot), com arte final, som e save na nuvem.</li>
+<li><b>Servidor.</b> Login Steam, drops validados, Steam Inventory Service com itemdefs, relógio do servidor e teto de drop.</li>
+<li><b>Beta fechado sem mercado.</b> Medir as horas reais até cada dificuldade, a quantidade de pacotes por semana e a retenção dos casuais. Ajustar as taxas aqui, e só aqui.</li>
+<li><b>Lançamento (acesso antecipado).</b> Mercado aberto pra pacotes e T4. T5 bloqueado.</li>
+<li><b>Pós-lançamento.</b> Liberar T5 se a oferta permitir, adicionar novos banners e atos e monitorar os preços toda semana.</li>
+</ol>
+</div></body></html>

@@ -23,6 +23,52 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.2: progressão estilo TBH, taxas calibradas e Central de Upload
+
+**Progressão** (mesma estrutura do TBH): 5 dificuldades × 3 atos × 10 fases.
+
+- Dificuldades: Normal → Avançado → Crítico → Zero-Day. Depois delas vem o **Kernel Panic**, uma torre infinita.
+- Atos: Sistema de arquivos, Memória e kernel, Rede.
+- A 5ª e a 10ª fase de cada ato são **Chefão**. As outras alternam entre **Horda** e **Blindados**.
+- Cada dificuldade multiplica a vida dos vírus por 2,5, o dano por 2, e melhora a chance de T3+.
+- **Tempo limite de 150 s por fase.** Se estourar o tempo ou o esquadrão cair 2 vezes, ele recua uma fase e farma 5 vezes antes de tentar de novo.
+
+**Curvas** (simuladas em 168 h com `tools/balance-sim.cjs`):
+
+- Vírus: ×1,10 por fase.
+- Recompensa: ×1,08 por fase.
+- Itens: ×1,06 por nível.
+- Aprimoramentos: ×1,06 por nível, com custo ×1,3.
+- Árvore: custo base 300 (3000 nos nós-chave), ×1,35 por distância e ×1,6 por nível.
+
+**Pacotes de download** (chance ao concluir uma fase, sem bônus de sorte, porque são negociáveis):
+
+| Pacote | Fase comum | Fase de chefe | Média na simulação |
+|---|---|---|---|
+| Comum | 3,5% | 7% | ~0,9/h |
+| Raro | 1% | 2% | ~0,3/h |
+| Lendário | 0,05% | 0,1% | ~1 a cada 33 h |
+
+A garantia de ★5 do Raro (180 downloads) sai em ~24 dias jogando 24/7. Um casual com ~3 h por dia recebe a maior parte dos ★4 e ★5 por sorte, antes da garantia.
+
+**Itens** não têm garantia. Pesos de tier:
+
+| Tier | Fase comum | Fase de chefe |
+|---|---|---|
+| T1–T2 | 72% / 22% | 55% / 32% |
+| T3–T5 | 5,45% / 0,5% / 0,05% | 10,75% / 2% / 0,25% |
+
+- T3+ ganha +25% por dificuldade.
+- **Sorte** (árvore, passivas e Honeypot) aumenta a chance de T3+, com teto de +50%.
+
+**Central de Upload** (ponte pro inventário da Steam, simulada no protótipo):
+
+- Negociáveis: pacotes de download e itens T4.
+- Vinculados à conta: T1–T3, itens saídos do Compilador e T5 (bloqueado no lançamento).
+- 4 espaços de envio. Cada um fica ocupado por 8 h depois de usado.
+- Um item que volta da Steam fica 7 dias preso ao jogo.
+- A tooltip diz se o item é negociável ou o motivo de estar vinculado.
+
 ## v1.0: tela de diagnóstico, créditos, tooltip e novas taxas
 
 - **Agentes** virou uma tela de **diagnóstico**: processos no topo (`firewall.sys PID 0421`), câmara de varredura com feixe animado, **soquetes de equipamento** em lista e leitura de atributos em terminal (`> dano ..... 13`) com comandos `> overclock` / `> blindagem`.

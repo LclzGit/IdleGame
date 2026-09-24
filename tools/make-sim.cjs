@@ -7,7 +7,7 @@ rep("    if (addItem({k:'chip', r, n:1})) {", "    window.__st.chips[r]++;\n    
 rep("function kill(e) {", "function kill(e) {\n  window.__st.kills++; if (e.boss) window.__st.clears = (window.__st.clears || 0) + 1; window.__st.cred += e.reward * (1 + tv('gold') + glob('gold'));");
 rep("  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }", "  window.__st.pulls[chip][st]++;\n  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }");
 rep("function compile(sel) {", "function compile(sel) {\n  window.__st.comp++;");
-rep("function rollback() {", "function rollback() {\n  window.__st.deaths++;");
+rep("function rollback(why) {", "function rollback(why) {\n  window.__st.deaths++;");
 rep("<script>\n(() => {", "<script>\nwindow.__st = {items:[0,0,0,0,0], chips:[0,0,0], pulls:[{3:0,4:0,5:0},{3:0,4:0,5:0},{3:0,4:0,5:0}], kills:0, cred:0, comp:0, deaths:0};\n(() => {");
 const i = s.lastIndexOf('})();');
 s = s.slice(0, i) + `window.__g = {
