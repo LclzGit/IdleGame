@@ -19,9 +19,15 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 
 - **Dados** (KB → MB → GB) são o dinheiro do jogo. Servem pra aprimorar **dano** e **resistência** de cada personagem (+12% por nível; o nível fica com o personagem mesmo quando ele sai do esquadrão).
 - **Fases:** 5 por setor (1-1 … 1-5, 2-1 …). Cada uma tem 10 vírus e um chefe. Vencer o chefe libera a próxima. Dá pra escolher qualquer fase liberada pra farmar. Cada fase mostra o **poder recomendado** (verde, âmbar ou vermelho em relação ao seu). Com "avançar sozinho", o esquadrão sobe de fase e recua uma se cair 2 vezes.
-- **Inventário (12 espaços):** equipamentos (8% por vírus, 100% no chefe) e pacotes de download. Com o inventário cheio, o que cai é reciclado em dados.
+- **Inventário (18 espaços):** equipamentos (8% por vírus, 100% no chefe) e pacotes de download. Com o inventário cheio, o que cai é reciclado em dados.
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
+
+## v0.8: menus no estilo TBH
+
+- Os menus viraram uma **janela centralizada acima da barra**, com moldura, placa de título, dados/DEF no canto e uma **barra de ícones** embaixo (Agentes, Coleção, Compilador, Download, Antivírus, Fases, Log). O HUD da barra também usa esses ícones.
+- **Agentes** junta esquadrão e inventário, como a tela HERO do TBH: equipamentos à esquerda, retrato grande com seletor ◂ ▸ e formação no centro, atributos e aprimoramentos à direita, e o **inventário embaixo com 18 espaços (6×3)**.
+- Coleção e Compilador viraram menus próprios.
 
 ## v0.7: Compilador (síntese)
 

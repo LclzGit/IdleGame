@@ -41,7 +41,9 @@
   .cur b{font:400 12px var(--pix); color:var(--amber); font-variant-numeric:tabular-nums}
   .cur.pw b{color:var(--cyan)}
   .tabs{display:flex; gap:2px; margin-left:auto}
-  .tabs button{padding:2px 7px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
+  .tabs button{display:flex; align-items:center; gap:4px; padding:2px 6px; box-shadow:none; background:transparent; border-color:transparent; color:var(--mute)}
+  .tabs button img{image-rendering:pixelated}
+  @media (max-width:900px){ .tabs button span{display:none} }
   .tabs button:hover{color:var(--text); border-color:var(--line)}
   .tabs button[aria-pressed="true"]{color:var(--amber); border-color:var(--amber); background:#12102a}
   .tabs i{font-style:normal; color:var(--cyan)}
@@ -53,11 +55,49 @@
   .clock{margin-left:auto; font-variant-numeric:tabular-nums}
 
   /* painel que abre acima da barra */
-  .panel{position:absolute; right:12px; bottom:calc(100% + 8px); width:min(560px, calc(100% - 24px)); max-height:min(360px, calc(100vh - 220px)); display:flex; flex-direction:column; background:var(--win); border:1px solid var(--line); box-shadow:5px 5px 0 #000; z-index:5}
+  .panel{position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 10px); width:min(600px, calc(100% - 24px)); max-height:calc(100vh - 200px); display:flex; flex-direction:column; z-index:5;
+    background:linear-gradient(rgba(92,225,230,.035) 1px, transparent 1px) 0 0/100% 4px, var(--win);
+    border:2px solid #3d3578; outline:2px solid #000; box-shadow:inset 0 0 0 1px #5a4fa6, 8px 8px 0 rgba(0,0,0,.6)}
+  .panel::before,.panel::after{content:""; position:absolute; width:10px; height:10px; border:2px solid var(--amber); pointer-events:none}
+  .panel::before{left:-4px; top:-4px; border-right:0; border-bottom:0}
+  .panel::after{right:-4px; bottom:-4px; border-left:0; border-top:0}
+  .ptitle{position:absolute; left:50%; top:-12px; transform:translateX(-50%); margin:0; padding:5px 26px 4px; white-space:nowrap;
+    font:400 15px var(--pix); letter-spacing:.1em; color:var(--amber); text-shadow:2px 2px 0 #000;
+    background:linear-gradient(#5b1e45, #2e0f26); border:2px solid #000; box-shadow:inset 0 0 0 1px #ff3d7f;
+    clip-path:polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%)}
+  .pcur{font:11px var(--mono); color:var(--mute); padding:2px 8px; background:#0b0a16; border:1px solid var(--line)}
+  .pcur b{font:400 11px var(--pix); color:var(--amber)} .pcur i{font-style:normal; color:var(--cyan)}
+  .pnav{display:flex; justify-content:center; flex-wrap:wrap; gap:6px; padding:8px; background:#110e22; border-top:2px solid #000; box-shadow:inset 0 1px 0 #3d3578}
+  .nb{display:grid; justify-items:center; gap:2px; width:62px; padding:5px 2px 3px; background:radial-gradient(circle at 50% 35%, #2a2452, #15122b 70%); border:2px solid #3d3578; box-shadow:0 2px 0 #000; clip-path:polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)}
+  .nb img{image-rendering:pixelated}
+  .nb span{font:9px var(--mono); color:var(--mute)}
+  .nb[aria-pressed="true"]{border-color:var(--amber); background:radial-gradient(circle at 50% 35%, #4a3a1a, #1d1608 70%)}
+  .nb[aria-pressed="true"] span{color:var(--amber)}
+  /* tela de agente */
+  .ag{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start; padding:12px; background:radial-gradient(ellipse at 50% 30%, #1d1840, #0b0a16 75%); border:1px solid var(--line); box-shadow:inset 0 0 0 1px #000}
+  .ag-eq{display:grid; grid-template-columns:repeat(2, 48px); gap:6px}
+  .eqs.big{width:48px; height:48px}
+  .eqs.big i{font-size:8px; right:2px; bottom:1px}
+  .eqs.na{opacity:.25; cursor:default}
+  .eqs .setd{position:absolute; left:2px; top:2px; width:5px; height:5px}
+  .ag-mid{display:grid; justify-items:center; gap:5px}
+  .ag-name{display:flex; align-items:center; gap:8px; font:400 12px var(--pix); color:var(--text)}
+  .ag-name button{padding:0 6px; box-shadow:none}
+  .ag-por{image-rendering:pixelated; background:radial-gradient(circle, #2c2560, #0b0a16 72%); border:1px solid #3d3578}
+  .ag-role{font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--mute)}
+  .ag-form{display:flex; gap:4px}
+  .fm{padding:1px; box-shadow:none; background:#0b0a16}
+  .fm img{image-rendering:pixelated; display:block}
+  .fm.on{border-color:var(--amber)}
+  .ag-st{display:grid; gap:5px; width:170px}
+  .ag-st .st{display:grid; grid-template-columns:auto 1fr; gap:1px 8px; font-size:11px}
+  .ag-st .st span{color:var(--mute)} .ag-st .st b{color:var(--text); font-weight:600; text-align:right}
+  .ag-st .st em{color:var(--pink); font-style:normal; text-align:right}
+  .ag-st button{text-align:left}
   .panel[hidden]{display:none}
-  .panel header{display:flex; justify-content:space-between; align-items:center; padding:5px 6px 5px 10px; background:var(--winhi); border-bottom:1px solid var(--line); font:600 12px var(--mono)}
+  .panel header{position:relative; display:flex; justify-content:space-between; align-items:center; padding:12px 8px 8px; background:linear-gradient(#262050, #17142e); border-bottom:2px solid #000; box-shadow:inset 0 -1px 0 #3d3578}
   .panel header button{padding:0 7px; box-shadow:none}
-  .pbody{overflow:auto; padding:10px 12px; font:12px/1.45 var(--mono)}
+  .pbody{overflow:auto; padding:12px; font:12px/1.45 var(--mono)}
   .pbody p{margin:0 0 8px}
   .hint{color:var(--mute)}
 
@@ -93,7 +133,7 @@
   .prev button[aria-pressed="true"]{border-color:currentColor; background:#0b0a16}
 
   /* inventário */
-  .inv{display:grid; grid-template-columns:repeat(6, 1fr); gap:5px}
+  .inv{display:grid; grid-template-columns:repeat(6, 56px); gap:5px; justify-content:center}
   .cell{aspect-ratio:1; max-width:100%; display:grid; place-content:center; gap:1px; padding:0; background:#0b0a16; border:1px solid var(--line); box-shadow:inset 0 -3px 0 var(--rc,transparent); color:var(--rc); text-align:center}
   .cell.empty{border-style:dashed; opacity:.5; box-shadow:none}
   .cell .ct{font:9px var(--mono); color:var(--mute)}
@@ -111,7 +151,7 @@
   .rates td:nth-child(n+2){text-align:right}
   .setlist summary{cursor:pointer; color:var(--text)}
   .cell.dim{opacity:.3}
-  .inv.comp{grid-template-columns:repeat(5, 1fr); max-width:320px; margin:6px 0}
+  .inv.comp{grid-template-columns:repeat(5, 56px); margin:6px 0}
   .cinfo{font-size:11px; color:var(--mute); margin:6px 0}
   .row{display:flex; flex-wrap:wrap; gap:6px}
   .cell.sel{border-color:var(--amber); outline:1px solid var(--amber)}
@@ -175,19 +215,20 @@
   .log time{color:#5d5790; margin-right:6px}
   .k{color:var(--cyan)}
 
-  @media (max-width:560px){ .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
+  @media (max-width:560px){ .ag{grid-template-columns:1fr; justify-items:center} .ag-st{width:100%} .inv{grid-template-columns:repeat(6, minmax(0, 48px))} .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
   @media (prefers-reduced-motion:reduce){ .res .card{animation:none} }
 </style>
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.7</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.8</p>
 </main>
 
 <footer class="dock">
   <section class="panel" id="panel" hidden>
-    <header><span id="pTitle"></span><button type="button" id="pClose" aria-label="Fechar painel">×</button></header>
+    <header><span class="pcur" id="pCur"></span><h2 class="ptitle" id="pTitle"></h2><button type="button" id="pClose" aria-label="Fechar painel">×</button></header>
     <div class="pbody" id="pBody"></div>
+    <nav class="pnav" id="pNav" aria-label="Menus"></nav>
   </section>
   <div class="hud">
     <button class="stg" id="stgBtn" type="button" data-open="stages" title="Escolher fase"></button>
@@ -196,12 +237,12 @@
     <span class="cur pw"><em>PODER</em><b id="pow"></b></span>
     <span class="cur pw"><em>DEF</em><b id="def"></b></span>
     <nav class="tabs">
-      <button type="button" data-open="squad" aria-pressed="false">Esquadrão</button>
-      <button type="button" data-open="tree" aria-pressed="false">Antivírus</button>
-      <button type="button" data-open="inv" aria-pressed="false">Inventário <i id="invN"></i></button>
-      <button type="button" data-open="gacha" aria-pressed="false">Download</button>
-      <button type="button" data-open="stages" aria-pressed="false">Fases</button>
-      <button type="button" data-open="log" aria-pressed="false">Log</button>
+      <button type="button" data-open="agent" aria-pressed="false" title="Agentes e inventário"><span>Agentes</span> <i id="invN"></i></button>
+      <button type="button" data-open="comp" aria-pressed="false" title="Compilador"><span>Compilador</span></button>
+      <button type="button" data-open="gacha" aria-pressed="false" title="Download de agentes"><span>Download</span></button>
+      <button type="button" data-open="tree" aria-pressed="false" title="Antivírus"><span>Antivírus</span></button>
+      <button type="button" data-open="stages" aria-pressed="false" title="Fases"><span>Fases</span></button>
+      <button type="button" data-open="log" aria-pressed="false" title="Log"><span>Log</span></button>
     </nav>
     <button id="speed" type="button" title="Velocidade do protótipo">1×</button>
   </div>
@@ -794,7 +835,7 @@ const nodeLv = id => S.tree[id] || 0;
 const nodeCost = n => Math.floor(n.base * 1.6 ** nodeLv(n.id));
 const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
 const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
-const invCap = () => 12 + tv('inv');
+const invCap = () => 18 + tv('inv');
 
 // Passivas dos itens: sorteadas no drop. Quantidade por tier: T1 0, T2 1, T3 1, T4 2, T5 3.
 // Valor = faixa × multiplicador do tier. 'spd' vale só pra quem usa; as outras valem pro esquadrão.
@@ -1094,7 +1135,7 @@ function dropGear(boss, forceType) {
   } else if (addItem(it)) say(`${gearTag(it)} foi pro inventário`);
   else if (S.autoComp && autoCompile() && addItem(it)) say(`${gearTag(it)} foi pro inventário`);
   else { S.data += gearVal(it); say(`Inventário cheio: ${gearTag(it)} reciclado → +${fmt(gearVal(it))}`); }
-  if (openP === 'inv' || openP === 'squad') renderPanel();
+  if (openP === 'agent' || openP === 'comp') renderPanel();
 }
 function dropChip(e) {
   for (let r = CHIPS.length - 1; r >= 0; r--) {
@@ -1105,7 +1146,7 @@ function dropChip(e) {
       say(`Pacote de download <span style="color:${C.c}">${C.n}</span> encontrado!`, true);
       if (r >= 1) showBanner('PACOTE ' + C.n.toUpperCase() + '!', C.c);
     } else { S.data += chipVal(r); say(`Inventário cheio: pacote ${C.n} reciclado → +${fmt(chipVal(r))}`); }
-    if (openP === 'inv' || openP === 'gacha') renderPanel();
+    if (openP === 'agent' || openP === 'gacha') renderPanel();
     return;
   }
 }
@@ -1355,7 +1396,7 @@ function update(dt) {
     const opts = [];
     for (const [k] of SLOTS) for (const u of ['a', 'h']) opts.push([k, u, upCost(slotAid(k), u)]);
     const best = opts.sort((a, b) => a[2] - b[2])[0];
-    if (best && buyUp(best[0], best[1]) && openP === 'squad') renderPanel();
+    if (best && buyUp(best[0], best[1]) && openP === 'agent') livePanel();
   }
 }
 
@@ -1515,8 +1556,8 @@ function equip(id) {
 }
 
 // ---------- painéis ----------
-let openP = null, selInv = -1, sqTab = 'team', colCls = 'fw';
-const PANELS = {squad:'Esquadrão', tree:'Antivírus · árvore de atualizações', inv:'Inventário', gacha:'Download de agentes', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
+let openP = null, selInv = -1, colCls = 'fw', agSel = 'fw';
+const PANELS = {agent:'AGENTES', col:'COLEÇÃO', comp:'COMPILADOR', tree:'ANTIVÍRUS', gacha:'DOWNLOAD', stages:'FASES', log:'LOG', readme:'LEIA-ME'};
 const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
 function invItems() {
@@ -1544,7 +1585,7 @@ function invItems() {
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <p class="hint drops">Chance de tier por item: ${RAR.map((r, i) => `<span style="color:${r.c}">${tierTxt(i)} ${r.n} ${TIER_W[i]}%</span>`).join(' · ')}. Chefes dão no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
-      <details class="setlist" open><summary>Chances atuais por vírus (base → com seus bônus)</summary>
+      <details class="setlist"><summary>Chances atuais por vírus (base → com seus bônus)</summary>
         <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
         <table class="rates">${[
           ['Item (qualquer)', GEAR_BASE, gearChance()],
@@ -1589,66 +1630,91 @@ function compView() {
     <p class="sub">Inventário</p>
     <div class="inv">${cells}</div>`;
 }
+// Tela de agente no estilo da tela HERO do TBH: equipamentos à esquerda, retrato no centro, atributos à direita.
+function agentTop() {
+  const k = agSel, h = heroOf(k), G = gearOf(k);
+  const slot = ty => {
+    if (!CLS_SLOTS[k].includes(ty)) return `<span class="eqs big na" title="${ITYPES[ty].n}: só o tanque usa">×</span>`;
+    const it = G[ty];
+    return it
+      ? `<button type="button" class="eqs big" data-uneq="${k}:${ty}" style="--rc:${RAR[it.t].c}" title="${it.name} ${tierTxt(it.t)} · Nv${it.lv} · ${statTxt(it)}${(it.af || []).map(a => ' · ' + bonusTxt(a.k, a.v)).join('')}${it.set ? ' · conjunto ' + SETS[it.set].n : ''} (clique pra remover)"><img src="${itemIcon(it)}" width="32" height="32" alt=""><i>${tierTxt(it.t)}</i>${it.set ? `<span class="setd" style="background:${SETS[it.set].c}"></span>` : ''}</button>`
+      : `<span class="eqs big empty" title="${ITYPES[ty].n}: vazio">${ITYPES[ty].ab}</span>`;
+  };
+  const form = SLOTS.map(([s_, lab]) => `<button type="button" class="fm${s_ === k ? ' on' : ''}" data-ag="${s_}" title="${heroOf(s_).def.name} · ${lab}"><img src="${portrait(s_)}" width="32" height="32" alt=""></button>`).join('');
+  const setsOn = Object.keys(setCounts(k)).filter(x => setCounts(k)[x] >= 2);
+  const role = k === 'sc' ? `<span style="color:${SUBS[dpsSub()].c}">DPS · ${SUBS[dpsSub()].n}</span>` : SLOTS.find(x => x[0] === k)[1];
+  return `<div class="ag">
+    <div class="ag-eq">${['weapon', 'shield', 'helmet', 'armor', 'boots'].map(slot).join('')}</div>
+    <div class="ag-mid">
+      <div class="ag-name"><button type="button" data-agstep="-1" aria-label="Agente anterior">◂</button><span>${h.def.name}</span><button type="button" data-agstep="1" aria-label="Próximo agente">▸</button></div>
+      <img class="ag-por" src="${portrait(k)}" width="96" height="96" alt="">
+      <div class="ag-role">${role}</div>
+      <div class="ag-form">${form}</div>
+    </div>
+    <div class="ag-st">
+      <div class="hp"><i id="hp-${k}"></i></div>
+      <div class="st" id="st-${k}"></div>
+      <button type="button" id="ua-${k}" data-up="${k}:a"></button>
+      <button type="button" id="uh-${k}" data-up="${k}:h"></button>
+      ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">Trocar agente</button>`}
+    </div>
+  </div>
+  <div class="sets">${setsOn.length ? setsOn.map(x => setTxt(k, x)).join('<br>') : '<span class="hint">Nenhum conjunto ativo: 2 peças do mesmo conjunto ativam o bônus.</span>'}</div>`;
+}
+
+// Ícones pixel da navegação.
+const UIICON = {};
+function uiIcon(k) {
+  if (UIICON[k]) return UIICON[k];
+  const P = Painter(16, 16), A = '#ffb454', C = '#5ce1e6', M = '#9aa1bd', D = '#3a3f5c';
+  if (k === 'agent') { P.ell(8, 5, 3, 3, M); P.rect(6, 4, 5, 2, C); P.poly([[2, 15], [4, 10], [8, 9], [12, 10], [14, 15]], D); P.line(6, 11, 10, 11, A); }
+  else if (k === 'col') { P.rect(1, 5, 7, 10, D); P.rect(4, 3, 7, 10, M); P.rect(8, 1, 7, 10, '#c38cff'); P.rect(10, 4, 3, 3, '#ffffff'); }
+  else if (k === 'comp') { P.poly([[8, 1], [15, 5], [8, 9], [1, 5]], A); P.poly([[1, 5], [8, 9], [8, 15], [1, 11]], mix(A, '#000000', .35)); P.poly([[15, 5], [8, 9], [8, 15], [15, 11]], mix(A, '#000000', .55)); }
+  else if (k === 'gacha') { P.rect(6, 1, 4, 7, C); P.poly([[2, 7], [14, 7], [8, 13]], C); P.rect(1, 14, 14, 2, M); }
+  else if (k === 'tree') { P.poly([[2, 1], [14, 1], [14, 8], [8, 15], [2, 8]], '#5ca8ff'); P.line(5, 7, 7, 10, '#ffffff'); P.line(7, 10, 11, 4, '#ffffff'); }
+  else if (k === 'stages') { P.line(4, 1, 4, 15, M); P.poly([[5, 1], [14, 4], [5, 8]], '#ff3d7f'); P.rect(1, 14, 7, 2, D); }
+  else if (k === 'log') { P.rect(2, 1, 12, 14, M); for (let y = 4; y < 13; y += 3) P.line(4, y, 11, y, D); }
+  P.outline('#05040b');
+  return UIICON[k] = P.canvas(false).toDataURL();
+}
+const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['log', 'Log']];
+
 const RENDER = {
-  squad: () => {
-    const tabs = `<div class="btabs"><button type="button" data-sqtab="team" aria-pressed="${sqTab === 'team'}">Equipe</button><button type="button" data-sqtab="col" aria-pressed="${sqTab === 'col'}">Coleção</button></div>`;
-    if (sqTab === 'col') {
-      const C = CLASSES[colCls];
-      const col = C.list.map(T => {
-        const own = T.id in S.roster, on = S[C.key] === T.id;
-        return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
-          <img src="${portraitOf(T.id, -1)}" width="40" height="40" alt="">
-          <span class="st${T.stars}">${stars(T.stars)}</span>
-          <span class="nm">${own ? T.name : '???'}</span>
-          ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
-          <span class="ps">${own ? T.ptxt : 'Ainda não baixado'}</span>
-          <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'No esquadrão' : own ? 'Colocar' : 'Bloqueado'}</button>
-        </div>`;
-      }).join('');
-      return tabs + `<div class="btabs"><button type="button" data-colc="fw" aria-pressed="${colCls === 'fw'}">Tanques</button><button type="button" data-colc="sc" aria-pressed="${colCls === 'sc'}">DPS</button></div>
-        ${colCls === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
-        <p class="sub">${C.label} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length} · novos agentes vêm do Download</small></p>
-        <div class="col">${col}</div>`;
-    }
-    return tabs + SLOTS.map(([k, lab]) => {
-      const h = heroOf(k), G = gearOf(k);
-      const slots = CLS_SLOTS[k].map(ty => { const it = G[ty]; return it
-        ? `<button type="button" class="eqs" data-uneq="${k}:${ty}" style="--rc:${RAR[it.t].c}" title="${it.name} ${tierTxt(it.t)} · Nv${it.lv} · ${statTxt(it)}${(it.af || []).map(a => ' · ' + bonusTxt(a.k, a.v)).join('')}${it.wt ? ' · ' + SUBS[it.wt].n : ''} (clique pra remover)"><img src="${itemIcon(it)}" width="24" height="24" alt=""><i>${tierTxt(it.t)}</i></button>`
-        : `<span class="eqs empty" title="${ITYPES[ty].n}: vazio">${ITYPES[ty].ab}</span>`; }).join('');
-      return `<div class="hr">
-        <img src="${portrait(k)}" width="48" height="48" alt="">
-        <div>
-          <div class="hn"><b>${h.def.name}</b><span${k === 'sc' ? ` style="color:${SUBS[dpsSub()].c}"` : ''}>${k === 'sc' ? 'DPS · ' + SUBS[dpsSub()].n : lab}</span></div>
-          <div class="hp"><i id="hp-${k}"></i></div>
-          <div class="st" id="st-${k}"></div>
-          <div class="eqrow">${slots}</div>
-          ${Object.keys(setCounts(k)).length ? `<div class="sets">${Object.keys(setCounts(k)).filter(x => setCounts(k)[x] >= 2).map(x => setTxt(k, x)).join('<br>') || '<span class="hint">nenhum conjunto ativo (2 peças iguais ativam)</span>'}</div>` : ''}
-        </div>
-        <div class="hb">
-          <button type="button" id="ua-${k}" data-up="${k}:a"></button>
-          <button type="button" id="uh-${k}" data-up="${k}:h"></button>
-          ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">trocar</button>`}
-        </div>
-      </div>`;
-    }).join('') + `
+  agent: () => agentTop() + `<p class="sub">Inventário <small>${S.inv.length}/${invCap()}</small></p>` + invItems() + `
       <div class="opts">
         <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
         <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar itens melhores</label>
       </div>
       <div class="prev">prévia (todos os itens no tier): ${[['real', -9], ...RAR.map((r, i) => [tierTxt(i), i])].map(([n, v]) =>
-        `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`;
+        `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
+
+  col: () => {
+    const C = CLASSES[colCls];
+    const col = C.list.map(T => {
+      const own = T.id in S.roster, on = S[C.key] === T.id;
+      return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
+        <img src="${portraitOf(T.id, -1)}" width="48" height="48" alt="">
+        <span class="st${T.stars}">${stars(T.stars)}</span>
+        <span class="nm">${own ? T.name : '???'}</span>
+        ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
+        <span class="ps">${own ? T.ptxt : 'Ainda não baixado'}</span>
+        <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'No esquadrão' : own ? 'Colocar' : 'Bloqueado'}</button>
+      </div>`;
+    }).join('');
+    return `<div class="btabs"><button type="button" data-colc="fw" aria-pressed="${colCls === 'fw'}">Tanques</button><button type="button" data-colc="sc" aria-pressed="${colCls === 'sc'}">DPS</button></div>
+      ${colCls === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
+      <p class="sub">${C.label} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length} · novos agentes vêm do Download</small></p>
+      <div class="col">${col}</div>`;
   },
 
-  inv: () => {
-    const tabs = `<div class="btabs"><button type="button" data-invtab="items" aria-pressed="${invTab === 'items'}">Itens</button><button type="button" data-invtab="comp" aria-pressed="${invTab === 'comp'}">Compilador</button></div>`;
-    return tabs + (invTab === 'comp' ? compView() : invItems());
-  },
+  comp: () => compView(),
+
   gacha: () => {
     const res = lastPull && lastPull.cls === gBanner ? `<div class="res">${lastPull.out.map((o, i) => `
       <div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" width="40" height="40" alt="">
       <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
       ${o.res === 'new' ? '<span class="tag new">NOVO</span>' : `<span class="tag dup">+${fmt(o.v)}</span>`}</div>`).join('')}</div>` : '';
-    return `<p class="hint">Baixe novos agentes pro antivírus usando pacotes de download. Os agentes baixados ficam na Coleção, no Esquadrão.</p>
+    return `<p class="hint">Baixe novos agentes pro antivírus usando pacotes de download. Os agentes baixados ficam na Coleção.</p>
       <div class="btabs">
         <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
         <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · DPS</button>
@@ -1713,12 +1779,13 @@ function renderPanel() {
   livePanel();
 }
 function livePanel() {
-  if (openP === 'squad') for (const [k] of SLOTS) {
+  $('#pCur').innerHTML = `<b>${fmt(S.data)}</b> · <i>${fmtN(S.def)} DEF</i>`;
+  if (openP === 'agent') for (const [k] of SLOTS) {
     const h = heroOf(k), aid = slotAid(k), lv = lvOf(aid), el = $('#hp-' + k);
-    if (!el) return;
+    if (!el) continue;
     const p = h.dead ? 0 : h.hp / maxHp(h) * 100;
     el.style.width = p.toFixed(1) + '%'; el.style.background = p < 35 ? 'var(--pink)' : '';
-    $('#st-' + k).textContent = `ATK ${fmtN(atk(h))} · HP ${fmtN(h.hp)}/${fmtN(maxHp(h))}${h.dead ? ' · reiniciando…' : ''}`;
+    $('#st-' + k).innerHTML = `<span>ATK</span><b>${fmtN(atk(h))}</b><span>HP</span><b>${fmtN(h.hp)}/${fmtN(maxHp(h))}</b><span>ATQ/s</span><b>${(1 / cdOf(h)).toFixed(2)}</b><span>Nível</span><b>${lv.a + lv.h}</b>${h.dead ? '<span></span><em>reiniciando…</em>' : ''}`;
     for (const u of ['a', 'h']) {
       const b = $(`#u${u}-${k}`), c = upCost(aid, u);
       b.innerHTML = `${u === 'a' ? '+Dano' : '+Resist.'} nv${lv[u]} · <b>${fmt(c)}</b>`;
@@ -1729,24 +1796,27 @@ function livePanel() {
 function openPanel(k, force) {
   openP = !force && openP === k ? null : k;
   $('#panel').hidden = !openP;
-  document.querySelectorAll('.tabs [data-open]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.open === openP)));
+  document.querySelectorAll('.tabs [data-open], #pNav [data-open]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.open === openP)));
   if (openP) renderPanel();
 }
 document.addEventListener('click', e => {
   const o = e.target.closest('[data-open]');
-  if (o) { openPanel(o.dataset.open); return; }
+  if (o) { openPanel(o.dataset.open, !!o.closest('#pNav')); return; }
 });
 $('#pClose').addEventListener('click', () => openPanel(null, true));
+$('#pNav').innerHTML = NAV.map(([k, n]) => `<button type="button" class="nb" data-open="${k}" aria-pressed="false" title="${n}"><img src="${uiIcon(k)}" width="24" height="24" alt=""><span>${n}</span></button>`).join('');
+document.querySelectorAll('.tabs [data-open]').forEach(b => { const k = b.dataset.open, n = NAV.find(x => x[0] === k); if (n) b.insertAdjacentHTML('afterbegin', `<img src="${uiIcon(k)}" width="16" height="16" alt="">`); });
 let wipeArmed = 0;
 $('#pBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   const d = b.dataset;
   if (d.up) { const [k, u] = d.up.split(':'); if (buyUp(k, u)) livePanel(); }
   else if (d.uneq) { const [c, ty] = d.uneq.split(':'); unequip(c, ty); }
-  else if (d.swap) { sqTab = 'col'; colCls = d.swap; renderPanel(); }
-  else if (d.sqtab) { sqTab = d.sqtab; renderPanel(); }
+  else if (d.swap) { colCls = d.swap; openPanel('col', true); }
+  else if (d.ag) { agSel = d.ag; renderPanel(); }
+  else if (d.agstep) { const ks = SLOTS.map(x => x[0]); agSel = ks[(ks.indexOf(agSel) + +d.agstep + ks.length) % ks.length]; renderPanel(); }
   else if (d.colc) { colCls = d.colc; renderPanel(); }
-  else if (d.gocol !== undefined) { sqTab = 'col'; colCls = gBanner; openPanel('squad', true); }
+  else if (d.gocol !== undefined) { colCls = gBanner; openPanel('col', true); }
   else if (d.prev !== undefined) { const v = +d.prev; previewTier = v < 0 ? null : v; renderPanel(); }
   else if (d.cell !== undefined) { selInv = +d.cell; renderPanel(); }
   else if (d.invtab) { invTab = d.invtab; renderPanel(); }
