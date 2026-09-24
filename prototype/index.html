@@ -265,8 +265,8 @@
   .pd{display:grid; gap:1px; padding:4px; text-align:center; background:#0b0a16; border:1px solid var(--line); font-size:9px}
   .pd b{font:400 9px var(--pix)} .pd small{color:var(--mute)}
   .pd.got{opacity:.45} .pd.now{border-color:var(--amber); background:#1d1608}
-  .ct{display:grid; grid-template-columns:1fr 90px auto auto; gap:8px; align-items:center; padding:5px 6px; border-bottom:1px solid #1a1733; font-size:11px}
-  .ct small{color:var(--mute)} .ct.ok{opacity:.5} .ct.done{background:#0d2018}
+  .ctr{display:grid; grid-template-columns:1fr 90px auto auto; gap:8px; align-items:center; padding:5px 6px; border-bottom:1px solid #1a1733; font-size:11px}
+  .ctr small{color:var(--mute)} .ctr.ok{opacity:.5} .ctr.done{background:#0d2018}
   .fmt{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 10px; margin-bottom:8px; border:1px solid var(--line); background:#0b0a16}
   .fmt.on{border-color:#ff5a2a; background:#1d0d08} .fmt b{color:#ff8a3a} .fmt small{color:var(--mute)} .fmt p{margin:2px 0 0}
   .pnav{overflow-y:auto}
@@ -279,6 +279,7 @@
   .sh small{color:var(--mute); font-size:10px}
   .sh select{font:11px var(--mono); background:#0b0a16; color:var(--text); border:1px solid var(--line)}
   .raids{display:grid; gap:6px}
+  .kcm{display:flex; gap:3px; margin-top:3px} .kcm i{font:9px var(--mono); font-style:normal; padding:0 4px; border:1px solid var(--line); color:var(--mute)} .kcm i.on{border-color:var(--cyan); color:var(--cyan)}
   .btabs .banL{border-color:var(--amber); color:var(--amber)} .btabs .banL[aria-pressed="true"]{background:#1d1608}
   .feat{display:grid; gap:2px; padding:6px 8px; margin-bottom:6px; border:1px solid var(--amber); background:#1d1608; font-size:11px}
   .feat b{color:var(--amber)} .feat small{color:var(--mute)} .feat .fl b{color:var(--text)}
@@ -354,6 +355,56 @@
 
   @media (max-width:560px){ .dx{grid-template-columns:1fr} .procs{grid-template-columns:1fr} .rd{grid-template-columns:1fr} .inv{grid-template-columns:repeat(6, minmax(0, 48px))} .task.opt{display:none} .chips{grid-template-columns:1fr} .inv{grid-template-columns:repeat(4, 1fr)} .hr{grid-template-columns:40px 1fr} .hb{grid-column:1 / -1; grid-template-columns:repeat(3, 1fr)} }
   @media (prefers-reduced-motion:reduce){ .res .card{animation:none} }
+  /* ===== modo compacto: janelas pequenas, como no Task Bar Hero (o jogo fica no canto da tela) ===== */
+  .panel{width:min(500px, calc(100% - 16px)); max-height:min(560px, calc(100vh - 120px)); left:auto; right:8px; transform:none}
+  .panel.wide{width:min(760px, calc(100% - 16px))}
+  .pbar{padding:3px 4px 3px 6px; gap:6px}
+  .ppath{font-size:11px} .ppath b{font-size:10px}
+  .pcur{font-size:10px; padding:0 6px}
+  .pnav{padding:4px 3px; gap:1px}
+  .nb{width:30px; padding:4px 2px}
+  .nb span{display:none}
+  .nb[aria-pressed="true"]::before{left:-4px}
+  .pbody{padding:8px; font:11px/1.4 var(--mono)}
+  .pbody p{margin:0 0 6px}
+  .sub{margin:8px 0 4px; font-size:10px}
+  .hint{font-size:10px}
+  .pstatus{display:none}
+  .procs{gap:3px; margin-bottom:6px}
+  .proc{padding:2px 4px; grid-template-columns:20px 1fr} .proc img{width:20px; height:20px} .proc b{font-size:10px} .proc small{font-size:8px}
+  .dx{grid-template-columns:112px 1fr; gap:8px}
+  .chamber{width:108px; height:108px} .chamber img{width:104px; height:104px}
+  .scan .nm{font-size:10px} .scan .rl{font-size:9px}
+  .sock{grid-template-columns:22px 58px 1fr auto; gap:4px; padding:1px 4px; font-size:10px} .sock img{width:20px; height:20px}
+  .sock.empty .ph{width:20px; height:20px}
+  .rd{margin-top:6px; padding:6px 8px; gap:3px 10px} .rd .st div{font-size:10px}
+  .cmds button{font-size:10px; padding:2px 6px}
+  .inv{grid-template-columns:repeat(6, 44px); gap:3px}
+  .cell img{width:22px; height:22px} .cell b{font-size:9px} .cell .ct{font-size:8px}
+  .det{margin-top:6px; padding:6px 8px; min-height:0}
+  .res,.col{grid-template-columns:repeat(auto-fill, minmax(76px, 1fr)); gap:4px}
+  .card{padding:4px 3px; font-size:9px} .card img.bust{width:60px; height:60px}
+  .chips{gap:4px} .chip{padding:4px 6px}
+  .shop{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:4px} .sh{padding:4px 6px; font-size:10px}
+  .raid{grid-template-columns:40px 1fr auto; gap:6px; padding:5px} .raid img{width:40px; height:40px} .raid .ri p{font-size:10px}
+  .sgrid{gap:2px} .sc{padding:2px 1px}
+  .tmap{height:min(380px, calc(100vh - 220px))}
+  .tree2{grid-template-columns:1fr 200px}
+  button{padding:2px 6px}
+  .opbox{padding:5px 8px} .opl{font-size:14px}
+  .rates td{padding:0 6px 0 0}
+  .ctr{grid-template-columns:1fr 60px auto auto; gap:6px; padding:3px 4px; font-size:10px}
+  .fmt{padding:5px 8px} .mut{padding:5px 8px}
+  .pres{gap:2px} .pd{padding:2px}
+  .tip{width:240px; font-size:10px}
+  .socks{grid-template-columns:repeat(5, 36px); gap:3px; justify-content:start; align-content:start}
+  .socks .lbl{grid-column:1 / -1; margin:2px 0 0}
+  .sock, .sock.empty{display:grid; grid-template-columns:1fr; place-items:center; width:36px; height:36px; padding:0; border-left-width:1px; border-bottom:3px solid var(--rc, #2e2856)}
+  .sock .sn, .sock .si{display:none}
+  .sock b{position:absolute; right:1px; bottom:0; font-size:7px}
+  .sock img{width:24px; height:24px}
+  .sock.empty .ph{border:0; width:auto; height:auto; font-size:8px}
+  .sock .setd{left:2px; top:2px}
 </style>
 
 <main class="desk">
@@ -1454,6 +1505,54 @@ const BOSS_PAINT = {
 };
 for (const id in BOSS_PAINT) { ENEMY_PAINT['raid:' + id] = BOSS_PAINT[id]; ESIZE['raid:' + id] = [64, 64]; }
 
+// Minichefões: o chefe das fases muda com o setor (o ransomware é o do C:\TEMP).
+Object.assign(ESIZE, {poison:[40, 40], leak:[40, 40], bootkit:[40, 40], botnet:[40, 40], hydra:[40, 40]});
+Object.assign(ENEMY_PAINT, {
+  // Cache Poison: pilha de blocos de cache com veneno verde escorrendo e rótulo de caveira
+  poison(P, f) {
+    const B = '#2a4a8a', B2 = '#5ca8ff', G = '#6ee7a8';
+    for (let i = 0; i < 4; i++) { const y = 32 - i * 8, x = 6 + (i % 2) * 2; P.rect(x, y, 28, 7, SH(i % 2 ? B : '#1f3a6a', y, y + 7, .4)); P.line(x, y, x + 27, y, B2); for (let k = x + 3; k < x + 26; k += 5) P.set(k, y + 3, B2); }
+    P.rect(13, 13, 14, 10, '#e9ecf5'); P.ell(20, 17, 3, 3, '#1a1a2a'); P.set(19, 17, '#e9ecf5'); P.set(21, 17, '#e9ecf5'); P.line(18, 21, 22, 21, '#1a1a2a');
+    for (const [x, l] of [[10, 5 + f * 2], [24, 3 + (1 - f) * 3], [32, 6]]) { P.line(x, 36, x, 36 + l, G, 2); P.ell(x, 37 + l, 1, 1, '#a6ffcf'); }
+    P.ell(12, 4, 2, 2, G); P.ell(28, 4, 2, 2, G); P.set(12, 3, '#ffffff'); P.set(28, 3, '#ffffff');
+  },
+  // Memory Leak: gosma roxa com vários olhos vazando de um pente de memória
+  leak(P, f) {
+    const V = '#b98cff', V2 = '#6a3aa8';
+    P.rect(4, 4, 32, 8, '#2a2d4a'); for (let x = 6; x < 35; x += 3) P.rect(x, 12, 1, 2, '#ffb454'); for (let k = 0; k < 3; k++) P.rect(8 + k * 9, 6, 6, 4, '#5a3a8a');
+    P.poly([[6, 14], [34, 14], [38, 30], [34, 39], [6, 39], [2, 30]], SH(V, 14, 39, .45));
+    for (const [x, l] of [[8, 4], [16, 7 - f * 2], [28, 5 + f * 2], [34, 3]]) P.ell(x, 39 + l / 2, 2, l / 2 + 1, V2);
+    for (const [x, y, r] of [[14, 24, 3], [26, 22, 4], [20, 32, 2], [31, 31, 2]]) { P.ell(x, y, r, r, '#ffffff'); P.ell(x + 1, y, Math.max(1, r - 2), Math.max(1, r - 2), '#1a0a2a'); }
+    P.ell(10, 18, 2, 1, mix(V, '#ffffff', .5));
+  },
+  // Bootkit: bota blindada gigante com caveira, vapor e brilho laranja do setor de boot
+  bootkit(P, f) {
+    const M = '#6a5a4a', O = '#ffb454';
+    P.poly([[8, 4], [24, 4], [24, 24], [38, 28], [38, 39], [4, 39], [4, 24]], SH(M, 4, 39, .5));
+    for (let y = 8; y < 24; y += 5) { P.line(8, y, 23, y, '#3a2e22'); P.set(10, y + 2, '#c9b8a0'); P.set(21, y + 2, '#c9b8a0'); }
+    P.rect(4, 35, 34, 4, '#2a2018'); for (let x = 6; x < 37; x += 5) P.rect(x, 37, 3, 2, O);
+    P.ell(16, 16, 5, 5, '#e9ecf5'); P.rect(13, 19, 6, 3, '#e9ecf5'); P.ell(14, 16, 1, 2, O); P.ell(18, 16, 1, 2, O);
+    for (let k = 0; k < 3; k++) P.ell(28 + k * 3, 22 - k * 6 - f * 2, 2 + k, 2, mix('#9aa0b5', '#0b0a16', .3 + k * .2));
+  },
+  // Botnet: nó central de rede (rainha) com antenas e drones zumbis orbitando
+  botnet(P, f) {
+    const G = '#6ee7a8', G2 = '#2a6a4a';
+    P.rect(10, 16, 20, 20, SH(G2, 16, 36, .45)); P.rect(12, 18, 16, 6, '#0b1a10'); for (let k = 0; k < 4; k++) P.set(14 + k * 3, 21, (k + f) % 2 ? G : '#1a3a24');
+    P.ell(20, 29, 4, 4, '#0b1a10'); P.ell(20, 29, 2, 2, G); P.rect(12, 36, 4, 4, G2); P.rect(24, 36, 4, 4, G2);
+    P.line(14, 16, 10, 4, '#9aa0b5'); P.line(26, 16, 30, 4, '#9aa0b5'); P.set(10, 4, G); P.set(30, 4, G);
+    for (let k = 0; k < 4; k++) { const q = k * Math.PI / 2 + f * .6, x = 20 + Math.cos(q) * 17, y = 20 + Math.sin(q) * 13; P.ell(x, y, 3, 2, '#3a3f5c'); P.set(x, y, G); P.line(x - 3, y - 2, x + 3, y - 2, '#9aa0b5'); }
+  },
+  // Darknet Hydra: três cabeças de serpente de glitch saindo de um corpo em camadas de cebola
+  hydra(P, f) {
+    const R = '#ff3d7f', R2 = '#8a1040';
+    P.ell(20, 33, 16, 7, SH(R2, 26, 40, .4)); P.ell(20, 33, 10, 4, '#3a0818');
+    for (const [bx, hx, hy] of [[12, 6, 10 + f], [20, 20, 4], [28, 34, 10 - f]]) {
+      for (let i = 0; i < 6; i++) { const x = bx + (hx - bx) * i / 6, y = 30 + (hy - 30) * i / 6; P.ell(x, y, 3, 3, SH(i % 2 ? R : R2, y - 3, y + 3, .4)); }
+      P.ell(hx, hy, 4, 3, SH(R, hy - 3, hy + 3, .4)); P.set(hx + 2, hy - 1, '#ffffff'); P.line(hx + 2, hy + 2, hx + 4, hy + 1, '#ffffff');
+    }
+    for (let k = 0; k < 5; k++) P.rect(4 + k * 7, 38 - (k % 2), 4, 1, '#5ce1e6');
+  },
+});
 const ESPR = {}, ESPRW = {};
 for (const k in ENEMY_PAINT) {
   ESPR[k] = []; ESPRW[k] = [];
@@ -1556,6 +1655,9 @@ const TYPES = {
   spyware:{hp:1.2, atk:1.1, rw:1.3, cd:.9, fam:'worm'}, rootkit:{hp:3.5, atk:1.2, rw:2.7, cd:1.6, fam:'trojan'},
   adware:{hp:1.8, atk:1, rw:1.5, cd:1.1, fam:'bug'}, keylogger:{hp:2, atk:1.5, rw:1.8, cd:1, fam:'bug'},
   cryptominer:{hp:2.8, atk:1.3, rw:2.2, cd:1.3, fam:'trojan'},
+  // minichefões por setor: mesmos números do ransomware, visual e nome próprios
+  poison:{hp:6, atk:1.6, rw:12, cd:1.6, fam:'boss'}, leak:{hp:6, atk:1.6, rw:12, cd:1.6, fam:'boss'}, bootkit:{hp:6, atk:1.6, rw:12, cd:1.6, fam:'boss'},
+  botnet:{hp:6, atk:1.6, rw:12, cd:1.6, fam:'boss'}, hydra:{hp:6, atk:1.6, rw:12, cd:1.6, fam:'boss'},
 };
 // Quais vírus aparecem em cada fase: novos entram com a dificuldade; o rootkit só nas fases Blindados.
 function virusPool(st, d, si) {
@@ -1567,7 +1669,14 @@ function virusPool(st, d, si) {
   if (d >= 4) P.push('cryptominer');
   return P;
 }
-const VCOL = {bug:'#ff3d7f', worm:'#a6e22e', trojan:'#c07a2a', boss:'#ffb454', spyware:'#5ce1e6', rootkit:'#9aa4b8', adware:'#ffb454', keylogger:'#ff3a3a', cryptominer:'#ffd84a'};
+// Bestiário: a cada marco de abates de um tipo de vírus, o esquadrão aprende a lidar com ele.
+// Cada marco: +3% de dano contra esse tipo e -2% de dano recebido dele (máx. +15% / -10%).
+const KC_MARKS = [100, 1e3, 1e4, 1e5, 1e6], KC_DMG = .03, KC_RED = .02;
+const kcLv = tn => KC_MARKS.filter(m => (S.kc[tn] || 0) >= m).length;
+const SEC_BOSS = ['boss', 'poison', 'leak', 'bootkit', 'botnet', 'hydra'];   // chefe de cada setor
+const BOSS_N = {boss:'RANSOMWARE', poison:'CACHE POISON', leak:'MEMORY LEAK', bootkit:'BOOTKIT', botnet:'BOTNET', hydra:'DARKNET HYDRA'};
+const VCOL = {bug:'#ff3d7f', worm:'#a6e22e', trojan:'#c07a2a', boss:'#ffb454', spyware:'#5ce1e6', rootkit:'#9aa4b8', adware:'#ffb454', keylogger:'#ff3a3a', cryptominer:'#ffd84a',
+  poison:'#6ee7a8', leak:'#b98cff', bootkit:'#ffb454', botnet:'#6ee7a8', hydra:'#ff3d7f'};
 const RAR = [
   {n:'Comum', c:'#9aa0b5', m:1, w:60}, {n:'Otimizado', c:'#6ee7a8', m:1.6, w:25},
   {n:'Criptografado', c:'#5ca8ff', m:2.5, w:10}, {n:'Zero-Day', c:'#c38cff', m:4, w:4},
@@ -1675,11 +1784,11 @@ function featView() {
 }
 // Loja de fragmentos
 const SHOP = [
-  {id:'s4', n:'Agente ★4 à escolha', c:300, d:'Escolha qualquer ★4 do Download atual. Se já tiver, conta como repetido.'},
-  {id:'s5', n:'Agente ★5 à escolha', c:1200, d:'Escolha qualquer ★5 do Download atual. Se já tiver, conta como repetido.'},
-  {id:'raro', n:'Pacote Raro (vinculado)', c:150, d:'Um pacote Raro que não vai pro mercado.'},
-  {id:'bcr', n:'Cache de créditos', c:60, d:'Dobra os créditos ganhos por 1 hora.'},
-  {id:'bdef', n:'Overclock de definições', c:60, d:'Dobra as definições ganhas por 1 hora.'},
+  {id:'s4', n:'★4 à escolha', c:300, d:'Se já tiver, vira repetido.'},
+  {id:'s5', n:'★5 à escolha', c:1200, d:'Se já tiver, vira repetido.'},
+  {id:'raro', n:'Pacote Raro', c:150, d:'Vinculado à conta.'},
+  {id:'bcr', n:'Créditos ×2', c:60, d:'Por 1 hora.'},
+  {id:'bdef', n:'Definições ×2', c:60, d:'Por 1 hora.'},
 ];
 const buffOn = k => (S.buff[k] || 0) > nowMs();
 const ITEM_G = 1.06;   // crescimento dos itens por nível (usado já no carregamento, pela vida dos agentes)
@@ -1982,7 +2091,7 @@ function showBanner(text, color) { banner = {text, color: color || '#ffb454', li
 function spawn(boss) {
   const st = ST(), L = S.stage + (boss ? 1 : spawned / st.count), si = sec().idx;
   const pool = virusPool(st, sec().d, si);
-  const tn = boss ? 'boss' : pool[Math.random() * pool.length | 0];
+  const tn = boss ? SEC_BOSS[si % SEC_BOSS.length] : pool[Math.random() * pool.length | 0];
   const T = TYPES[tn], s = boss ? (st.bossHp ? 4 : 3) : 2;
   const hpM = boss ? (st.bossHp || 6) / T.hp : st.hp, atkM = boss ? st.bossAtk || 1 : 1, rwM = boss ? (st.bossHp ? 2.5 : 1) : st.rw;
   const w = (ESIZE[tn] ? ESIZE[tn][0] / 4 : SPR[tn].width) * s, h = (ESIZE[tn] ? ESIZE[tn][1] / 4 : SPR[tn].height) * s;
@@ -2010,7 +2119,7 @@ function hit(e, d) {
 function deal(e, d, area, dps) {
   if (area) d *= (1 + tv('aoe') + glob('aoe')) * (e.armored ? .5 : 1);
   if (e.boss) d *= 1 + tv('boss') + glob('boss');
-  d *= 1 + vaccine(e.raid ? 'boss' : (TYPES[e.tn] && TYPES[e.tn].fam) || e.tn);
+  d *= (1 + vaccine(e.raid ? 'boss' : (TYPES[e.tn] && TYPES[e.tn].fam) || e.tn)) * (1 + KC_DMG * kcLv(e.tn));
   if (dps) {
     const sb = dpsSub();
     if (sb === 'boss') d *= e.boss ? 1.8 : e.armored ? 1.4 : 1;
@@ -2497,18 +2606,19 @@ function raidView() {
     const tot = R.w.reduce((a, b) => a + b, 0);
     const tiers = R.w.map((w, t) => w ? `<span style="color:${RAR[t].c}">${tierTxt(t)} ${pct2(w / tot)}</span>` : '').filter(Boolean).join(' · ');
     const pks = R.gp.map((n, r) => n ? `<span style="color:${CHIPS[r].c}">${n} ${CHIPS[r].n}</span>` : '').filter(Boolean).join(' · ') + ' garantido' + (R.gp.reduce((a, b) => a + b, 0) > 1 ? 's' : '');
-    return `<div class="raid${open ? '' : ' lock'}${R.guest ? ' guest' : ''}" style="--rc:${R.c}">
-      <img src="${raidIcon(R.id)}" width="56" height="56" alt="">
-      <div class="ri">${R.guest ? `<span class="gtag">CONVIDADO DA SEMANA · sai em ${waitTxt(nextWeek)}</span><br>` : ''}<b>${open ? R.n : '???'}</b> <small>${R.y} · ${R.guest ? 'acompanha sua fase · +50% de créditos e definições' : 'dificuldade ' + '◆'.repeat(i + 1)}</small>
-        <p>${open ? R.d : `Libera ao chegar em ${stageLabel(R.L - 8)}.`}</p>
-        <div class="rd2">poder recomendado <span class="rp ${cls}">${fmtN(rp)}</span> · ${cdTxt(R.cd)} · ${RAID_TIME} s pra vencer</div>
-        <div class="rd2">drops: ${R.items} ${R.items > 1 ? 'itens' : 'item'} (${tiers}) · pacotes: ${pks} · créditos e definições</div>
+    const tierTxtR = R.w.map((w, t) => w ? t : -1).filter(t => t >= 0), trange = `${tierTxt(tierTxtR[0])}–${tierTxt(tierTxtR[tierTxtR.length - 1])}`;
+    const pk = R.gp.map((n, r) => n ? `${n} ${CHIPS[r].n}` : '').filter(Boolean).join(' + ');
+    const tipTxt = open ? `${R.d}\n\nDrops: ${R.items} ${R.items > 1 ? 'itens' : 'item'} (${R.w.map((w, t) => w ? `${tierTxt(t)} ${pct2(w / tot)}` : '').filter(Boolean).join(', ')}) · ${pk} · créditos e definições.` : `Libera em ${stageLabel(R.L - 8)}.`;
+    return `<div class="raid${open ? '' : ' lock'}${R.guest ? ' guest' : ''}" style="--rc:${R.c}" title="${tipTxt.replace(/"/g, '&quot;')}">
+      <img src="${raidIcon(R.id)}" width="40" height="40" alt="">
+      <div class="ri">${R.guest ? `<span class="gtag">CONVIDADO · ${waitTxt(nextWeek)}</span> ` : ''}<b>${open ? R.n : '???'}</b> <small>${R.y}${R.guest ? '' : ' · ' + '◆'.repeat(i + 1)}</small>
+        <div class="rd2">poder <span class="rp ${cls}">${fmtN(rp)}</span> · ${cdTxt(R.cd).replace('1 tentativa ', '')} · ${R.items}× ${trange} · ${pk}</div>
       </div>
-      <button type="button" data-raid="${R.id}" ${open && ready && !raid ? '' : 'disabled'}>${!open ? 'Bloqueado' : raid ? 'Em luta' : ready ? 'Enfrentar' : 'Volta em ' + waitTxt(S.raids[R.id] - now)}</button>
+      <button type="button" data-raid="${R.id}" ${open && ready && !raid ? '' : 'disabled'}>${!open ? 'Bloqueado' : raid ? 'Em luta' : ready ? 'Enfrentar' : waitTxt(S.raids[R.id] - now)}</button>
     </div>`;
   };
   const cards = card(G, 0) + RAIDS.map(card).join('');
-  return `<p class="hint">Malwares que marcaram a história, fora da campanha. Entrar gasta a tentativa, mesmo se você perder. O esquadrão tem ${RAID_TIME} s. Os itens caem no nível da sua fase máxima, então não pulam a progressão.</p>
+  return `<p class="hint">Entrar gasta a tentativa. ${RAID_TIME} s pra vencer. Passe o mouse pra ver a história e os drops.</p>
     ${res}<div class="raids">${cards}</div>
     <p class="pity"><button type="button" data-raidreset>protótipo: zerar esperas</button></p>`;
 }
@@ -2549,17 +2659,19 @@ function give(rw, why) {
 const rwTxt = rw => [rw.comum && `${rw.comum} Comum`, rw.raro && `${rw.raro} Raro`, rw.frag && `${rw.frag} frag.`, rw.def && `${rw.def} DEF`].filter(Boolean).join(' · ');
 
 // ---------- contratos, presença, modificador semanal e temporada ----------
+// Metas medidas na simulação (v1.9): um casual (3 h/dia) faz por dia ~1.200 abates, ~80 fases, ~5 Chefões,
+// ~20 compilações, ~25 itens T3+ e pega ~15 vírus dourados. Diário ≈ 1 h de jogo casual; semanal ≈ a semana
+// inteira de um casual (quem joga 24/7 fecha em 1–2 dias).
 const CT_D = [
-  {id:'kill', n:'Apague 400 vírus', ev:'kill', g:400}, {id:'clear', n:'Conclua 15 fases', ev:'clear', g:15},
-  {id:'raid', n:'Vença 1 Chefão', ev:'raid', g:1}, {id:'pull', n:'Baixe 10 agentes', ev:'pull', g:10},
-  {id:'comp', n:'Compile 3 vezes', ev:'comp', g:3}, {id:'up', n:'Compre 10 aprimoramentos', ev:'up', g:10},
-  {id:'t3', n:'Consiga 3 itens T3 ou melhor', ev:'t3', g:3}, {id:'gold', n:'Pegue 1 vírus dourado', ev:'gold', g:1},
+  {id:'kill', n:'Apague 500 vírus', ev:'kill', g:500}, {id:'clear', n:'Conclua 30 fases', ev:'clear', g:30},
+  {id:'raid', n:'Vença 2 Chefões', ev:'raid', g:2}, {id:'comp', n:'Compile 8 vezes', ev:'comp', g:8},
+  {id:'up', n:'Compre 5 aprimoramentos', ev:'up', g:5}, {id:'t3', n:'Consiga 8 itens T3 ou melhor', ev:'t3', g:8},
+  {id:'gold', n:'Pegue 4 vírus dourados', ev:'gold', g:4},
 ];
 const CT_W = [
-  {id:'kill', n:'Apague 6.000 vírus', ev:'kill', g:6000}, {id:'clear', n:'Conclua 150 fases', ev:'clear', g:150},
-  {id:'raid', n:'Vença 6 Chefões', ev:'raid', g:6}, {id:'pull', n:'Baixe 100 agentes', ev:'pull', g:100},
-  {id:'comp', n:'Compile 25 vezes', ev:'comp', g:25}, {id:'t4', n:'Consiga 3 itens T4 ou melhor', ev:'t4', g:3},
-  {id:'gold', n:'Pegue 8 vírus dourados', ev:'gold', g:8},
+  {id:'kill', n:'Apague 7.500 vírus', ev:'kill', g:7500}, {id:'clear', n:'Conclua 500 fases', ev:'clear', g:500},
+  {id:'raid', n:'Vença 30 Chefões', ev:'raid', g:30}, {id:'comp', n:'Compile 150 vezes', ev:'comp', g:150},
+  {id:'t4', n:'Consiga 15 itens T4 ou melhor', ev:'t4', g:15}, {id:'gold', n:'Pegue 90 vírus dourados', ev:'gold', g:90},
 ];
 const RW_D = {comum:2, frag:10}, RW_W = {raro:1, frag:60};
 const PRES = [{comum:1}, {comum:2}, {frag:15}, {comum:3}, {frag:25}, {raro:1}, {raro:1, frag:40}];
@@ -2600,7 +2712,7 @@ function questView() {
   const G = guestRaid(), left = ms => waitTxt(ms);
   const nextDay = (dayIdx() + 1) * DAY + new Date().getTimezoneOffset() * 6e4 - nowMs(), nextWeek = ((weekIdx() + 1) * 7 - 3) * DAY + new Date().getTimezoneOffset() * 6e4 - nowMs();
   const row = (kind, c, i) => { const D = ctrDef(kind === 'd' ? CT_D : CT_W, c), done = c.n >= D.g;
-    return `<div class="ct${c.ok ? ' ok' : done ? ' done' : ''}"><span>${D.n}</span><i class="vbar"><i style="width:${(c.n / D.g * 100).toFixed(0)}%"></i></i><small>${fmtNum(c.n)}/${fmtNum(D.g)}</small>
+    return `<div class="ctr${c.ok ? ' ok' : done ? ' done' : ''}"><span>${D.n}</span><i class="vbar"><i style="width:${(c.n / D.g * 100).toFixed(0)}%"></i></i><small>${fmtNum(c.n)}/${fmtNum(D.g)}</small>
       <button type="button" data-ctr="${kind}:${i}" ${done && !c.ok ? '' : 'disabled'}>${c.ok ? 'feito' : rwTxt(kind === 'd' ? RW_D : RW_W)}</button></div>`; };
   const pres = PRES.map((rw, k) => `<div class="pd${k < S.pres.n % 7 || (S.pres.n % 7 === 0 && S.pres.n && S.pres.last === dayIdx()) ? ' got' : ''}${k === S.pres.n % 7 && S.pres.last < dayIdx() ? ' now' : ''}"><b>dia ${k + 1}</b><small>${rwTxt(rw)}</small></div>`).join('');
   return `<div class="mut"><b>Chefão convidado: <span style="color:${G.c}">${G.n}</span></b> <small>${G.y} · troca em ${left(nextWeek)}</small><p>${G.d} Enfrente no menu Chefões.</p></div>
@@ -2665,13 +2777,18 @@ function metaSecond() {   // 1× por segundo, em tempo real
 // ---------- bestiário e conquistas ----------
 const kcTotal = () => Object.values(S.kc).reduce((a, b) => a + b, 0);
 const VIR_TXT = {
+  poison:'Cache Poison: envenena o cache com respostas falsas. Chefe do CACHE L2.',
+  leak:'Memory Leak: vaza memória até o sistema engasgar. Chefe da RAM.',
+  bootkit:'Bootkit: se instala antes do sistema ligar. Chefe do KERNEL.',
+  botnet:'Botnet: comanda um exército de máquinas zumbis. Chefe da REDE LOCAL.',
+  hydra:'Darknet Hydra: corta uma cabeça e nascem duas. Chefe da DEEP WEB.',
   spyware:'Spyware: olho voador que espiona tudo. Rápido e frágil. A partir do Avançado.',
   rootkit:'Rootkit: se esconde fundo no sistema, coberto de chapa de aço. Só aparece nas fases Blindados.',
   adware:'Adware: pop-up com dentes que não fecha nunca. A partir do Crítico.',
   keylogger:'Keylogger: aranha-teclado que anota tudo que você digita. Bate forte. A partir do Zero-Day.',
   cryptominer:'Cryptominer: rouba o seu processador pra minerar moedas. Resistente. No Kernel Panic.',
   bug:'Bug: o erro mais comum. Pouca vida, chega em bando.', worm:'Worm: se copia sozinho pela rede. Um pouco mais resistente.',
-  trojan:'Trojan: se disfarça de programa útil. Muita vida e bate forte.', boss:'Ransomware: o chefe de cada fase. Sequestra seus arquivos.',
+  trojan:'Trojan: se disfarça de programa útil. Muita vida e bate forte.', boss:'Ransomware: sequestra seus arquivos e pede resgate. Chefe do C:\\TEMP.',
 };
 const ACH = [
   {id:'r1', n:'Primeira quarentena', d:'Vença um Chefão.', ok:() => Object.keys(S.rw).length >= 1, rw:{frag:20}},
@@ -2706,10 +2823,11 @@ function codexView() {
     return `<div class="raid${open ? '' : ' lock'}" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="56" height="56" alt="">
       <div class="ri"><b>${open ? R.n : '???'}</b> <small>${open ? R.y : ''}${R.guest ? ' · convidado' : ''}</small><p>${open ? R.d : R.guest ? 'Convidado de outra semana: ainda não apareceu pra você.' : 'Ainda não encontrado.'}</p>
       <div class="rd2">${w ? `eliminado ${w.n}× · primeira vez em ${new Date(w.first).toLocaleDateString('pt-BR')}` : open ? 'ainda não eliminado' : ''}</div></div><span></span></div>`; }).join('');
-  else if (codexTab === 'vir') body = ['bug', 'worm', 'trojan', 'boss', 'spyware', 'rootkit', 'adware', 'keylogger', 'cryptominer'].map(tn => `<div class="raid" style="--rc:${VCOL[tn]}"><img src="${ESPR[tn][0].toDataURL()}" width="56" height="${Math.round(56 * ESPR[tn][0].height / ESPR[tn][0].width)}" alt="" style="image-rendering:pixelated">
-      <div class="ri"><b>${(VIR[tn] || tn).toUpperCase()}</b><p>${VIR_TXT[tn]}</p><div class="rd2">apagados: ${fmtNum(S.kc[tn] || 0)}</div></div><span></span></div>`).join('');
+  else if (codexTab === 'vir') body = `<p class="hint">A cada marco de abates (100, 1k, 10k, 100k, 1M) o esquadrão ganha +3% de dano contra aquele vírus e recebe 2% menos dano dele.</p>` + ['bug', 'worm', 'trojan', 'spyware', 'rootkit', 'adware', 'keylogger', 'cryptominer', ...SEC_BOSS].map(tn => `<div class="raid" style="--rc:${VCOL[tn]}"><img src="${ESPR[tn][0].toDataURL()}" width="56" height="${Math.round(56 * ESPR[tn][0].height / ESPR[tn][0].width)}" alt="" style="image-rendering:pixelated">
+      <div class="ri"><b>${(BOSS_N[tn] || VIR[tn] || tn).toUpperCase()}</b><p>${VIR_TXT[tn]}</p><div class="rd2">apagados: <b>${fmtNum(S.kc[tn] || 0)}</b>${kcLv(tn) < 5 ? ` / ${fmtNum(KC_MARKS[kcLv(tn)])}` : ''} · bônus: <b class="k">+${Math.round(KC_DMG * kcLv(tn) * 100)}% dano, -${Math.round(KC_RED * kcLv(tn) * 100)}% dano recebido</b></div>
+      <div class="kcm">${KC_MARKS.map((m, i) => `<i class="${i < kcLv(tn) ? 'on' : ''}">${m >= 1e6 ? '1M' : m >= 1e3 ? m / 1e3 + 'k' : m}</i>`).join('')}</div></div><span></span></div>`).join('');
   else body = ACH.map(A => { const got = S.ach[A.id], ok = A.ok();
-    return `<div class="ct${got ? ' ok' : ok ? ' done' : ''}"><span><b>${A.n}</b> <small>${A.d}</small></span><span></span><small>${rwTxt(A.rw)}</small>
+    return `<div class="ctr${got ? ' ok' : ok ? ' done' : ''}"><span><b>${A.n}</b> <small>${A.d}</small></span><span></span><small>${rwTxt(A.rw)}</small>
       <button type="button" data-ach="${A.id}" ${ok && !got ? '' : 'disabled'}>${got ? 'pega' : ok ? 'Pegar' : 'bloqueada'}</button></div>`; }).join('');
   return `<div class="btabs">${tabs}</div>${body}`;
 }
@@ -2802,7 +2920,7 @@ function update(dt) {
       e.t = e.cd; e.lunge = 1;
       const dodged = tv('dodge') && Math.random() < tv('dodge');
       if (dodged) float(front.def.x + 15, GROUND - 40, 'BLOQUEADO', '#5ca8ff');
-      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
+      const isTank = front.def.id === 'fw', dmg = e.atk * (1 - KC_RED * kcLv(e.tn)) * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
       if (!dodged) { front.hp -= dmg; front.flash = .1; }
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front !== line) espits.push({x:e.x, tx:front.def.x + front.def.w - 2, y:GROUND - e.h * .6, t:0});   // tanque caído: o vírus cospe à distância
@@ -2817,7 +2935,7 @@ function update(dt) {
     if (spawned < st.count) {
       if (spawnT <= 0 && enemies.length < st.max) { spawn(false); spawned++; spawnT = st.gap[0] + Math.random() * (st.gap[1] - st.gap[0]); }
     } else if (!enemies.length) {
-      spawn(true); bossUp = true; showBanner('!! RANSOMWARE !!', '#ff3d7f');
+      spawn(true); bossUp = true; const bt = SEC_BOSS[sec().idx % SEC_BOSS.length]; showBanner(`!! ${BOSS_N[bt]} !!`, VCOL[bt]);
     }
   }
 
@@ -2880,6 +2998,35 @@ const mkSheet = ([u, w, h, fx]) => {
 };
 for (const id in (typeof SHEET_SPR !== 'undefined' ? SHEET_SPR : {})) SHEET_IMG[id] = {w:SHEET_SPR[id].w.map(mkSheet), a:SHEET_SPR[id].a.map(mkSheet)};
 const sheetReady = SI => SI && SI.w.every(o => o.ok) && SI.a.every(o => o.ok);
+// Caminhada: tronco (parte de cima) balança; parte de baixo é cortada no x dos pés em duas metades
+// (perna de trás / perna da frente) que alternam: uma avança e sobe enquanto a outra fica no chão.
+function drawWalk(h, P, cyc, bob, rot) {
+  const ax = h.def.x + h.def.w / 2, gy = GROUND + 1, HIP = .56;   // quadril em 56% da altura
+  const iw = P.im.naturalWidth, ih = P.im.naturalHeight, k = iw / P.w, hipY = ih * HIP, fxi = P.fx * k;
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ax + 1, gy - .5, P.w * .28, 1.3, 0, 0, Math.PI * 2); ctx.fill();
+  const vt = visTier(h.def.id);
+  ctx.save(); ctx.translate(ax, gy);
+  if (h.dead) ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
+  else if (vt >= 3) { ctx.shadowColor = RAR[vt].c; ctx.shadowBlur = vt >= 5 ? 10 : vt === 4 ? 7 : 4; }
+  ctx.imageSmoothingEnabled = true;
+  const s = Math.sin(cyc), legL = P.h * (1 - HIP);
+  // perna de trás (metade esquerda da parte de baixo) e da frente (metade direita)
+  const legs = [[0, fxi, -s], [fxi, iw - fxi, s]];
+  for (const [sx0, sw, ph] of legs) {
+    const dx = ph * 1.6, lift = Math.max(0, ph) * 1.4;
+    ctx.save(); ctx.translate(-P.fx + sx0 / k + dx * .5, -lift);
+    ctx.transform(1, 0, ph * .12, 1, 0, 0);   // inclina a perna pra frente/trás a partir do quadril
+    ctx.drawImage(P.im, sx0, hipY, sw, ih - hipY, 0, -legL, sw / k, legL);
+    ctx.restore();
+  }
+  // tronco por cima
+  ctx.translate(0, bob); ctx.rotate(rot);
+  ctx.drawImage(P.im, 0, 0, iw, hipY + 2 * k, -P.fx, -P.h, P.w, P.h * HIP + 2);
+  ctx.shadowBlur = 0;
+  if (!h.dead && h.flash > 0 && P.white) { ctx.globalAlpha = .7; ctx.drawImage(P.white, -P.fx, -P.h, P.w, P.h); }
+  ctx.restore(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
+  return gy + bob - P.h;
+}
 function drawSheetHero(h, SI, walking) {
   const aid = slotAid(h.def.id), veh = aid === 'tankm1', ph = h.def.x * .37;
   const e0 = enemies[0], fight = !h.dead && e0 && e0.x < W - 6 && e0.x - (h.def.x + h.def.w) <= h.def.range + 2;   // inimigo no alcance
@@ -2891,12 +3038,12 @@ function drawSheetHero(h, SI, walking) {
     sy = 1 + Math.sin(t * 3 + ph) * .012;                  // respiração
     if (firing) { sy *= .985; sx = 1.015; }
   } else if (walking) {
-    const cyc = t * 9 + ph, step = Math.floor(cyc / Math.PI);
-    P = SI.w[((step % SI.w.length) + SI.w.length) % SI.w.length];
-    const up = Math.abs(Math.sin(cyc));
-    bob = -up * (veh ? .6 : 1.8);                          // sobe a cada passo
-    sy = 1 - (1 - up) * .035; sx = 1 + (1 - up) * .02;     // amassa quando o pé bate no chão
-    rot = veh ? Math.sin(t * 30) * .004 : .035 + Math.sin(cyc) * .02;   // inclina pra frente e balança
+    // uma pose só; as pernas são animadas separando a parte de baixo do sprite em perna de trás e da frente
+    P = SI.w[0];
+    const cyc = t * 7 + ph;
+    bob = -Math.abs(Math.sin(cyc)) * (veh ? .4 : 1);
+    rot = veh ? 0 : .02 + Math.sin(cyc * 2) * .006;
+    if (!veh) return drawWalk(h, P, cyc, bob, rot);
   } else { P = SI.w[0]; sy = 1 + Math.sin(t * 2.5 + ph) * .015; }
   const ax = h.def.x + h.def.w / 2 + dx, gy = GROUND + 1;
   // sombra
@@ -3378,7 +3525,7 @@ function shopView() {
   const list = st => CLASSES[banCls(gBanner)].list.filter(x => x.stars === st && released(x) && inShop(x));
   const sel = st => { const L = list(st); if (!L.some(x => x.id === shopPick[st])) shopPick[st] = L[0].id;
     return `<select data-shopsel="${st}">${L.map(x => `<option value="${x.id}" ${x.id === shopPick[st] ? 'selected' : ''}>${x.name}${x.id in S.roster ? ' (' + verTxt(x.id) + ')' : ' (novo)'}</option>`).join('')}</select>`; };
-  return `<p class="sub">Loja de fragmentos <small>você tem <b class="k">${fmtNum(S.frag)}</b> fragmentos · vinculados à conta</small></p>
+  return `<p class="sub">Loja <small><b class="k">${fmtNum(S.frag)}</b> fragmentos</small></p>
     <div class="shop">${SHOP.map(o => `<div class="sh"><b>${o.n}</b><small>${o.d}${o.id === 'bcr' && buffOn('cr') ? ' · <span class="k">ativo</span>' : o.id === 'bdef' && buffOn('def') ? ' · <span class="k">ativo</span>' : ''}</small>
       ${o.id === 's4' ? sel(4) : o.id === 's5' ? sel(5) : ''}<button type="button" data-shop="${o.id}" ${S.frag < o.c ? 'disabled' : ''}>${o.c} fragmentos</button></div>`).join('')}</div>`;
 }
@@ -3440,8 +3587,7 @@ const RENDER = {
       <div class="card s${o.T.stars}" style="--i:${i}"><img class="bust" src="${bustOf(o.T.id)}" width="56" height="56" alt="">
       <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
       ${o.res === 'new' ? '<span class="tag new">NOVO</span>' : o.res === 'up' ? `<span class="tag new">${verTxt(o.T.id)}</span>` : o.res === 'frag' ? `<span class="tag dup">+${o.f} frag.</span>` : `<span class="tag dup">${verTxt(o.T.id)}${verOf(o.T.id).v < 10 ? ` ${verOf(o.T.id).d}/${VCOST[o.T.stars][verOf(o.T.id).v]}` : ''}</span>`}</div>`).join('')}</div>` : '';
-    return `<p class="hint">Baixe novos agentes pro antivírus usando pacotes de download. Os agentes baixados ficam na Coleção.</p>
-      <div class="btabs">
+    return `<div class="btabs">
         <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
         <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · Ataque</button>
         ${launch() ? `<button type="button" class="banL" data-ban="L" aria-pressed="${gBanner === 'L'}">Lançamento · ${launch().T.name}</button>` : ''}
@@ -3449,7 +3595,7 @@ const RENDER = {
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
         <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}${chipCount(r, true) ? ` <small>(${chipCount(r, true)} vinculados)</small>` : ''}</span><small>${c.min ? 'nunca ★3' : '&nbsp;'}</small><small>${c.pity5 ? `★5 garantido em ${c.pity5 - pityOf(gBanner, r).p5}` : ''}${c.pity4 ? ` · ★4 em ${c.pity4 - pityOf(gBanner, r).p4}` : ''}${c.ten4 ? ' · ×10 garante ★4' : ''}</small>
         <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Baixar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
-      <p class="pity">Repetido atualiza o agente (v1.0 → v2.0). Depois da v2.0 vira fragmentos (★3 ${FRAG[3]} · ★4 ${FRAG[4]} · ★5 ${FRAG[5]}).
+      <p class="pity">Repetido = versão nova do agente. Na v2.0 vira fragmento.
         · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-demorel>${S.demoRel ? 'protótipo: encerrar lançamento' : 'protótipo: simular lançamento'}</button> <button type="button" data-gocol>ver coleção</button></p>
       ${res}${shopView()}`;
   },

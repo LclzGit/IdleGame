@@ -23,6 +23,33 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.10: menus compactos, minichefões, bônus do bestiário e contratos recalibrados
+
+- **Menus compactos, no estilo do TBH:**
+  - Janela menor (500 px), presa no canto direito e com a navegação só em ícones (o nome aparece ao passar o mouse).
+  - Equipamentos numa grade 5 + 4 de quadradinhos.
+  - Chefões em 2 linhas; a história e os drops aparecem ao passar o mouse.
+  - Textos mais curtos no Download e na loja.
+- **Caminhada:** cada agente usa uma pose só. As pernas são animadas cortando a parte de baixo do sprite em perna de trás e da frente, que alternam, e o tronco balança por cima. Acabou a troca entre poses diferentes.
+- **Inventário:** o nível dos itens (Nv) vazava das células porque usava o mesmo nome de estilo das linhas de contrato. Corrigido.
+- **Minichefões por setor**, com arte e animação:
+
+  | Setor | Chefe |
+  |---|---|
+  | C:\TEMP | RANSOMWARE |
+  | CACHE L2 | CACHE POISON |
+  | RAM | MEMORY LEAK |
+  | KERNEL | BOOTKIT |
+  | REDE LOCAL | BOTNET |
+  | DEEP WEB | DARKNET HYDRA |
+
+- **Bestiário com bônus:** a cada marco de abates de um vírus (100, 1k, 10k, 100k, 1M), o esquadrão ganha +3% de dano contra ele e recebe 2% menos dano dele, até +15% / -10%.
+- **Contratos** recalibrados com a simulação (casual, 3 h por dia, contra 24/7):
+  - Diário, cerca de 1 h de jogo casual: 500 vírus · 30 fases · 2 Chefões · 8 compilações · 5 aprimoramentos · 8 itens T3+ · 4 vírus dourados.
+  - Semanal, cerca de uma semana de jogo casual: 7.500 vírus · 500 fases · 30 Chefões · 150 compilações · 15 itens T4+ · 90 vírus dourados.
+  - Saiu o contrato "Baixe agentes".
+  - Resultado: o casual fecha os diários todo dia e os semanais no fim de semana. Quem joga 24/7 fecha tudo em 1–2 dias.
+
 ## v1.9: chefões redesenhados, 5 vírus novos e morte sem volta na fase
 
 - **Morte:** um agente que cai fica fora ("OFF") até a próxima fase, porque ainda não existe suporte que revive. Os vírus param sempre na linha do tanque, mesmo com ele caído, e passam a cuspir à distância nos agentes de trás.

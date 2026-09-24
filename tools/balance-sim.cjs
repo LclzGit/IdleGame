@@ -25,7 +25,7 @@ for (let m=1; m<=HOURS*60; m++) {
   }
   if (m % 60 === 0 || m === 10 || m === 30) {
     const r = await p.evaluate(()=>{ const g=window.__g, S=g.S(), st=window.__st; return {stage:g.stageLabel(S.maxStage), max:S.maxStage, peak:S.peak, pow:Math.round(g.power()), rec:Math.round(g.recPow(S.maxStage)), cred:Math.round(st.cred), items:[...st.items], chips:[...st.chips], rchips:[...st.rchips], ritems:[...st.ritems], raids:st.raids, raidWins:st.raidWins, pulls:JSON.parse(JSON.stringify(st.pulls)), kills:st.kills, clears:st.clears||0, comp:st.comp, deaths:st.deaths, roster:Object.keys(S.roster), def:Math.round(S.def), treeN:Object.keys(S.tree).length,
-      frag:S.frag, verTotal:g.verTotal(), v20:Object.values(S.ver).filter(v=>v.v>=10).length, colMul:+g.colMul().toFixed(3), setores:S.setores, fmtN:S.fmtN, ctr:S.stat.ctr||0, gold:S.stat.gold||0, ach:Object.keys(S.ach).length, bound:S.inv.filter(x=>x.k==='chip'&&x.b).reduce((a,x)=>a+x.n,0)}; });
+      frag:S.frag, verTotal:g.verTotal(), v20:Object.values(S.ver).filter(v=>v.v>=10).length, colMul:+g.colMul().toFixed(3), setores:S.setores, fmtN:S.fmtN, ctr:S.stat.ctr||0, gold:S.stat.gold||0, ach:Object.keys(S.ach).length, bound:S.inv.filter(x=>x.k==='chip'&&x.b).reduce((a,x)=>a+x.n,0), stat:{...S.stat}}; });
     r.min = m; rows.push(r); console.log(JSON.stringify(r));
   }
 }
