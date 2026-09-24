@@ -30,13 +30,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Tooltip:** passar o mouse num item (inventário, soquetes, compilador) abre uma janela com atributos, passivas, conjunto, comparação com o equipado e valor de reciclagem.
 - **Créditos:** o dinheiro agora se chama créditos e é escrito como a gente fala (12,4 mil · 3,1 mi · 2 bi), com ícone de moeda. DEF virou **definições**.
 
-**Pacotes de download** (chance por vírus derrotado):
+**Pacotes de download** (chance ao **concluir uma fase**; offline sorteia como uma fase comum a cada 2 min):
 
 | Pacote | Fase comum | Fase de chefe (Chefão) |
 |---|---|---|
-| Comum | 5% | 20% |
-| Raro | 1% | 5% |
-| Lendário | 0,5% | 1% |
+| Comum | 0,5% | 2% |
+| Raro | 0,1% | 0,5% |
+| Lendário | 0,05% | 0,1% |
 
 **O que cada pacote baixa** (garantias contam por banner e por tipo de pacote):
 

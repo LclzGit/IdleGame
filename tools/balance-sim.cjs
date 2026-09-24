@@ -11,7 +11,7 @@ const rows=[]; const t0=Date.now();
 for (let m=1; m<=HOURS*60; m++) {
   await p.evaluate(()=>{ window.__g.step(1200, .05); window.__g.player(); });   // 1 minuto de jogo
   if (m % 60 === 0 || m === 10 || m === 30) {
-    const r = await p.evaluate(()=>{ const S=window.__g.S(), st=window.__st; return {stage:window.__g.stageLabel(S.maxStage), max:S.maxStage, pow:Math.round(window.__g.power()), rec:Math.round(window.__g.recPow(S.maxStage)), cred:Math.round(st.cred), items:[...st.items], chips:[...st.chips], pulls:JSON.parse(JSON.stringify(st.pulls)), kills:st.kills, comp:st.comp, deaths:st.deaths, roster:Object.keys(S.roster), def:Math.round(S.def), treeN:Object.keys(S.tree).length}; });
+    const r = await p.evaluate(()=>{ const S=window.__g.S(), st=window.__st; return {stage:window.__g.stageLabel(S.maxStage), max:S.maxStage, pow:Math.round(window.__g.power()), rec:Math.round(window.__g.recPow(S.maxStage)), cred:Math.round(st.cred), items:[...st.items], chips:[...st.chips], pulls:JSON.parse(JSON.stringify(st.pulls)), kills:st.kills, clears:st.clears||0, comp:st.comp, deaths:st.deaths, roster:Object.keys(S.roster), def:Math.round(S.def), treeN:Object.keys(S.tree).length}; });
     r.min = m; rows.push(r); console.log(JSON.stringify(r));
   }
 }

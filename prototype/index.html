@@ -838,11 +838,11 @@ const GEAR = {
 };
 // Chips de invocação: caem raramente das fases. p5/p4 = chance de ★5/★4.
 const CHIPS = [
-  // drop = chance por vírus em fase comum; boss = em fase de chefe (Chefão).
+  // drop = chance ao concluir uma fase comum; boss = ao concluir uma fase de chefe (Chefão).
   // pity5/pity4: garantia de ★5/★4 após N downloads sem ele; ten4: ×10 garante ★4; min: estrela mínima.
-  {n:'Comum', c:'#9aa0b5', p5:.002, p4:.02, pity5:500, pity4:50, drop:.05, boss:.20, val:5},
-  {n:'Raro', c:'#5ca8ff', p5:.02, p4:.15, pity5:180, ten4:true, drop:.01, boss:.05, val:25},
-  {n:'Lendário', c:'#ffb454', p5:.10, p4:.90, min:4, drop:.005, boss:.01, val:120},
+  {n:'Comum', c:'#9aa0b5', p5:.002, p4:.02, pity5:500, pity4:50, drop:.005, boss:.02, val:5},
+  {n:'Raro', c:'#5ca8ff', p5:.02, p4:.15, pity5:180, ten4:true, drop:.001, boss:.005, val:25},
+  {n:'Lendário', c:'#ffb454', p5:.10, p4:.90, min:4, drop:.0005, boss:.001, val:120},
 ];
 const UPBASE = {3:30, 4:45, 5:70};
 
@@ -1110,7 +1110,7 @@ function kill(e) {
   if (e.boss || Math.random() < gearChance()) dropGear(e.boss);
   // o bônus de armas soma só a parte extra: chance de arma × bônus
   if (glob('wdrop') + tv('wdrop') && Math.random() < gearChance() * W_SHARE * (glob('wdrop') + tv('wdrop'))) dropGear(false, 'weapon');
-  dropChip(e);
+  if (e.boss) dropChip(e);   // pacotes só ao concluir a fase (o chefe fecha a fase)
   if (e.boss) stageClear(); else S.kills++;
 }
 
@@ -1769,14 +1769,14 @@ function invItems() {
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
       <table class="rates"><tr><td>Tier do item</td><td>fase comum</td><td>fase de chefe</td></tr>${RAR.map((r, i) => `<tr><td style="color:${r.c}">${tierTxt(i)} ${r.n}</td><td>${TIER_W.n[i]}%</td><td>${TIER_W.b[i]}%</td></tr>`).join('')}</table>
       <p class="hint drops">Itens não têm garantia: só os pacotes de download têm. O chefe de cada fase dá no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo). Passivas por tier: T1 0 · T2 1 · T3 1 · T4 2 · T5 3.</p>
-      <details class="setlist"><summary>Chances atuais por vírus (base → com seus bônus)</summary>
+      <details class="setlist"><summary>Chances atuais (base → com seus bônus)</summary>
         <p class="hint">Bônus de drop multiplicam a chance base: +10% sobre 0,1% vira 0,11%.</p>
         <table class="rates">${[
           ['Item (fase comum)', GEAR_N, gearChance(false)],
           ['Item (fase de chefe)', GEAR_B, gearChance(true)],
           ['Arma (fase atual)', gearChance() / (1 + tv('drop') + glob('idrop')) * W_SHARE, weaponChance()],
-          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (fase comum)`, c.drop, chipChance(r, false)]),
-          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (fase de chefe)`, c.boss, chipChance(r, true)]),
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase comum)`, c.drop, chipChance(r, false)]),
+          ...CHIPS.map((c, r) => [`<span style="color:${c.c}">Pacote ${c.n}</span> (ao concluir fase de chefe)`, c.boss, chipChance(r, true)]),
         ].map(([n, b, e]) => `<tr><td>${n}</td><td>${pct2(b)}</td><td>→</td><td class="${e > b ? 'k' : ''}">${pct2(e)}</td></tr>`).join('')}</table>
       </details>
       <details class="setlist"><summary>Conjuntos</summary>${Object.values(SETS).map(x => `<div><span style="color:${x.c}">${x.n}</span>: ${x.b.map(([k, eff]) => `${k} peças ${Object.entries(eff).map(([e, v]) => bonusTxt(e, v)).join(', ')}`).join(' · ')}</div>`).join('')}</details>
@@ -2159,10 +2159,11 @@ function offline(ms) {
   if (sec_ < 30) return;
   const gain = sec_ * rewardAt(S.stage * 10 + 5) * .25 * (1 + tv('off'));
   S.data += gain;
-  const chips = Math.floor(sec_ / 1800);
-  if (chips) addItem({k:'chip', r:0, n:chips});
+  let chips = 0;
+  for (let c = 0; c < Math.floor(sec_ / 120); c++)
+    for (let r = CHIPS.length - 1; r >= 0; r--) if (Math.random() < chipChance(r, false) * (1 + tv('off'))) { addItem({k:'chip', r, n:1}); chips++; break; }
   const h = Math.floor(sec_ / 3600), m = Math.floor(sec_ % 3600 / 60);
-  say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min): +${fmt(gain)}${chips ? ` e ${chips} chip(s) comum(ns)` : ''}`, true);
+  say(`Enquanto você estava fora (${h ? h + 'h ' : ''}${m}min): +${fmt(gain)}${chips ? ` e ${chips} pacote(s) de download` : ''}`, true);
   showBanner('+' + fmt(gain) + ' OFFLINE', '#ffb454');
 }
 

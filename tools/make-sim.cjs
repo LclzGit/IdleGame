@@ -4,7 +4,7 @@ let s = fs.readFileSync(path.join(__dirname, '../prototype/index.html'), 'utf8')
 const rep = (o, n) => { if (!s.includes(o)) throw new Error('não achei: ' + o.slice(0, 60)); s = s.replace(o, n); };
 rep("function dropGear(boss, forceType) {\n  const it = makeItem(boss, forceType),", "function dropGear(boss, forceType) {\n  const it = makeItem(boss, forceType); window.__st.items[it.t]++; const _x = 0,");
 rep("    if (addItem({k:'chip', r, n:1})) {", "    window.__st.chips[r]++;\n    if (addItem({k:'chip', r, n:1})) {");
-rep("function kill(e) {", "function kill(e) {\n  window.__st.kills++; window.__st.cred += e.reward * (1 + tv('gold') + glob('gold'));");
+rep("function kill(e) {", "function kill(e) {\n  window.__st.kills++; if (e.boss) window.__st.clears = (window.__st.clears || 0) + 1; window.__st.cred += e.reward * (1 + tv('gold') + glob('gold'));");
 rep("  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }", "  window.__st.pulls[chip][st]++;\n  if (!(T.id in S.roster)) { S.roster[T.id] = 1; return {T, res:'new'}; }");
 rep("function compile(sel) {", "function compile(sel) {\n  window.__st.comp++;");
 rep("function rollback() {", "function rollback() {\n  window.__st.deaths++;");
