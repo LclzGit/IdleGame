@@ -80,6 +80,11 @@
   .hp i{display:block; height:100%; background:var(--green)}
   .st{color:var(--mute); font-size:11px; font-variant-numeric:tabular-nums}
   .gear{color:var(--rc); font-size:11px}
+  .eqrow{display:flex; gap:3px; margin-top:4px}
+  .eqs{position:relative; display:grid; place-items:center; width:30px; height:30px; padding:0; background:#0b0a16; border:1px solid var(--rc, var(--line)); box-shadow:inset 0 -2px 0 var(--rc, transparent); font:9px var(--mono); color:var(--mute)}
+  .eqs img{image-rendering:pixelated}
+  .eqs i{position:absolute; right:1px; bottom:0; font:400 7px var(--pix); color:var(--rc); font-style:normal}
+  .eqs.empty{border-style:dashed; box-shadow:none; opacity:.6}
   .gear button{padding:0 5px; box-shadow:none; font-size:10px; margin-left:4px}
   .hb{display:grid; gap:4px}
   .hb button{text-align:left}
@@ -91,10 +96,15 @@
   .inv{display:grid; grid-template-columns:repeat(6, 1fr); gap:5px}
   .cell{aspect-ratio:1; max-width:100%; display:grid; place-content:center; gap:1px; padding:0; background:#0b0a16; border:1px solid var(--line); box-shadow:inset 0 -3px 0 var(--rc,transparent); color:var(--rc); text-align:center}
   .cell.empty{border-style:dashed; opacity:.5; box-shadow:none}
-  .cell .ct{font:10px var(--mono); letter-spacing:.06em; color:var(--mute)}
+  .cell .ct{font:9px var(--mono); color:var(--mute)}
+  .cell img{image-rendering:pixelated; justify-self:center}
   .cell b{font:400 11px var(--pix); color:var(--rc)}
   .cell.sel{border-color:var(--amber); outline:1px solid var(--amber)}
   .det{margin-top:10px; padding:8px 10px; border:1px solid var(--line); background:#0b0a16; min-height:58px}
+  .dh{display:flex; gap:8px; align-items:center; margin-bottom:4px}
+  .dh img{image-rendering:pixelated}
+  .drops{margin-top:8px; font-size:11px}
+  .chip img{image-rendering:pixelated; vertical-align:middle}
   .det .row{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
 
   /* invocar */
@@ -156,7 +166,7 @@
 
 <main class="desk">
   <button class="dicon" type="button" data-open="readme"><span class="ic"></span>LEIA-ME.txt</button>
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.4</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v0.5</p>
 </main>
 
 <footer class="dock">
@@ -174,7 +184,7 @@
       <button type="button" data-open="squad" aria-pressed="false">Esquadrão</button>
       <button type="button" data-open="tree" aria-pressed="false">Antivírus</button>
       <button type="button" data-open="inv" aria-pressed="false">Inventário <i id="invN"></i></button>
-      <button type="button" data-open="gacha" aria-pressed="false">Invocar</button>
+      <button type="button" data-open="gacha" aria-pressed="false">Download</button>
       <button type="button" data-open="stages" aria-pressed="false">Fases</button>
       <button type="button" data-open="log" aria-pressed="false">Log</button>
     </nav>
@@ -602,8 +612,45 @@ const clsOf = id => TANKS.some(x => x.id === id) ? 'fw' : 'sc';
 const tankOf = id => TANKS.find(x => x.id === id) || TANKS[0];
 const heroCache = {};
 // Sprites na raridade visual `tier` (-1 = sem módulo): [pernas][pano]. `aid` é um agente ou um tanque.
-function spriteFor(aid, tier) {
-  const key = aid + tier;
+// Peças equipadas aparecem no sprite: capacete (faixa/crista na cabeça), armadura (ombreiras)
+// e botas (solas). A cor é a do tier; tiers altos ganham detalhes extras.
+const ANCH = {
+  human: {head:[13, 18, 1], sh:[[9, 10], [19, 10]], hips:[13, 16]},
+  mech:  {head:[14, 18, 1], sh:[[7, 8], [21, 8]], hips:[12, 17]},
+  veh:   {head:[10, 19, 10], sh:[[5, 16], [23, 16]]},
+};
+function overlay(P, art, f, lk) {
+  const A = ANCH[art.kind || 'human'];
+  if (lk.h >= 0) {
+    const c = RAR[lk.h].c, [x0, x1, y] = A.head, mid = (x0 + x1) >> 1;
+    P.line(x0, y, x1, y, c);
+    if (lk.h >= 2) { P.set(x0 - 1, y + 1, c); P.set(x1 + 1, y + 1, c); }
+    if (lk.h >= 3) P.set(mid, y - 1, c);
+    if (lk.h >= 4) { P.set(mid, y - 2, '#ffffff'); P.set(mid - 2, y - 1, c); P.set(mid + 2, y - 1, c); }
+  }
+  if (lk.a >= 0) {
+    const c = RAR[lk.a].c;
+    A.sh.forEach(([x, y]) => {
+      P.line(x, y, x + 3, y, c);
+      if (lk.a >= 2) P.line(x, y + 1, x + 3, y + 1, mix(c, '#000000', .4));
+      if (lk.a >= 3) { P.set(x + 1, y - 1, c); P.set(x + 2, y - 1, c); }
+      if (lk.a >= 4) P.set(x + 1, y - 2, '#ffffff');
+    });
+  }
+  if (lk.b >= 0) {
+    const c = RAR[lk.b].c;
+    if (A.hips) {
+      const [bf, ff] = stride(f);
+      for (const fx of [A.hips[0] + bf, A.hips[1] + ff]) {
+        P.rect(fx - 1, 30, 5, 1, c);
+        if (lk.b >= 2) P.set(fx + 3, 29, c);
+        if (lk.b >= 3) P.set(fx - 1, 28, c);
+      }
+    } else { P.line(3, 23, 27, 23, c); if (lk.b >= 3) P.line(3, 30, 27, 30, c); }
+  }
+}
+function spriteFor(aid, tier, look) {
+  const key = aid + tier + (look ? '|' + look.h + look.a + look.b : '');
   if (heroCache[key]) return heroCache[key];
   const art = HERO_ART[aid] || charOf(aid).art, glow = tier <= 0 ? art.base : RAR[tier].c;
   const n = [], w = [];
@@ -612,6 +659,7 @@ function spriteFor(aid, tier) {
     for (let v = 0; v < art.cloth; v++) {
       const P = Painter(32, 32);
       art.draw(P, f, v, tier, glow);
+      if (look) overlay(P, art, f, look);
       P.outline(art.line);
       n[f].push(P.canvas(false)); w[f].push(P.canvas(true));
     }
@@ -619,15 +667,18 @@ function spriteFor(aid, tier) {
   return heroCache[key] = {n, w, glow};
 }
 const slotAid = k => k === 'fw' ? S.tank : k === 'sc' ? S.gunner : k;
-const heroSpr = (k, tier) => spriteFor(slotAid(k), tier);
+const heroSpr = k => spriteFor(slotAid(k), visTier(k), lookOf(k));
 const portraitCache = {};
-function portraitOf(aid, tier) {
-  const key = aid + tier;
-  return portraitCache[key] || (portraitCache[key] = spriteFor(aid, tier).n[0][0].toDataURL());
+function portraitOf(aid, tier, look) {
+  const key = aid + tier + (look ? '|' + look.h + look.a + look.b : '');
+  return portraitCache[key] || (portraitCache[key] = spriteFor(aid, tier, look).n[0][0].toDataURL());
 }
-const portrait = (k, tier) => portraitOf(slotAid(k), tier);
+const portrait = k => portraitOf(slotAid(k), visTier(k), lookOf(k));
 let previewTier = null;
-const visTier = id => previewTier ?? (S.gear[id] ? S.gear[id].r : -1);
+// A cor das luzes vem da arma (no tanque, do escudo); capacete, armadura e botas vêm de lookOf.
+const glowPiece = id => { const G = gearOf(id); return id === 'fw' ? G.shield || G.weapon : G.weapon; };
+const visTier = id => previewTier ?? (glowPiece(id) ? glowPiece(id).t : -1);
+const lookOf = id => { const G = gearOf(id), T = x => previewTier ?? (x ? x.t : -1); return {h:T(G.helmet), a:T(G.armor), b:T(G.boots)}; };
 const SPR = {}, SPRW = {};
 for (const k in ART) { SPR[k] = mk(...ART[k]); SPRW[k] = mk(ART[k][0], ART[k][1], true); }
 
@@ -684,6 +735,8 @@ const SUBS = {
 };
 const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', pulse:'single', scanner:'single', ghost:'boss', infiltrator:'boss', blade:'boss'};
 GUNNERS.forEach(g => g.sub = SUBOF[g.id]);
+TANKS.slice(1).forEach(x => x.art.kind = 'mech');
+charOf('tankm1').art.kind = 'veh';
 const GEARW = {
   area:['Lança-granadas', 'Canhão de plasma', 'Varredura em cone'],
   single:['Mira de precisão', 'Regex Afiada', 'Sonda DPI'],
@@ -728,19 +781,27 @@ const nodeOpen = n => !n.req || nodeLv(n.req) > 0;
 const tv = k => TREE.reduce((a, n) => a + (n.eff[k] || 0) * nodeLv(n.id), 0);
 const invCap = () => 12 + tv('inv');
 
-const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:null, sc:null, pt:null},
+const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:{}, sc:{}, pt:{}},
   inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, tree:{}, def:0, autoUp:true, autoEq:true, autoAdv:true, last:0,
   tank:'firewall', gunner:'scanner', roster:{firewall:1, scanner:1}, pity:{fw:0, sc:0}};
 let S = load();
 function load() {
-  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.lv) return Object.assign(structuredClone(S0), r); } catch (e) {}
+  try {
+    const r = JSON.parse(localStorage.getItem(KEY));
+    if (r && r.lv) {
+      const st = Object.assign(structuredClone(S0), r);
+      // saves antigos tinham um único módulo por personagem: descarta e começa os equipamentos do zero
+      for (const c of ['fw', 'sc', 'pt']) if (!st.gear[c] || typeof st.gear[c] !== 'object' || 'b' in st.gear[c]) st.gear[c] = {};
+      st.inv = st.inv.filter(x => x.k === 'chip' || x.type);
+      return st;
+    }
+  } catch (e) {}
   return structuredClone(S0);
 }
 function save() { S.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const dpsSub = () => equipped('sc').sub;
-const synergy = g => !!(g && g.wt && g.wt === dpsSub());
-const gm = id => { const g = S.gear[id]; return g ? 1 + g.b / 100 * (id === 'sc' && synergy(g) ? 1.5 : 1) : 1; };
+
 const equipped = cls => charOf(S[CLASSES[cls].key]) || CLASSES[cls].list[0];
 const pT = () => equipped('fw').passive, pG = () => equipped('sc').passive;
 const lvOf = aid => S.lv[aid] || (S.lv[aid] = {a:0, h:0});
@@ -753,9 +814,9 @@ function applySlots() {
     d.hp = C.stars[T.stars].hp; d.atk = C.stars[T.stars].atk;
   }
 }
-const maxHp = h => h.def.hp * 1.12 ** lvOf(slotAid(h.def.id)).h * gm(h.def.id) * (1 + (pT().teamHp || 0)) * (1 + tv('hp'));
-const atk = h => h.def.atk * 1.12 ** lvOf(slotAid(h.def.id)).a * gm(h.def.id) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg'));
-const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd'));
+const maxHp = h => h.def.hp * 1.12 ** lvOf(slotAid(h.def.id)).h * (1 + gearStat(h.def.id, 'hp') / 100) * (1 + (pT().teamHp || 0)) * (1 + tv('hp'));
+const atk = h => h.def.atk * 1.12 ** lvOf(slotAid(h.def.id)).a * (1 + gearStat(h.def.id, 'atk') / 100) * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg'));
+const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd')) / (1 + gearStat(h.def.id, 'spd') / 100);
 const rewardAt = L => 5 * 1.10 ** L;
 const power = () => heroes.reduce((a, h) => a + atk(h) / cdOf(h) * 4 + maxHp(h) * .5, 0);
 
@@ -836,32 +897,115 @@ function kill(e) {
 }
 
 // ---------- itens ----------
-const gearVal = it => rewardAt(it.s * 10) * 3 * RAR[it.r].m;
+// Equipamentos: capacete, armadura, botas e arma para todos; escudo só para o tanque.
+// Tier (T1…T5) é sorteado com chances fixas; o nível do item é o número da fase onde caiu.
+const ITYPES = {
+  helmet:{n:'Capacete', ab:'CAP'}, armor:{n:'Armadura', ab:'ARM'}, boots:{n:'Botas', ab:'BOT'},
+  weapon:{n:'Arma', ab:'ARMA'}, shield:{n:'Escudo', ab:'ESC'},
+};
+const CLS_SLOTS = {fw:['helmet', 'armor', 'boots', 'weapon', 'shield'], sc:['helmet', 'armor', 'boots', 'weapon'], pt:['helmet', 'armor', 'boots', 'weapon']};
+const INAMES = {
+  fw:{helmet:'Elmo', armor:'Couraça', boots:'Grevas', weapon:'Lâmina de plasma', shield:'Escudo hexagonal'},
+  sc:{helmet:'Capacete tático', armor:'Colete balístico', boots:'Botas de salto'},
+  pt:{helmet:'Tiara-visor', armor:'Manto de nanofibra', boots:'Sandálias antigravidade', weapon:'Cajado de nanobots'},
+};
+const TIER_W = [60, 25, 10, 4, 1];
+const tierTxt = t => 'T' + (t + 1);
+function gearOf(cls) { return S.gear[cls] || (S.gear[cls] = {}); }
+function itemStats(it) {
+  const m = RAR[it.t].m, g = 1.25 ** (it.lv - 1) * it.q;
+  switch (it.type) {
+    case 'weapon': return {atk: 12 * m * g};
+    case 'helmet': return {hp: 6 * m * g, atk: 3 * m * g};
+    case 'armor':  return {hp: 12 * m * g};
+    case 'boots':  return {hp: 5 * m * g, spd: 3 * m};
+    case 'shield': return {hp: 8 * m * g, red: Math.min(30, 2 * m)};
+  }
+  return {};
+}
+function synergy(it) { return !!(it && it.wt && it.wt === dpsSub()); }
+function gearStat(cls, key) {
+  let v = 0;
+  const G = gearOf(cls);
+  for (const ty in G) {
+    const it = G[ty]; if (!it) continue;
+    v += (itemStats(it)[key] || 0) * (key === 'atk' && cls === 'sc' && synergy(it) ? 1.5 : 1);
+  }
+  return v;
+}
+const itemScore = it => { const st = itemStats(it); return (st.atk || 0) * (it.cls === 'sc' && synergy(it) ? 1.5 : 1) + (st.hp || 0) + (st.spd || 0) * 2 + (st.red || 0) * 3; };
+const STATN = {atk:'ATK', hp:'HP', spd:'vel. de ataque', red:'redução de dano'};
+const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => `+${Math.round(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))}% ${STATN[k]}`).join(' · ');
+const gearVal = it => rewardAt((it.lv - 1) * 10) * 3 * RAR[it.t].m;
 const chipVal = r => rewardAt(S.maxStage * 10) * CHIPS[r].val;
 const chipCount = r => (S.inv.find(x => x.k === 'chip' && x.r === r) || {n:0}).n;
-const itemColor = it => it.k === 'chip' ? CHIPS[it.r].c : RAR[it.r].c;
-const gearTag = it => `<span style="color:${RAR[it.r].c}">${it.name} [${RAR[it.r].n}]</span>`;
-const wtTag = g => g && g.wt ? ` <span style="color:${SUBS[g.wt].c}">${SUBS[g.wt].n}${synergy(g) ? ' ✓ sinergia ×1,5' : ''}</span>` : '';
+const itemColor = it => it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c;
+const gearTag = it => `<span style="color:${RAR[it.t].c}">${it.name} ${tierTxt(it.t)}</span>`;
+const wtTag = it => it && it.wt ? ` <span style="color:${SUBS[it.wt].c}">${SUBS[it.wt].n}${synergy(it) ? ' ✓ sinergia ×1,5' : ''}</span>` : '';
+
+// Ícones 16x16 pintados por código, um desenho por tipo (e por classe, no caso da arma).
+const iconCache = {};
+function itemIcon(it) {
+  const key = [it.k, it.type, it.cls, it.wt, it.t, it.r].join('|');
+  if (iconCache[key]) return iconCache[key];
+  const P = Painter(16, 16), c = it.k === 'chip' ? CHIPS[it.r].c : RAR[it.t].c;
+  const dk = mix(c, '#000000', .55), lt = mix(c, '#ffffff', .5), M = '#5d6384', M2 = '#9aa1bd';
+  if (it.k === 'chip') {
+    P.poly([[2, 5], [8, 2], [14, 5], [14, 12], [8, 15], [2, 12]], dk);
+    P.line(2, 5, 8, 8, c); P.line(14, 5, 8, 8, c); P.line(8, 8, 8, 15, c);
+    P.line(6, 11, 8, 13, lt); P.line(10, 11, 8, 13, lt); P.line(8, 9, 8, 13, lt);
+  } else if (it.type === 'helmet') {
+    P.poly([[3, 14], [3, 7], [5, 4], [8, 3], [11, 4], [13, 7], [13, 14]], M);
+    P.line(4, 6, 7, 4, M2); P.rect(5, 8, 7, 2, c); P.set(11, 8, '#ffffff'); P.rect(4, 13, 9, 1, dk);
+    if (it.t >= 2) P.line(8, 0, 8, 2, c);
+  } else if (it.type === 'armor') {
+    P.poly([[1, 3], [6, 3], [8, 5], [10, 3], [15, 3], [15, 8], [12, 8], [12, 15], [4, 15], [4, 8], [1, 8]], M);
+    P.line(2, 4, 5, 4, M2); P.line(11, 4, 14, 4, M2);
+    P.line(6, 7, 10, 7, c); P.line(8, 7, 8, 12, c); P.set(8, 9, '#ffffff'); P.line(5, 14, 11, 14, dk);
+  } else if (it.type === 'boots') {
+    P.rect(2, 3, 4, 8, M); P.rect(2, 10, 6, 3, M); P.rect(9, 3, 4, 8, M2); P.rect(9, 10, 6, 3, M2);
+    P.line(2, 13, 7, 13, c); P.line(9, 13, 14, 13, c); P.line(2, 6, 5, 6, c); P.line(9, 6, 12, 6, c);
+  } else if (it.type === 'shield') {
+    const hex = [[8, 1], [14, 4], [14, 11], [8, 15], [2, 11], [2, 4]];
+    P.poly(hex, dk); hex.forEach((q, i) => { const n = hex[(i + 1) % 6]; P.line(q[0], q[1], n[0], n[1], c); });
+    P.line(8, 5, 8, 11, '#ffffff'); P.line(6, 8, 10, 8, '#ffffff');
+  } else if (it.cls === 'fw') {
+    P.line(3, 12, 13, 2, M2, 2); P.line(4, 13, 14, 3, c); P.line(1, 10, 5, 14, M); P.line(1, 15, 3, 13, M);
+  } else if (it.cls === 'sc') {
+    P.rect(1, 6, 13, 3, M); P.line(1, 6, 13, 6, M2); P.rect(4, 9, 3, 4, M); P.rect(9, 9, 2, 2, M);
+    P.rect(14, 7, 2, 1, c); P.line(3, 7, 9, 7, SUBS[it.wt].c);
+  } else {
+    P.line(3, 15, 10, 5, M); P.line(4, 15, 11, 5, M2);
+    P.ell(12, 3, 2, 2, dk); P.ell(12, 3, 1, 1, c); P.set(12, 3, '#ffffff');
+  }
+  if (it.k !== 'chip' && it.t >= 3) { P.set(1, 1, lt); P.set(14, 1, lt); P.set(15, 14, lt); }
+  P.outline('#05040b');
+  return iconCache[key] = P.canvas(false).toDataURL();
+}
+
 function addItem(it) {
   if (it.k === 'chip') { const st = S.inv.find(x => x.k === 'chip' && x.r === it.r); if (st) { st.n += it.n; return true; } }
   if (S.inv.length >= invCap()) return false;
   S.inv.push(it); return true;
 }
+function rollTier(boss) {
+  let roll = Math.random() * 100, t = 0;
+  for (; t < TIER_W.length - 1; t++) { roll -= TIER_W[t]; if (roll < 0) break; }
+  return boss ? Math.max(t, 1) : t;
+}
+function makeItem(boss) {
+  const cls = ['fw', 'sc', 'pt'][Math.random() * 3 | 0], slots = CLS_SLOTS[cls], type = slots[Math.random() * slots.length | 0];
+  const wt = cls === 'sc' && type === 'weapon' ? ['area', 'single', 'boss'][Math.random() * 3 | 0] : undefined;
+  const base = wt ? GEARW[wt][Math.random() * 3 | 0] : INAMES[cls][type], lv = S.stage + 1;
+  return {k:'gear', cls, type, wt, t:rollTier(boss), lv, q:.85 + Math.random() * .3, name:`${base} Mk${lv}`};
+}
 function dropGear(boss) {
-  let roll = Math.random() * 100, r = 0;
-  for (; r < RAR.length - 1; r++) { roll -= RAR[r].w; if (roll < 0) break; }
-  if (boss) r = Math.max(r, 1);
-  const slot = ['fw','sc','pt'][Math.random() * 3 | 0];
-  const wt = slot === 'sc' ? ['area', 'single', 'boss'][Math.random() * 3 | 0] : undefined, names = wt ? GEARW[wt] : GEAR[slot];
-  const it = {k:'gear', slot, wt, r, s:S.stage,
-    name: names[Math.random() * names.length | 0] + ' v' + (S.stage + 1) + '.' + (Math.random() * 10 | 0),
-    b: Math.round(10 * RAR[r].m * 1.25 ** S.stage * (.8 + Math.random() * .4))};
-  const cur = S.gear[slot], eff = g => g ? g.b * (slot === 'sc' && synergy(g) ? 1.5 : 1) : 0;
-  if (S.autoEq && eff(it) > eff(cur)) {
-    S.gear[slot] = it;
+  const it = makeItem(boss), G = gearOf(it.cls), cur = G[it.type];
+  if (S.autoEq && (!cur || itemScore(it) > itemScore(cur))) {
+    G[it.type] = it;
     if (cur) S.data += gearVal(cur);
-    say(`${heroOf(slot).def.name} instalou ${gearTag(it)} +${it.b}%${cur ? ' (antigo reciclado)' : ''}`, true);
-    if (r >= 3) showBanner(RAR[r].n.toUpperCase() + '!', RAR[r].c);
+    say(`${heroOf(it.cls).def.name} equipou ${gearTag(it)}${cur ? ' (antigo reciclado)' : ''}`, true);
+    if (it.t >= 3) showBanner(RAR[it.t].n.toUpperCase() + ' ' + tierTxt(it.t) + '!', RAR[it.t].c);
   } else if (addItem(it)) say(`${gearTag(it)} foi pro inventário`);
   else { S.data += gearVal(it); say(`Inventário cheio: ${gearTag(it)} reciclado → +${fmt(gearVal(it))}`); }
   if (openP === 'inv' || openP === 'squad') renderPanel();
@@ -871,21 +1015,20 @@ function dropChip(e) {
     if (Math.random() >= (e.boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + tv('chip'))) continue;
     const C = CHIPS[r];
     if (addItem({k:'chip', r, n:1})) {
-      float(e.x + e.w / 2, GROUND - e.h - 26, 'CHIP ' + C.n.toUpperCase(), C.c);
-      say(`Chip de invocação <span style="color:${C.c}">${C.n}</span> encontrado!`, true);
-      if (r >= 1) showBanner('CHIP ' + C.n.toUpperCase() + '!', C.c);
-    } else { S.data += chipVal(r); say(`Inventário cheio: chip ${C.n} reciclado → +${fmt(chipVal(r))}`); }
+      float(e.x + e.w / 2, GROUND - e.h - 26, 'PACOTE ' + C.n.toUpperCase(), C.c);
+      say(`Pacote de download <span style="color:${C.c}">${C.n}</span> encontrado!`, true);
+      if (r >= 1) showBanner('PACOTE ' + C.n.toUpperCase() + '!', C.c);
+    } else { S.data += chipVal(r); say(`Inventário cheio: pacote ${C.n} reciclado → +${fmt(chipVal(r))}`); }
     if (openP === 'inv' || openP === 'gacha') renderPanel();
     return;
   }
 }
 function equipItem(i) {
   const it = S.inv[i]; if (!it || it.k !== 'gear') return;
-  const cur = S.gear[it.slot];
-  S.inv.splice(i, 1);
-  S.gear[it.slot] = it;
+  const G = gearOf(it.cls), cur = G[it.type];
+  S.inv.splice(i, 1); G[it.type] = it;
   if (cur && !addItem(cur)) S.data += gearVal(cur);
-  say(`${heroOf(it.slot).def.name} instalou ${gearTag(it)}`);
+  say(`${heroOf(it.cls).def.name} equipou ${gearTag(it)}`);
   selInv = -1; renderPanel(); save();
 }
 function sellItem(i) {
@@ -895,18 +1038,20 @@ function sellItem(i) {
   say(`Reciclado → +${fmt(v)}`);
   selInv = -1; renderPanel(); save();
 }
-function unequip(slot) {
-  const g = S.gear[slot]; if (!g) return;
-  if (!addItem(g)) { say('Inventário cheio: libere um espaço antes de remover o módulo.'); return; }
-  S.gear[slot] = null; renderPanel(); save();
+function unequip(cls, type) {
+  const G = gearOf(cls), g = G[type]; if (!g) return;
+  if (!addItem(g)) { say('Inventário cheio: libere um espaço antes de remover o item.'); return; }
+  G[type] = null; renderPanel(); save();
 }
 function sellWorse() {
   let v = 0;
   S.inv = S.inv.filter(it => {
-    if (it.k !== 'gear' || (S.gear[it.slot] && it.b > S.gear[it.slot].b)) return true;
+    if (it.k !== 'gear') return true;
+    const cur = gearOf(it.cls)[it.type];
+    if (!cur || itemScore(it) > itemScore(cur)) return true;
     v += gearVal(it); return false;
   });
-  if (v) say(`Módulos piores reciclados → +${fmt(v)}`);
+  if (v) say(`Itens piores reciclados → +${fmt(v)}`);
   S.data += v; selInv = -1; renderPanel(); save();
 }
 
@@ -1005,7 +1150,7 @@ function update(dt) {
     else if (h.def.id === 'sc') {
       const G = pG(), sh = equipped('sc').shot || {};
       const crit = Math.random() < (G.crit || 0) + tv('crit'), d = atk(h) * (crit ? G.critX || 2 : 1);
-      const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc', visTier('sc')).glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0, dps: true};
+      const base = {y: GROUND - (sh.y || 16), c: sh.c || heroSpr('sc').glow, style: sh.style, pierce: G.pierce || 0, splash: G.splash || 0, dps: true};
       const obs = G.obs ? ++obsCount % G.obs === 0 : false;
       shots.push({...base, x: h.def.x + (sh.x || 27), dmg: d, crit, obs});
       for (let m = 1; m <= (G.multishot || 0); m++) shots.push({...base, x: h.def.x + 27 - m * 8, y: base.y + (m % 2 ? -3 : 3), dmg: d * .5});
@@ -1044,7 +1189,7 @@ function update(dt) {
     e.t -= dt;
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
-      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red'));
+      const isTank = front.def.id === 'fw', dmg = e.atk * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100);
       front.hp -= dmg; front.flash = .1;
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front.hp <= 0) { front.dead = true; front.respawn = 7; front.hp = 0; }
@@ -1139,12 +1284,12 @@ function draw() {
     if (walking && fr) y -= 1;
     if (h.dead) {
       ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
-      ctx.drawImage(heroSpr(k, visTier(k)).n[0][0], x, y);
+      ctx.drawImage(heroSpr(k).n[0][0], x, y);
       ctx.globalAlpha = 1;
       text(Math.ceil(h.respawn) + 's', x + 15, y - 10, '#8f89b8', true);
       continue;
     }
-    const hs = heroSpr(k, visTier(k)), frames = (h.flash > 0 ? hs.w : hs.n)[fr];
+    const hs = heroSpr(k), frames = (h.flash > 0 ? hs.w : hs.n)[fr];
     ctx.drawImage(frames[Math.floor(t * 5 + h.def.x) % frames.length], x, y);
     if (k === 'pt') {
       ctx.fillStyle = hs.glow;
@@ -1198,7 +1343,7 @@ function draw() {
   }
 }
 
-// ---------- invocação ----------
+// ---------- download (invocação) ----------
 const stars = n => '★'.repeat(n);
 const dupVal = st => rewardAt(S.maxStage * 10 + 5) * {3:15, 4:60, 5:250}[st];
 let gBanner = 'fw', lastPull = null;
@@ -1225,8 +1370,8 @@ function summon(chip, n) {
   lastPull = {cls: gBanner, out};
   const best = out.reduce((a, o) => o.T.stars > a.T.stars ? o : a);
   const dup = out.filter(o => o.res === 'dup').reduce((a, o) => a + o.v, 0);
-  if (best.T.stars === 5) { showBanner('★★★★★ ' + best.T.name, '#ffb454'); say(`<span style="color:#ffb454">★5 ${best.T.name}</span> invocado!`, true); }
-  else say(`Invocação ×${n}: melhor ${stars(best.T.stars)} ${best.T.name}`);
+  if (best.T.stars === 5) { showBanner('★★★★★ ' + best.T.name, '#ffb454'); say(`<span style="color:#ffb454">★5 ${best.T.name}</span> baixado!`, true); }
+  else say(`Download ×${n}: melhor ${stars(best.T.stars)} ${best.T.name}`);
   if (dup) say(`Repetidos convertidos → +${fmt(dup)}`);
   renderPanel(); save();
 }
@@ -1241,87 +1386,100 @@ function equip(id) {
 }
 
 // ---------- painéis ----------
-let openP = null, selInv = -1;
-const PANELS = {squad:'Esquadrão', tree:'Antivírus · árvore de atualizações', inv:'Inventário', gacha:'Invocar', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
+let openP = null, selInv = -1, sqTab = 'team', colCls = 'fw';
+const PANELS = {squad:'Esquadrão', tree:'Antivírus · árvore de atualizações', inv:'Inventário', gacha:'Download de agentes', stages:'Fases', log:'Log', readme:'LEIA-ME.txt'};
 const pct = x => Math.round(x * 100) + '%';
 const RENDER = {
-  squad: () => SLOTS.map(([k, lab]) => {
-    const h = heroOf(k), g = S.gear[k];
-    return `<div class="hr">
-      <img src="${portrait(k, visTier(k))}" width="48" height="48" alt="">
-      <div>
-        <div class="hn"><b>${h.def.name}</b><span${k === 'sc' ? ` style="color:${SUBS[dpsSub()].c}"` : ''}>${k === 'sc' ? 'DPS · ' + SUBS[dpsSub()].n : lab}</span></div>
-        <div class="hp"><i id="hp-${k}"></i></div>
-        <div class="st" id="st-${k}"></div>
-        <div class="gear" style="--rc:${g ? RAR[g.r].c : 'var(--mute)'}">${g ? `${g.name} +${g.b}%${wtTag(g)}<button type="button" data-unequip="${k}">remover</button>` : 'sem módulo'}</div>
+  squad: () => {
+    const tabs = `<div class="btabs"><button type="button" data-sqtab="team" aria-pressed="${sqTab === 'team'}">Equipe</button><button type="button" data-sqtab="col" aria-pressed="${sqTab === 'col'}">Coleção</button></div>`;
+    if (sqTab === 'col') {
+      const C = CLASSES[colCls];
+      const col = C.list.map(T => {
+        const own = T.id in S.roster, on = S[C.key] === T.id;
+        return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
+          <img src="${portraitOf(T.id, -1)}" width="40" height="40" alt="">
+          <span class="st${T.stars}">${stars(T.stars)}</span>
+          <span class="nm">${own ? T.name : '???'}</span>
+          ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
+          <span class="ps">${own ? T.ptxt : 'Ainda não baixado'}</span>
+          <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'No esquadrão' : own ? 'Colocar' : 'Bloqueado'}</button>
+        </div>`;
+      }).join('');
+      return tabs + `<div class="btabs"><button type="button" data-colc="fw" aria-pressed="${colCls === 'fw'}">Tanques</button><button type="button" data-colc="sc" aria-pressed="${colCls === 'sc'}">DPS</button></div>
+        ${colCls === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
+        <p class="sub">${C.label} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length} · novos agentes vêm do Download</small></p>
+        <div class="col">${col}</div>`;
+    }
+    return tabs + SLOTS.map(([k, lab]) => {
+      const h = heroOf(k), G = gearOf(k);
+      const slots = CLS_SLOTS[k].map(ty => { const it = G[ty]; return it
+        ? `<button type="button" class="eqs" data-uneq="${k}:${ty}" style="--rc:${RAR[it.t].c}" title="${it.name} ${tierTxt(it.t)} · Nv${it.lv} · ${statTxt(it)}${it.wt ? ' · ' + SUBS[it.wt].n : ''} (clique pra remover)"><img src="${itemIcon(it)}" width="24" height="24" alt=""><i>${tierTxt(it.t)}</i></button>`
+        : `<span class="eqs empty" title="${ITYPES[ty].n}: vazio">${ITYPES[ty].ab}</span>`; }).join('');
+      return `<div class="hr">
+        <img src="${portrait(k)}" width="48" height="48" alt="">
+        <div>
+          <div class="hn"><b>${h.def.name}</b><span${k === 'sc' ? ` style="color:${SUBS[dpsSub()].c}"` : ''}>${k === 'sc' ? 'DPS · ' + SUBS[dpsSub()].n : lab}</span></div>
+          <div class="hp"><i id="hp-${k}"></i></div>
+          <div class="st" id="st-${k}"></div>
+          <div class="eqrow">${slots}</div>
+        </div>
+        <div class="hb">
+          <button type="button" id="ua-${k}" data-up="${k}:a"></button>
+          <button type="button" id="uh-${k}" data-up="${k}:h"></button>
+          ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">trocar</button>`}
+        </div>
+      </div>`;
+    }).join('') + `
+      <div class="opts">
+        <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
+        <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar itens melhores</label>
       </div>
-      <div class="hb">
-        <button type="button" id="ua-${k}" data-up="${k}:a"></button>
-        <button type="button" id="uh-${k}" data-up="${k}:h"></button>
-        ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">trocar</button>`}
-      </div>
-    </div>`;
-  }).join('') + `
-    <div class="opts">
-      <label><input type="checkbox" id="oUp" ${S.autoUp ? 'checked' : ''}> auto-aprimorar</label>
-      <label><input type="checkbox" id="oEq" ${S.autoEq ? 'checked' : ''}> auto-equipar módulos melhores</label>
-    </div>
-    <div class="prev">prévia do visual: ${[['real', -9], ...RAR.map((r, i) => [r.n, i])].map(([n, v]) =>
-      `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
+      <div class="prev">prévia (todos os itens no tier): ${[['real', -9], ...RAR.map((r, i) => [tierTxt(i), i])].map(([n, v]) =>
+        `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`;
+  },
 
   inv: () => {
     const cells = Array.from({length: invCap()}, (_, i) => {
       const it = S.inv[i];
       if (!it) return '<div class="cell empty"></div>';
-      return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" style="--rc:${itemColor(it)}" title="${it.k === 'chip' ? 'Chip ' + CHIPS[it.r].n : it.name}">${
-        it.k === 'chip' ? `<span class="ct">CHIP</span><b>×${it.n}</b>` : `<span class="ct"${it.wt ? ` style="color:${SUBS[it.wt].c}"` : ''}>${it.wt ? SUBS[it.wt].n.slice(0, 5).toUpperCase() : SLOTTAG[it.slot]}</span><b>+${it.b}%</b>`}</button>`;
+      return `<button type="button" class="cell${i === selInv ? ' sel' : ''}" data-cell="${i}" style="--rc:${itemColor(it)}" title="${it.k === 'chip' ? 'Pacote ' + CHIPS[it.r].n : it.name}">
+        <img src="${itemIcon(it)}" width="28" height="28" alt="">${it.k === 'chip' ? `<b>×${it.n}</b>` : `<b>${tierTxt(it.t)}</b><span class="ct">Nv${it.lv}</span>`}</button>`;
     }).join('');
     const it = S.inv[selInv];
-    let det = '<p class="hint">Clique num item. Módulos caem dos vírus (8%) e sempre do chefe; chips de invocação são raros.</p>';
+    let det = '<p class="hint">Clique num item pra ver detalhes.</p>';
     if (it && it.k === 'gear') {
-      const cur = S.gear[it.slot], diff = it.b - (cur ? cur.b : 0);
-      det = `${gearTag(it)} · ${it.wt ? 'arma' : 'módulo'} de <b>${SLOTTAG[it.slot]}</b>${wtTag(it)} · +${it.b}% de ATK e HP
-        <div class="hint">Equipado agora: ${cur ? `${cur.name} +${cur.b}%` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? '+' : ''}${diff}%</span></div>
+      const cur = gearOf(it.cls)[it.type], diff = Math.round(itemScore(it) - (cur ? itemScore(cur) : 0));
+      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div>${gearTag(it)} · ${RAR[it.t].n}<br>
+        <span class="hint">${ITYPES[it.type].n} de <b>${heroOf(it.cls).def.name}</b> (${SLOTTAG[it.cls]}) · Nv${it.lv}</span>${wtTag(it)}</div></div>
+        <div>${statTxt(it)}</div>
+        <div class="hint">Equipado: ${cur ? `${cur.name} ${tierTxt(cur.t)} (${statTxt(cur)})` : 'nada'} → <span style="color:${diff >= 0 ? 'var(--green)' : 'var(--pink)'}">${diff >= 0 ? 'melhor' : 'pior'}</span></div>
         <div class="row"><button type="button" data-equip="${selInv}">Equipar</button><button type="button" data-sell="${selInv}">Reciclar · <b>+${fmt(gearVal(it))}</b></button></div>`;
     } else if (it) {
       const C = CHIPS[it.r];
-      det = `<span style="color:${C.c}">Chip de invocação ${C.n}</span> ×${it.n} · ★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}
-        <div class="row"><button type="button" data-go="fw">Invocar tanque</button><button type="button" data-go="sc">Invocar DPS</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
+      det = `<div class="dh"><img src="${itemIcon(it)}" width="40" height="40" alt=""><div><span style="color:${C.c}">Pacote de download ${C.n}</span> ×${it.n}<br><span class="hint">★5 ${pct(C.p5)} · ★4 ${pct(C.p4)}</span></div></div>
+        <div class="row"><button type="button" data-go="fw">Baixar tanque</button><button type="button" data-go="sc">Baixar DPS</button><button type="button" data-sell="${selInv}">Reciclar tudo · <b>+${fmt(chipVal(it.r) * it.n)}</b></button></div>`;
     }
     return `<div class="inv">${cells}</div><div class="det">${det}</div>
-      <div class="opts"><button type="button" data-sellworse>Reciclar módulos piores que os equipados</button></div>`;
+      <p class="hint drops">Chance de tier por item: ${RAR.map((r, i) => `<span style="color:${r.c}">${tierTxt(i)} ${r.n} ${TIER_W[i]}%</span>`).join(' · ')}. Chefes dão no mínimo T2. O nível do item é o número da fase (fases baixas só dão itens de nível baixo).</p>
+      <div class="opts"><button type="button" data-sellworse>Reciclar itens piores que os equipados</button></div>`;
   },
 
   gacha: () => {
-    const C = CLASSES[gBanner];
     const res = lastPull && lastPull.cls === gBanner ? `<div class="res">${lastPull.out.map((o, i) => `
       <div class="card s${o.T.stars}" style="--i:${i}"><img src="${portraitOf(o.T.id, -1)}" width="40" height="40" alt="">
       <span class="st${o.T.stars}">${stars(o.T.stars)}</span><span class="nm">${o.T.name}</span>
       ${o.res === 'new' ? '<span class="tag new">NOVO</span>' : `<span class="tag dup">+${fmt(o.v)}</span>`}</div>`).join('')}</div>` : '';
-    const col = C.list.map(T => {
-      const own = T.id in S.roster, on = S[C.key] === T.id;
-      return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
-        <img src="${portraitOf(T.id, -1)}" width="40" height="40" alt="">
-        <span class="st${T.stars}">${stars(T.stars)}</span>
-        <span class="nm">${own ? T.name : '???'}</span>
-        ${T.sub ? `<span class="tag" style="color:${SUBS[T.sub].c}">${SUBS[T.sub].n}</span>` : ''}
-        <span class="ps">${own ? T.ptxt : 'Não invocado'}</span>
-        <button type="button" data-eq="${T.id}" ${own && !on ? '' : 'disabled'}>${on ? 'Equipado' : own ? 'Equipar' : 'Bloqueado'}</button>
-      </div>`;
-    }).join('');
-    return `<div class="btabs">
-        <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Banner · Tanques</button>
-        <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Banner · DPS</button>
+    return `<p class="hint">Baixe novos agentes pro antivírus usando pacotes de download. Os agentes baixados ficam na Coleção, no Esquadrão.</p>
+      <div class="btabs">
+        <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
+        <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · DPS</button>
       </div>
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">
-        <span><b>${c.n}</b> ×${n}</span><small>★5 ${pct(c.p5)} · ★4 ${pct(c.p4)}</small>
-        <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Usar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
-      <p class="pity">★5 garantido em ${50 - S.pity[gBanner]} invocações · ×10 garante ★4 · repetido vira dados (★3 ${fmt(dupVal(3))}, ★4 ${fmt(dupVal(4))}, ★5 ${fmt(dupVal(5))})
-        · <button type="button" data-free>protótipo: +chips</button></p>
-      ${res}
-      ${gBanner === 'sc' ? `<p class="hint">${Object.values(SUBS).map(x => `<span style="color:${x.c}">${x.n}</span>: ${x.d}`).join('<br>')}</p>` : ''}
-      <p class="sub">Coleção de ${gBanner === 'sc' ? 'DPS' : 'tanques'} <small>${C.list.filter(x => x.id in S.roster).length}/${C.list.length}</small></p>
-      <div class="col">${col}</div>`;
+        <span><img src="${itemIcon({k:'chip', r})}" width="20" height="20" alt=""> <b>${c.n}</b> ×${n}</span><small>★5 ${pct(c.p5)} · ★4 ${pct(c.p4)}</small>
+        <div><button type="button" data-pull="${r}:1" ${n < 1 ? 'disabled' : ''}>Baixar ×1</button><button type="button" data-pull="${r}:10" ${n < 10 ? 'disabled' : ''}>×10</button></div></div>`; }).join('')}</div>
+      <p class="pity">★5 garantido em ${50 - S.pity[gBanner]} downloads · ×10 garante ★4 · repetido vira dados (★3 ${fmt(dupVal(3))}, ★4 ${fmt(dupVal(4))}, ★5 ${fmt(dupVal(5))})
+        · <button type="button" data-free>protótipo: +pacotes</button> <button type="button" data-gocol>ver coleção</button></p>
+      ${res}`;
   },
 
   stages: () => {
@@ -1364,7 +1522,7 @@ const RENDER = {
   readme: () => `<p><b>Você não é um herói de fantasia. Você é o antivírus.</b></p>
     <p>Um esquadrão de agentes digitais (tanque, DPS e suporte) patrulha o seu computador enquanto você trabalha, caçando vírus de fase em fase. Cada vírus apagado vira <span class="k">dados</span> (KB → MB → GB), o dinheiro do jogo.</p>
     <p><b>Antivírus:</b> a árvore de atualizações do sistema, paga com DEF. <b>Fases:</b> Horda (muitos vírus juntos, bom pra DPS de Área), Blindados (poucos e resistentes, bom pra Precisão) e Chefão (bom pra Caça-chefes).</p>
-    <p><b>Esquadrão:</b> gaste dados pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> 12 espaços pros módulos e chips que caem. <b>Invocar:</b> use chips Comum, Raro ou Lendário nos banners de tanques e DPS; repetidos viram dados. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
+    <p><b>Esquadrão:</b> gaste dados pra aprimorar dano e resistência de cada personagem. <b>Inventário:</b> equipamentos (capacete, armadura, botas, arma e, no tanque, escudo) com tiers T1 a T5, e pacotes de download. Os itens equipados aparecem no personagem. <b>Download:</b> use pacotes Comum, Raro ou Lendário pra baixar novos tanques e DPS; repetidos viram dados. A <b>Coleção</b> fica no Esquadrão. <b>Fases:</b> escolha onde farmar; as mais altas pedem mais poder.</p>
     <p class="opts"><button type="button" id="wipe">Apagar progresso</button></p>`,
 };
 function renderPanel() {
@@ -1405,8 +1563,11 @@ $('#pBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   const d = b.dataset;
   if (d.up) { const [k, u] = d.up.split(':'); if (buyUp(k, u)) livePanel(); }
-  else if (d.unequip) unequip(d.unequip);
-  else if (d.swap) { gBanner = d.swap; openPanel('gacha', true); }
+  else if (d.uneq) { const [c, ty] = d.uneq.split(':'); unequip(c, ty); }
+  else if (d.swap) { sqTab = 'col'; colCls = d.swap; renderPanel(); }
+  else if (d.sqtab) { sqTab = d.sqtab; renderPanel(); }
+  else if (d.colc) { colCls = d.colc; renderPanel(); }
+  else if (d.gocol !== undefined) { sqTab = 'col'; colCls = gBanner; openPanel('squad', true); }
   else if (d.prev !== undefined) { const v = +d.prev; previewTier = v < 0 ? null : v; renderPanel(); }
   else if (d.cell !== undefined) { selInv = +d.cell; renderPanel(); }
   else if (d.equip !== undefined) equipItem(+d.equip);

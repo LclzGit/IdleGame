@@ -19,9 +19,25 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 
 - **Dados** (KB → MB → GB) são o dinheiro do jogo. Servem pra aprimorar **dano** e **resistência** de cada personagem (+12% por nível; o nível fica com o personagem mesmo quando ele sai do esquadrão).
 - **Fases:** 5 por setor (1-1 … 1-5, 2-1 …). Cada uma tem 10 vírus e um chefe. Vencer o chefe libera a próxima. Dá pra escolher qualquer fase liberada pra farmar. Cada fase mostra o **poder recomendado** (verde, âmbar ou vermelho em relação ao seu). Com "avançar sozinho", o esquadrão sobe de fase e recua uma se cair 2 vezes.
-- **Inventário (12 espaços):** módulos (8% por vírus, 100% no chefe) e chips de invocação. Com o inventário cheio, o que cai é reciclado em dados.
-- **Chips de invocação:** Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
+- **Inventário (12 espaços):** equipamentos (8% por vírus, 100% no chefe) e pacotes de download. Com o inventário cheio, o que cai é reciclado em dados.
+- **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
+
+## v0.5: equipamentos com tier e Download
+
+**Equipamentos por classe:** capacete, armadura, botas e arma pra todos; escudo só pro tanque. A arma de DPS tem tipo (Área, Precisão, Caça-chefes). Cada item tem ícone próprio desenhado por código e aparece no personagem: capacete na cabeça, armadura nas ombreiras e botas nas solas, na cor do tier. A arma (no tanque, o escudo) define a cor das luzes.
+
+| Peça | Atributos |
+|---|---|
+| Arma | +% ATK |
+| Capacete | +% HP e +% ATK |
+| Armadura | +% HP |
+| Botas | +% HP e +% velocidade de ataque |
+| Escudo (tanque) | +% HP e redução de dano |
+
+**Tiers:** T1 Comum 60% · T2 Otimizado 25% · T3 Criptografado 10% · T4 Zero-Day 4% · T5 Quântico 1% (chefes dão no mínimo T2). **Nível do item = número da fase**, então fases baixas só dão itens de nível baixo, seja qual for o tier.
+
+**Download** substitui "Invocar": pacotes de download Comum/Raro/Lendário baixam novos agentes. A **Coleção** saiu do Download e foi pro **Esquadrão** (aba Coleção).
 
 ## v0.4: subclasses, tipos de fase e árvore do antivírus
 
