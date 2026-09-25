@@ -67,6 +67,11 @@
   .taskbar .tb[aria-pressed="true"]{color:var(--text); border-bottom:2px solid var(--cyan); background:#12102a}
   .taskbar .tb img{image-rendering:auto}
   #panel.nocur .pcur{display:none}
+  .arena{display:block; width:100%; image-rendering:pixelated; border:1px solid #1f5a60; background:#07060f}
+  .rhud{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:4px 8px; margin:6px 0; font-size:11px}
+  .rhud .bar{height:6px; background:#1a1024; border:1px solid #3a1a2a} .rhud .bar i{display:block; height:100%; background:var(--rc, #ff3d7f)}
+  .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; font-size:10px}
+  .rsq div{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .rsq .bar{height:3px; background:#101c14; margin-top:2px} .rsq .bar i{display:block; height:100%; background:var(--green)}
   .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
   .cfg section:last-child{border-bottom:0}
   .cfg h3{margin:0 0 4px; font:400 11px var(--pix); letter-spacing:.08em; color:var(--cyan)}
@@ -446,7 +451,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.18</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.19</p>
 </main>
 
 <footer class="dock">
@@ -522,7 +527,8 @@
 (() => {
 const $ = s => document.querySelector(s);
 const SCALE = 2, H = 52, GROUND = 47, KEY = 'daemonbar.v2';
-const cv = $('#strip'), ctx = cv.getContext('2d');
+const cv = $('#strip'), stripCtx = cv.getContext('2d');
+let ctx = stripCtx;   // durante um Chefão o mundo é desenhado na arena (janela de Chefões) e a barra mostra o esquadrão em missão
 let W = 320;
 
 // ---------- sprites ----------
@@ -3322,6 +3328,15 @@ const raidReady = R => (S.raids[R.id] || 0) <= nowMs();
 const cdTxt = h => h < 24 ? `1 tentativa a cada ${h} h` : h === 24 ? '1 tentativa por dia' : h < 168 ? `1 tentativa a cada ${h / 24} dias` : h === 168 ? '1 tentativa por semana' : h < 720 ? `1 tentativa a cada ${h / 168} semanas` : '1 tentativa por mês';
 const waitTxt = ms => { const m = Math.ceil(ms / 60e3), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60); return d ? `${d}d ${h}h` : h ? `${h}h ${m % 60}min` : `${m}min`; };
 let raid = null, lastRaid = null;
+// Arena do Chefão: a luta acontece dentro da janela de Chefões. O mundo do jogo passa a ter ARENA_W de largura,
+// os agentes entram andando pela esquerda e o chefão pela direita; a barra de tarefas mostra o esquadrão em missão.
+const ARENA_W = 175, arenaCv = document.createElement('canvas'), arenaCtx = arenaCv.getContext('2d');
+arenaCv.className = 'arena'; arenaCv.width = ARENA_W * 2; arenaCv.height = 52 * 2; arenaCtx.setTransform(2, 0, 0, 2, 0, 0); arenaCtx.imageSmoothingEnabled = false;
+arenaCv.addEventListener('click', () => {});
+function raidRestore() {   // devolve o esquadrão pra barra
+  heroes.forEach(h => { if (h.bx != null) h.def.x = h.bx; });
+  resize();
+}
 let stT = 0, farmLeft = 0;
 let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0, fails = 0, obsCount = 0;
 const LOG = [];
@@ -3804,7 +3819,7 @@ function tryRevive(h) {
   return true;
 }
 function startStage(s, msg) {
-  raid = null;   // escolher outra fase no meio de um chefão abandona a luta (a tentativa já foi gasta)
+  if (raid) { raid = null; raidRestore(); }   // escolher outra fase no meio de um chefão abandona a luta (a tentativa já foi gasta)
   S.stage = s; S.kills = 0; spawned = 0; bossUp = false; enemies = []; shots = []; spawnT = 1.5; stT = 0;
   heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); h.shield = 0; }); supReset();
   showBanner(msg || stageLabel(s) + ' ' + STYPES[stageType(s)].n.toUpperCase(), STYPES[stageType(s)].c);
@@ -3838,20 +3853,22 @@ function startRaid(id) {
   const R = raidOf(id);
   if (!R || !raidOpen(R) || !raidReady(R) || raid) return;
   S.raids[R.id] = nowMs() + R.cd * 3600e3;   // a tentativa é gasta ao entrar
-  raid = {R, back:S.stage};
+  raid = {R, back:S.stage, intro:true};
+  W = ARENA_W;
+  heroes.forEach((h, i) => { h.bx = h.bx ?? h.def.x; h.def.x = h.bx - 125 - i * 6; });   // começam fora da arena, à esquerda
   const d = stagePos(Math.min(R.L, CAMPAIGN + 60)).d, sz = 3, spr = SPR['raid:' + R.id];
   enemies = []; shots = []; spawned = 0; stT = 0; bossUp = true;
   heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
   const hp = ENEMY.hp * ENEMY.hpG ** R.L * ENEMY.djHp ** d * 60;
-  enemies.push({tn:'raid:' + R.id, raid:true, boss:true, w:spr.width * sz, h:spr.height * sz, x:W + 4, hp, max:hp,
+  enemies.push({tn:'raid:' + R.id, raid:true, boss:true, w:spr.width * sz, h:spr.height * sz, x:ARENA_W + 4, hp, max:hp,
     atk:ENEMY.atk * ENEMY.atkG ** R.L * ENEMY.djAtk ** d * 2.2, cd:1.4, t:1.5, armored:false, reward:0, flash:0, lunge:0, atStop:false});
   showBanner(`!! ${R.n} (${R.y}) !!`, R.c);
   say(`Chefão <span style="color:${R.c}">${R.n}</span> iniciado. Próxima tentativa em ${waitTxt(R.cd * 3600e3)}.`, true);
-  openPanel(null, true); save();
+  openPanel('raid', true); save();
 }
 function raidEnd(win, why) {
   const R = raid.R, out = [];
-  raid = null;
+  raid = null; raidRestore();
   if (win) {
     const lv = Math.min(R.L, S.maxStage) + 1, tot = R.w.reduce((a, b) => a + b, 0);
     for (let i = 0; i < R.items; i++) {
@@ -3873,14 +3890,32 @@ function raidEnd(win, why) {
     say(`<span style="color:${R.c}">${R.n}</span> eliminado! ${out.join(' · ')}`, true);
   } else {
     showBanner(`${R.n} ESCAPOU`, '#ff3d7f');
-    say(`<span style="color:${R.c}">${R.n}</span> escapou (${why === 'time' ? 'tempo esgotado' : 'esquadrão derrubado'}). Tentativa gasta.`, true);
+    say(`<span style="color:${R.c}">${R.n}</span> escapou (${why === 'time' ? 'tempo esgotado' : why === 'quit' ? 'luta abandonada' : 'esquadrão derrubado'}). Tentativa gasta.`, true);
   }
   lastRaid = {id:R.id, win, out, at:nowMs()};
   const back = S.stage; enemies = []; startStage(back, win ? `${R.n} ELIMINADO` : `${R.n} ESCAPOU`);
   if (openP === 'raid') renderPanel();
   save();
 }
+function raidFightView() {
+  const R = raid.R;
+  return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y}</small>
+      <div class="bar"><i id="rHp"></i></div></div><b id="rT"></b></div>
+    <div id="arenaHost"></div>
+    <div class="rsq" id="rSq"></div>
+    <div class="opts"><span class="hint" id="rMsg"></span><button type="button" data-raidquit>Abandonar luta</button></div>`;
+}
+function raidLive() {
+  if (!raid || openP !== 'raid') return;
+  const e = enemies[0], hp = $('#rHp'), tt = $('#rT'), sq = $('#rSq'), m = $('#rMsg');
+  if (hp) hp.style.width = (e ? Math.max(0, e.hp / e.max) * 100 : 0) + '%';
+  const left = Math.max(0, RAID_TIME - stT);
+  if (tt) tt.textContent = `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
+  if (sq) sq.innerHTML = heroes.map(h => `<div>${h.def.name}<div class="bar"><i style="width:${h.dead ? 0 : h.hp / maxHp(h) * 100}%"></i></div></div>`).join('');
+  if (m) m.textContent = raid.intro ? 'O esquadrão está chegando…' : 'Derrube o chefão antes do tempo acabar.';
+}
 function raidView() {
+  if (raid) return raidFightView();
   const pw = power(), now = nowMs();
   const res = lastRaid && now - lastRaid.at < 10 * 60e3 ? `<div class="rres ${lastRaid.win ? 'ok' : 'bad'}"><b>${raidOf(lastRaid.id).n}</b> ${lastRaid.win ? 'eliminado: ' + lastRaid.out.join(' · ') : 'escapou. A tentativa foi gasta.'}</div>` : '';
   const G = guestRaid(), nextWeek = ((weekIdx() + 1) * 7 - 3) * DAY + new Date().getTimezoneOffset() * 6e4 - now;
@@ -4122,6 +4157,14 @@ function codexView() {
 
 function update(dt) {
   t += dt; stT += dt;
+  if (raid && raid.intro) {   // entrada: agentes andam até a posição, o chefão vem da direita; o relógio da luta não corre
+    stT -= dt; let done = true;
+    for (const h of heroes) { h.def.x = Math.min(h.bx, h.def.x + 55 * dt); if (h.def.x < h.bx) done = false; }
+    const e = enemies[0], stop = heroes.reduce((a, h) => Math.max(a, h.bx + h.def.w), 0) + 2;
+    if (e) { e.x = Math.max(stop, e.x - 32 * dt); if (e.x > stop) done = false; }
+    if (done) { raid.intro = false; showBanner('LUTA!', raid.R.c); SND.play('boss'); }
+    return;
+  }
   if (stT > (raid ? RAID_TIME : STAGE_TIME)) { if (raid) raidEnd(false, 'time'); else rollback('time'); return; }
   const alive = heroes.filter(h => !h.dead);
   if (!alive.length) { if (raid) raidEnd(false); else rollback(); return; }
@@ -4354,6 +4397,13 @@ function drawSheetHero(h, SI, walking) {
     if (firing) { sy *= .985; sx = 1.015; }
   } else if (walking) {
     // uma pose só; as pernas são animadas separando a parte de baixo do sprite em perna de trás e da frente
+    if (SI.w.length >= 4) {   // folha de caminhada completa: usa os quadros de verdade
+      const n = SI.w.length; P = SI.w[((Math.floor(t * 9 + ph) % n) + n) % n];
+      const ax = h.def.x + h.def.w / 2, gy = GROUND + 1;
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ax + 1, gy - .5, P.w * .28, 1.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.imageSmoothingEnabled = true; ctx.drawImage(P.im, ax - P.fx, gy - P.h, P.w, P.h); ctx.imageSmoothingEnabled = false;
+      return gy - P.h;
+    }
     P = SI.w[0];
     const cyc = t * 7 + ph;
     bob = -Math.abs(Math.sin(cyc)) * (veh ? .4 : 1);
@@ -4456,6 +4506,26 @@ function drawCore(sc, panic) {
   if (danger && Math.sin(t * 8) > 0) text('!', cx + 1, top - 20, '#ff3d7f', true);
 }
 function draw() {
+  if (!raid) { ctx = stripCtx; drawWorld(); return; }
+  ctx = arenaCtx; drawWorld();
+  ctx = stripCtx; drawAway();
+}
+// Barra de tarefas durante o Chefão: núcleo sozinho, aviso do esquadrão em missão e a vida do chefão
+function drawAway() {
+  const sw = cv.width / RES, R = raid.R, e = enemies[0], sc = sec();
+  ctx.setTransform(RES, 0, 0, RES, 0, 0);
+  const sky = ctx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#07060f'); sky.addColorStop(1, mix('#0b0a16', R.c, .22));
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, sw, H);
+  ctx.fillStyle = rgba(R.c, .5); ctx.fillRect(0, GROUND, sw, 1);
+  const W0 = W; W = sw; drawCore(sc, false); W = W0;
+  const cx = sw / 2;
+  text(raid.intro ? 'ESQUADRÃO A CAMINHO' : 'ESQUADRÃO EM COMBATE', cx, 8, '#e7e3ff', true);
+  text(R.n, cx, 18, R.c, true);
+  if (e) { const bw = Math.min(160, sw * .4), p = Math.max(0, e.hp / e.max); ctx.fillStyle = '#000'; ctx.fillRect(cx - bw / 2, 30, bw, 3); ctx.fillStyle = R.c; ctx.fillRect(cx - bw / 2, 30, bw * p, 3); }
+  const left = Math.max(0, RAID_TIME - stT); text(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`, cx, 36, '#8f89b8', true);
+  if (Math.sin(t * 4) > 0) text('abrir chefões ›', sw - 44, 40, '#8f89b8', true);
+}
+function drawWorld() {
   const sc = sec(), tint = sc.tint, panic = stagePos(S.stage).d === 4, SC = sceneOf(sc.idx, tint, panic);
   // céu: escuro em cima, com a cor do setor perto do chão
   const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
@@ -4480,10 +4550,10 @@ function draw() {
     ctx.fillStyle = rgba(tint, .25 + .65 * a * a); ctx.fillRect(nx, GROUND + 2, 1, 1);
   }
 
-  drawCore(sc, panic);
+  if (!raid) drawCore(sc, panic);
   for (const h of heroes) {
     const k = h.def.id;
-    const walking = false;   // agentes ficam na posição de defesa; quem anda são os vírus
+    const walking = !!(raid && raid.intro && h.bx != null && h.def.x < h.bx - .5);   // só andam entrando na arena do Chefão
     const fr = walking ? Math.floor(t * 7 + h.def.x) % 2 : 0;
     const SI = SHEET_IMG[slotAid(k)];
     if (sheetReady(SI)) {
@@ -5130,6 +5200,7 @@ function renderPanel() {
   tipEl.hidden = true;
   body.innerHTML = RENDER[openP]();
   body.scrollTop = top;
+  const ah = $('#arenaHost'); if (ah) { ah.appendChild(arenaCv); raidLive(); }
   const map = $('#tmap');
   if (map) {
     const can = map.firstElementChild;
@@ -5257,6 +5328,7 @@ $('#pBody').addEventListener('click', e => {
   else if (d.ach) claimAch(d.ach);
   else if (d.cdx) { codexTab = d.cdx; renderPanel(); }
   else if (d.raid) startRaid(d.raid);
+  else if (d.raidquit !== undefined) { if (raid) raidEnd(false, 'quit'); }
   else if (d.raidreset !== undefined) { S.raids = {}; renderPanel(); save(); }
   else if (d.rkt) { rankTab = d.rkt; renderPanel(); }
   else if (d.upsend !== undefined) uploadItem(+d.upsend);
@@ -5340,18 +5412,18 @@ function offline(ms) {
 }
 
 function resize() {
-  const w = cv.parentElement.clientWidth;
-  W = Math.max(160, Math.floor(w / SCALE));
+  const w = cv.parentElement.clientWidth, sw = Math.max(160, Math.floor(w / SCALE));
+  W = raid ? ARENA_W : sw;   // durante o Chefão o mundo tem a largura da arena
   // canvas em resolução dobrada: a lógica continua em W×H, mas sprites das fichas e cenário ganham detalhe
-  cv.width = W * RES; cv.height = H * RES;
-  cv.style.width = W * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
+  cv.width = sw * RES; cv.height = H * RES;
+  cv.style.width = sw * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
   ctx.setTransform(RES, 0, 0, RES, 0, 0);
   ctx.imageSmoothingEnabled = false;
 }
 new ResizeObserver(resize).observe(cv.parentElement);
 // clique no vírus dourado
 const goldHit = ev => { if (!gold) return false; const r = cv.getBoundingClientRect(), x = (ev.clientX - r.left) / SCALE, y = (ev.clientY - r.top) / SCALE; return Math.abs(x - gold.x) < 10 && Math.abs(y - gold.y) < 9; };
-cv.addEventListener('click', ev => { if (goldHit(ev)) catchGold(); });
+cv.addEventListener('click', ev => { if (raid) { openPanel('raid', true); return; } if (goldHit(ev)) catchGold(); });
 cv.addEventListener('mousemove', ev => { cv.style.cursor = goldHit(ev) ? 'pointer' : ''; });
 resize();
 
@@ -5369,7 +5441,7 @@ setInterval(metaSecond, 1000);
 setInterval(save, 5000);
 i18nStart();
 setInterval(fitTabs, 1000);
-setInterval(() => { renderHud(); livePanel(); if (livePanelQ && openP === 'quest') { livePanelQ = false; renderPanel(); } }, 250);
+setInterval(() => { renderHud(); livePanel(); raidLive(); if (livePanelQ && openP === 'quest') { livePanelQ = false; renderPanel(); } }, 250);
 setInterval(clock, 10000); clock();
 renderHud();
 

@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.19: chefão na janela de Chefões
+
+- Ao clicar em **Enfrentar**, a luta abre dentro da própria janela de Chefões (mesmo tamanho dos outros menus): arena com o chefão, barra de vida, tempo e a vida de cada agente.
+- O esquadrão sai da barra de tarefas e entra andando na arena; o chefão chega pelo outro lado e a luta começa com "LUTA!" (o tempo só corre depois disso).
+- Enquanto isso, a barra mostra "esquadrão a caminho / em combate" com a vida do chefão e o tempo; clicar nela reabre a luta.
+- Botão **Abandonar luta** (a tentativa continua gasta). Ao vencer, perder ou abandonar, os agentes voltam para a barra.
+
 ## v1.18: suportes trocáveis
 
 - O slot de suporte agora é trocável como tanque e ataque: **Download · Suportes** (mesmas chances e garantias), aba Suportes na Coleção com versões e segunda passiva, botão "trocar agente" no painel.
