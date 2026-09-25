@@ -74,6 +74,15 @@
   .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin-top:6px; font-size:10px}
   .rcard{display:grid; grid-template-columns:28px minmax(0, 1fr); gap:6px; align-items:center; padding:3px; background:#0e0c1d; border:1px solid #2a2450; min-width:0}
   .rcard img{border:1px solid #2a2450} .rcard b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .oflist{display:flex; flex-direction:column; gap:3px}
+  .ofrow{display:grid; grid-template-columns:28px minmax(0, 1fr) auto auto; gap:6px; align-items:center; padding:4px 5px; background:#0e0c1d; border:1px solid #2a2450; border-left:3px solid var(--rc); font-size:10px}
+  .ofrow img{image-rendering:pixelated} .ofrow.empty{opacity:.7}
+  .ofe{width:28px; height:28px; border:1px dashed #2a2450}
+  .ofi{min-width:0; display:flex; flex-direction:column} .ofi > *{overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .ofi small{color:#8f89b8}
+  .ofn{color:var(--amber)}
+  .ofc{display:flex; flex-direction:column; align-items:flex-end; gap:1px; white-space:nowrap} .ofc img{vertical-align:-1px}
+  .ofb{display:flex; gap:3px}
+  @container (max-width:400px){ .ofrow{grid-template-columns:28px minmax(0, 1fr) auto} .ofrow .ofc{display:none} }
   .rdos{display:grid; grid-template-columns:48px minmax(0, 1fr); gap:8px; align-items:center; padding:6px; margin-bottom:6px; border:1px solid color-mix(in srgb, var(--rc) 45%, #2a2450);
     background:linear-gradient(90deg, color-mix(in srgb, var(--rc) 16%, #0b0a16), #0b0a16 70%)}
   .rdos img{image-rendering:pixelated; filter:drop-shadow(0 0 6px var(--rc))} .rdos b{color:var(--rc); font-size:13px} .rdos small{color:#8f89b8}
@@ -497,7 +506,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.22</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.23</p>
 </main>
 
 <footer class="dock">
@@ -524,6 +533,7 @@
       <button type="button" class="opt2" data-open="tree" aria-pressed="false" title="Antivírus" aria-label="Antivírus"><span>Antivírus</span></button>
       <button type="button" class="opt2" data-open="stages" aria-pressed="false" title="Fases" aria-label="Fases"><span>Fases</span></button>
       <button type="button" class="opt" data-open="comp" aria-pressed="false" title="Compilador" aria-label="Compilador"><span>Compilador</span></button>
+      <button type="button" class="opt" data-open="forge" aria-pressed="false" title="Oficina: recompilar e reforçar" aria-label="Oficina"><span>Oficina</span></button>
       <button type="button" class="opt" data-open="upload" aria-pressed="false" title="Central de Upload (Steam)" aria-label="Upload"><span>Upload</span></button>
       <button type="button" class="opt" data-open="codex" aria-pressed="false" title="Bestiário e conquistas" aria-label="Bestiário"><span>Bestiário</span></button>
       <button type="button" class="opt" data-open="rank" aria-pressed="false" title="Ranking e nível do operador" aria-label="Ranking"><span>Ranking</span></button>
@@ -2883,6 +2893,10 @@ function uiIcon(k) {
     case 'stages':   // bandeira fincada
       P.line(4, 1, 4, 18, M2); P.rect(3, 17, 5, 2, D);
       P.poly([[5, 2], [17, 5], [5, 10]], PK); P.poly([[5, 2], [11, 3.5], [5, 6]], '#ff8098'); P.set(4, 1, W); break;
+    case 'forge':   // chave inglesa sobre um chip, com seta de nível subindo
+      P.rect(2, 8, 11, 11, '#2a4a3a'); P.rect(3, 9, 9, 9, '#3f7a5a'); for (let i = 4; i < 12; i += 3) { P.set(i, 7, M2); P.set(i, 19, M2); P.set(1, i + 1, M2); P.set(13, i + 1, M2); }
+      P.line(4, 16, 11, 9, M2, 2); P.ell(12, 8, 2, 2, M2); P.set(12, 8, '#3f7a5a');
+      P.rect(15, 5, 3, 10, GR); P.poly([[13, 6], [20, 6], [16.5, 1]], GR); P.line(16, 4, 16, 13, '#d6ffe9'); break;
     case 'raid':   // crânio com chifres
       P.poly([[2, 1], [5, 6], [3, 7]], '#c02050'); P.poly([[18, 1], [15, 6], [17, 7]], '#c02050');
       P.ell(10, 9, 7, 6, PK); P.rect(5, 13, 10, 5, PK); P.ell(9, 7, 5, 4, '#ff6a9a');
@@ -3250,7 +3264,7 @@ const glob = k => (bonuses().g[k] || 0) / 100 + (SUP_G[k] ? pS()[SUP_G[k]] || 0 
 
 const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:{}, sc:{}, pt:{}},
   inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, tree:{}, def:0, autoUp:true, autoEq:true, autoAdv:true, autoComp:true, last:0,
-  tank:'aura2', gunner:'pulse', support:'pt', roster:{aura2:1, pulse:1, pt:1}, pity:{fw:{}, sc:{}, pt:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}, op:0, best:0, raids:{}, ver:{}, frag:0, buff:{}, toff:0,
+  tank:'aura2', gunner:'pulse', support:'pt', roster:{aura2:1, pulse:1, pt:1}, pity:{fw:{}, sc:{}, pt:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}, op:0, best:0, raids:{}, ref:{}, ver:{}, frag:0, buff:{}, toff:0,
   setores:0, fmtN:0, peak:0, ctr:{}, pres:{last:-1, n:0}, stat:{}, kc:{}, rw:{}, ach:{}, seenT:-1};
 let S = load();
 function load() {
@@ -3265,7 +3279,7 @@ function load() {
       if (!st.ipity) st.ipity = {p4:0, p5:0};
       if (!st.upl) st.upl = {slots:[0, 0, 0, 0], steam:[]};
       st.support = st.support || 'pt'; st.roster.pt = 1; if (!(st.support in st.roster)) st.support = 'pt';
-      st.op = st.op || 0; st.best = st.best || 0; st.raids = st.raids || {}; st.ver = st.ver || {}; st.frag = st.frag || 0; st.buff = st.buff || {}; st.toff = st.toff || 0;
+      st.ref = st.ref || {}; st.op = st.op || 0; st.best = st.best || 0; st.raids = st.raids || {}; st.ver = st.ver || {}; st.frag = st.frag || 0; st.buff = st.buff || {}; st.toff = st.toff || 0;
       for (const k of ['setores', 'fmtN', 'peak']) st[k] = st[k] || 0; delete st.season; for (const k of ['ctr', 'stat', 'kc', 'rw', 'ach']) st[k] = st[k] || {}; st.pres = st.pres || {last:-1, n:0}; if (st.seenT === undefined) st.seenT = -1;
       for (const id in OLD_TREE) if (st.tree[id]) { for (let l = 0; l < st.tree[id]; l++) st.def += Math.floor(OLD_TREE[id] * 1.6 ** l); delete st.tree[id]; }
       return st;
@@ -3817,7 +3831,7 @@ function gearStat(cls, key) {
   const G = gearOf(cls);
   for (const ty in G) {
     const it = G[ty]; if (!it) continue;
-    v += (itemStats(it)[key] || 0) * (key === 'atk' && cls === 'sc' && synergy(it) ? 1.5 : 1);
+    v += (itemStats(it)[key] || 0) * (key === 'atk' && cls === 'sc' && synergy(it) ? 1.5 : 1) * refMul(cls, ty);
   }
   return v;
 }
@@ -3831,6 +3845,77 @@ function setTxt(cls, set) {
 const aiTxt = it => it.ai ? `<span style="color:${AIS[it.ai].c}">${AIS[it.ai].n}</span>: ${bonusTxt(AIS[it.ai].k, aiVal(it))}${WEAR.has(AIS[it.ai].k) ? ' (quem usa)' : ''}<br><i class="hint">${AIS[it.ai].d}</i>` : '';
 const afTxt = it => (it.af || []).map(a => `<span class="af">${bonusTxt(a.k, a.v)}</span>`).join(' · ');
 const statTxt = it => Object.entries(itemStats(it)).map(([k, v]) => k === 'atk' || k === 'hp' ? `+${fmtNum(v * (k === 'atk' && it.cls === 'sc' && synergy(it) ? 1.5 : 1))} ${k === 'atk' ? 'ATK' : 'vida'}` : `+${+v.toFixed(1)}% ${k === 'vdmg' ? 'dano contra ' + VIR[it.vs] + ' (esquadrão)' : STATN[k]}`).join(' · ');
+// ---------- oficina ----------
+// Recompilar: itens T5 (Quântico) e T6 (Root) sobem pro nível da fase mais alta, pagando créditos e definições;
+// atributos e passivas ficam, só o nível sobe. Assim um Root de 50 fases atrás continua valendo a pena.
+// Reforço: cada vaga de equipamento tem um nível (+2% nos atributos do item que estiver nela). O reforço é da
+// vaga, então continua valendo quando o item é trocado. O limite sobe com a fase mais alta.
+const RECOMP_T = 4, REF_B = .02;
+const recompTo = () => S.maxStage + 1;
+const recompCost = it => { const gap = Math.max(0, recompTo() - it.lv), r = it.t >= 5; return {gap, cr:gap ? Math.round(rewardAt(recompTo() - 1) * 6 * RAR[it.t].m * (r ? 3 : 2)) : 0, df:Math.ceil(gap / 10) * (r ? 20 : 10)}; };
+const canRecomp = it => { const c = recompCost(it); return c.gap > 0 && S.data >= c.cr && S.def >= c.df; };
+function recompile(it, quiet) {
+  if (!it || it.k !== 'gear' || it.t < RECOMP_T || !canRecomp(it)) return false;
+  const c = recompCost(it), from = it.lv;
+  S.data -= c.cr; S.def -= c.df; it.lv = recompTo(); bonusCache = null;
+  if (!quiet) { say(`${gearTag(it)} recompilado: Nv${from} → Nv${it.lv}.`, true); SND.play('clear'); }
+  return true;
+}
+const refOf = (cls, ty) => ((S.ref[cls] || {})[ty]) || 0;
+const refMul = (cls, ty) => 1 + REF_B * refOf(cls, ty);
+const refCap = () => 5 + Math.floor(S.maxStage / 3);
+const refCost = n => Math.round(rewardAt(n * 3) * 12);   // custo pra ir de +n pra +n+1
+function reinforce(cls, ty, times) {
+  let k = 0;
+  while (k < times && refOf(cls, ty) < refCap() && S.data >= refCost(refOf(cls, ty))) { S.data -= refCost(refOf(cls, ty)); (S.ref[cls] || (S.ref[cls] = {}))[ty] = refOf(cls, ty) + 1; k++; }
+  return k;
+}
+// reforçar tudo: sempre compra o mais barato (a vaga mais atrasada), só onde tem item equipado
+function reinforceAll() {
+  let k = 0;
+  for (let guard = 0; guard < 5000; guard++) {
+    let best = null;
+    for (const cls of ['fw', 'sc', 'pt']) for (const ty of CLS_SLOTS[cls]) if (gearOf(cls)[ty] && refOf(cls, ty) < refCap() && (!best || refOf(cls, ty) < refOf(best[0], best[1]))) best = [cls, ty];
+    if (!best || !reinforce(best[0], best[1], 1)) break; k++;
+  }
+  return k;
+}
+let ofcTab = 'rc', ofcCls = 'fw';
+function forgeView() {
+  const tabs = `<div class="btabs"><button type="button" data-ofc="rc" aria-pressed="${ofcTab === 'rc'}">Recompilar T5/T6</button><button type="button" data-ofc="rf" aria-pressed="${ofcTab === 'rf'}">Reforço das vagas</button></div>`;
+  const coin = `<img src="${uiIcon('coin')}" width="10" height="10" alt="">`, defs = `<img src="${uiIcon('defs')}" width="10" height="10" alt="">`;
+  const main = (it, lv) => { const st = itemStats(lv ? {...it, lv} : it), k = st.atk && it.type === 'weapon' ? 'atk' : st.hp ? 'hp' : st.atk ? 'atk' : Object.keys(st)[0]; if (!k) return ''; const v = st[k];
+    return `${{atk:'ATQ', hp:'VIDA', spd:'VEL', red:'RED', vdmg:'VAC'}[k] || k} ${k === 'atk' || k === 'hp' ? fmtN(v) : v.toFixed(1) + '%'}`; };
+  if (ofcTab === 'rc') {
+    const eq = [], inv = [];
+    for (const cls of ['fw', 'sc', 'pt']) for (const ty of CLS_SLOTS[cls]) { const it = gearOf(cls)[ty]; if (it && it.t >= RECOMP_T) eq.push([it, `eq:${cls}:${ty}`]); }
+    S.inv.forEach((it, i) => { if (it && it.k === 'gear' && it.t >= RECOMP_T) inv.push([it, `inv:${i}`]); });
+    const rows = [...eq.map(x => [...x, true]), ...inv.map(x => [...x, false])].sort((a, b) => (a[0].lv - b[0].lv)).map(([it, ref, on]) => {
+      const c = recompCost(it), ok = canRecomp(it);
+      return `<div class="ofrow" style="--rc:${RAR[it.t].c}">
+        <img src="${itemIcon(it)}" width="28" height="28" alt="">
+        <div class="ofi"><b style="color:${RAR[it.t].c}">${it.name} ${tierTxt(it.t)}</b><small>${on ? 'equipado' : 'inventário'} · ${ITYPES[it.type].n} · ${heroOf(it.cls).def.name}</small>
+          <small>${c.gap ? `Nv${it.lv} → <b class="up">Nv${recompTo()}</b> · ${main(it)} → <b class="up">${main(it, recompTo())}</b>` : `Nv${it.lv} · <span class="up">atualizado</span>`}</small></div>
+        <div class="ofc">${c.gap ? `<span class="${S.data >= c.cr ? '' : 'dn'}">${coin} ${fmtNum(c.cr)}</span><span class="${S.def >= c.df ? '' : 'dn'}">${defs} ${fmtNum(c.df)}</span>` : ''}</div>
+        <button type="button" data-rcmp="${ref}" ${ok ? '' : 'disabled'}>${c.gap ? 'Recompilar' : 'OK'}</button></div>`;
+    }).join('');
+    return tabs + `<p class="hint">Itens <b style="color:${RAR[4].c}">T5 Quântico</b> e <b style="color:${RAR[5].c}">T6 Root</b> podem ser recompilados pro nível da sua fase mais alta (<b>Nv${recompTo()}</b>). Passivas e conjunto continuam iguais; só o nível sobe.</p>
+      ${rows ? `<div class="oflist">${rows}</div><div class="ract"><button type="button" data-rcmpall ${eq.concat(inv).some(([it]) => canRecomp(it)) ? '' : 'disabled'}>Recompilar tudo que der</button></div>` : '<p class="hint">Nenhum item T5 ou T6 ainda. Eles caem dos chefes das fases e dos Chefões.</p>'}`;
+  }
+  const ctabs = ['fw', 'sc', 'pt'].map(k => `<button type="button" data-ofcls="${k}" aria-pressed="${ofcCls === k}">${heroOf(k).def.name}</button>`).join('');
+  const cap = refCap(), rows = CLS_SLOTS[ofcCls].map(ty => {
+    const it = gearOf(ofcCls)[ty], n = refOf(ofcCls, ty), max = n >= cap, cost = refCost(n);
+    return `<div class="ofrow${it ? '' : ' empty'}" style="--rc:${it ? RAR[it.t].c : '#2a2450'}">
+      ${it ? `<img src="${itemIcon(it)}" width="28" height="28" alt="">` : '<span class="ofe"></span>'}
+      <div class="ofi"><b>${ITYPES[ty].n} <span class="ofn">+${n}</span></b><small>${it ? `${it.name} ${tierTxt(it.t)}` : 'vaga vazia (o reforço fica guardado)'}</small>
+        <small>bônus <b>+${Math.round(n * REF_B * 100)}%</b>${max ? ' · <span class="up">no limite</span>' : ` → <b class="up">+${Math.round((n + 1) * REF_B * 100)}%</b>`}</small></div>
+      <div class="ofc">${max ? '' : `<span class="${S.data >= cost ? '' : 'dn'}">${coin} ${fmtNum(cost)}</span>`}</div>
+      <div class="ofb"><button type="button" data-rf="${ofcCls}:${ty}:1" ${!max && S.data >= cost ? '' : 'disabled'}>+1</button><button type="button" data-rf="${ofcCls}:${ty}:10" ${!max && S.data >= cost ? '' : 'disabled'}>+10</button></div></div>`;
+  }).join('');
+  return tabs + `<p class="hint">Cada nível de reforço dá <b>+2%</b> nos atributos do item da vaga. O reforço é da vaga: trocar o item não perde nada. Limite atual <b>+${cap}</b> (sobe 1 a cada 3 fases da sua fase mais alta).</p>
+    <div class="btabs">${ctabs}</div><div class="oflist">${rows}</div>
+    <div class="ract"><button type="button" data-rfall>Reforçar tudo (o mais barato primeiro)</button></div>`;
+}
 const gearVal = it => rewardAt(it.lv - 1) * 6 * RAR[it.t].m;
 const chipVal = r => rewardAt(S.maxStage) * CHIPS[r].val * 3;
 // Pacotes vêm em duas pilhas por raridade: negociável e vinculada à conta (b = Comuns dos Chefões).
@@ -5082,7 +5167,7 @@ function equip(id) {
 // ---------- painéis ----------
 let stDiff = null;
 let openP = null, selInv = -1, colCls = 'fw', colSub = 'single', agSel = 'fw';
-const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt', cfg:'configurações', rank:'ranking de operadores', raid:'chefões · malwares reais', quest:'contratos e presença', codex:'bestiário e conquistas', odds:'probabilidades publicadas'};
+const PANELS = {agent:'agentes', col:'coleção', comp:'compilador', forge:'oficina', tree:'núcleo do antivírus', upload:'central de upload', gacha:'download de agentes', stages:'fases', log:'log do sistema', readme:'leia-me.txt', cfg:'configurações', rank:'ranking de operadores', raid:'chefões · malwares reais', quest:'contratos e presença', codex:'bestiário e conquistas', odds:'probabilidades publicadas'};
 const pct2 = x => (x * 100).toLocaleString('pt-BR', {maximumSignificantDigits: 3}) + '%';
 const pct = x => Math.round(x * 100) + '%';
 // Seletor de passivas do Root: escolhe N passivas diferentes, confirma uma vez e fica pra sempre.
@@ -5365,7 +5450,7 @@ function buyShop(id) {
   else if (id === 'bdef') S.buff.def = Math.max(nowMs(), S.buff.def || 0) + 3600e3;
   renderPanel(); save();
 }
-const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['raid', 'Chefões'], ['quest', 'Contratos'], ['codex', 'Bestiário'], ['rank', 'Ranking'], ['odds', 'Chances'], ['log', 'Log']];
+const NAV = [['agent', 'Agentes'], ['col', 'Coleção'], ['comp', 'Compilador'], ['forge', 'Oficina'], ['gacha', 'Download'], ['upload', 'Upload'], ['tree', 'Antivírus'], ['stages', 'Fases'], ['raid', 'Chefões'], ['quest', 'Contratos'], ['codex', 'Bestiário'], ['rank', 'Ranking'], ['odds', 'Chances'], ['log', 'Log']];
 
 const RENDER = {
   agent: () => agentTop() + invItems(`<b class="ivh">Inventário <small>${invUsed()}/${invCap()}</small></b>`) + `
@@ -5402,6 +5487,7 @@ const RENDER = {
   },
 
   comp: () => compView(),
+  forge: () => forgeView(),
 
   gacha: () => {
     if (gBanner === 'L' && !launch()) gBanner = 'fw';
@@ -5628,7 +5714,7 @@ $('#pLogo').src = treeIcon('core');
 const fitPanel = () => document.documentElement.style.setProperty('--dockH', document.querySelector('.dock').offsetHeight + 'px');
 addEventListener('resize', fitPanel); fitPanel();
 // abas do HUD nunca encolhem: se não couberem, as menos usadas somem daqui (continuam na coluna do painel)
-const TAB_DROP = ['log', 'rank', 'codex', 'upload', 'comp', 'stages', 'tree', 'quest', 'raid', 'gacha'];
+const TAB_DROP = ['log', 'rank', 'codex', 'upload', 'forge', 'comp', 'stages', 'tree', 'quest', 'raid', 'gacha'];
 function fitTabs() {
   const box = document.querySelector('.tabs'); if (!box) return;
   box.querySelectorAll('.fit-off').forEach(b => b.classList.remove('fit-off'));
@@ -5689,6 +5775,12 @@ $('#pBody').addEventListener('click', e => {
   else if (d.day !== undefined) { S.toff += DAY; ctrSync(); renderPanel(); save(); }
   else if (d.week !== undefined) { S.toff += 7 * DAY; ctrSync(); renderPanel(); save(); }
   else if (d.ach) claimAch(d.ach);
+  else if (d.ofc) { ofcTab = d.ofc; renderPanel(); }
+  else if (d.ofcls) { ofcCls = d.ofcls; renderPanel(); }
+  else if (d.rcmp) { const [w, a, c] = d.rcmp.split(':'), it = w === 'eq' ? gearOf(a)[c] : S.inv[+a]; if (recompile(it)) { renderPanel(); renderHud(); save(); } }
+  else if (d.rcmpall !== undefined) { let n = 0; for (const cls of ['fw', 'sc', 'pt']) for (const ty of CLS_SLOTS[cls]) if (recompile(gearOf(cls)[ty], true)) n++; for (const it of S.inv) if (recompile(it, true)) n++; if (n) { say(`${n} ${n > 1 ? 'itens recompilados' : 'item recompilado'} pro Nv${recompTo()}.`, true); SND.play('clear'); } renderPanel(); renderHud(); save(); }
+  else if (d.rf) { const [c, ty, n] = d.rf.split(':'); if (reinforce(c, ty, +n)) { SND.play('ui'); renderPanel(); renderHud(); save(); } }
+  else if (d.rfall !== undefined) { const n = reinforceAll(); if (n) say(`Reforço: +${n} ${n > 1 ? 'níveis distribuídos' : 'nível'} nas vagas.`, true); renderPanel(); renderHud(); save(); }
   else if (d.cdx) { codexTab = d.cdx; renderPanel(); }
   else if (d.raid) raidPickOpen(d.raid);
   else if (d.rtm) { const [k, id] = d.rtm.split(':'); if (raidPick && S.roster[id] && raidPick.team[k] !== id) { raidPick.prev = teamPow(raidPick.team); raidPick.team[k] = id; raidPick.anim = k; renderPanel(); raidPick.anim = null; } }

@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.23: Oficina (recompilar T5/T6 e reforço das vagas)
+
+- Nova aba **Oficina** (menu lateral e barra).
+- **Recompilar T5/T6:** itens Quântico (T5) e Root (T6), equipados ou no inventário, sobem para o nível da fase mais alta. Passivas e conjunto continuam; só o nível sobe. Custa créditos e definições (Root custa mais). Tem "Recompilar tudo que der". Um Root do Nv90 volta a valer mais que um roxo do Nv200.
+- **Reforço das vagas:** cada vaga de equipamento (capacete do tanque, arma do ataque etc.) tem um nível; cada +1 dá +2% nos atributos do item que estiver nela. O reforço é da vaga: trocar o item não perde nada. Limite = 5 + fase mais alta ÷ 3. Botões +1, +10 e "Reforçar tudo" (sempre o mais barato primeiro).
+
 ## v1.22: preparação da luta contra o Chefão
 
 - **Dossiê do chefão:** ícone, ano, o que ele faz na luta (golpeia o tanque, marca áreas, enfurece no fim) e o prêmio.
