@@ -11,7 +11,7 @@
 
 Se uma animação vier com quadros muito diferentes entre si, gere de novo pedindo só 2 ou 3 quadros por vez.
 
-Retratos e animações já prontos (não refazer): todos os tanques, SCANNER, TRACEROUTE, SHREDDER, PENTEST, SPECTRE, SNIFFER, CHECKSUM, DEFRAG. Todos prontos. Refazer: FORMAT-C (seção logo abaixo).
+Retratos e animações já prontos (não refazer): todos os tanques, SCANNER, TRACEROUTE, SHREDDER, PENTEST, SPECTRE, SNIFFER, CHECKSUM, DEFRAG. Refazer: FORMAT-C. Novo: HEURISTIC (seções logo abaixo).
 
 Retratos já prontos (lista antiga): FIREWALL, SANDBOX-II, QUARENTENA, RESTORE-9, KILLSWITCH-7.
 
@@ -43,6 +43,32 @@ Pixel art sprite sheet of ONE character, 5 frames in a single horizontal row, ev
 **Transformação e torreta (5 quadros — vira a "defesa" do jogo)**
 ```
 Pixel art sprite sheet of ONE character, 5 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: transforming into a stationary turret and firing, 5 frames: 1 robot guard stance, 2 legs folding down and armor plates opening, 3 fully deployed sentry turret mode anchored to the ground with a large rotary gatling gun on top and a front armor plate, 4 turret firing a heavy burst with a big amber muzzle flash and spent casings, 5 still in turret mode, barrels spinning down. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
+```
+
+---
+
+## ⚠ HEURISTIC — NOVO (pendente)
+
+Rastreador 4★ (entre SCANNER e TRACEROUTE). No jogo está com arte provisória desenhada por código.
+
+**Retrato**
+```
+High-detail pixel art character portrait for a video game, bust shot (head, neck and upper shoulders), three-quarter view facing right, top of the head near the top of the frame, shoulders cropped by the bottom edge. A calm, focused analyst operative with short silver-white hair and warm tan skin, a dark teal half-mask covering the lower face, a slim teal-and-white tactical suit with light armor plates, a long marking sniper rifle with a cyan scope, a small hovering analyzer drone with a cyan eye beside the shoulder. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background. Rounded square frame with a thick dark gray border and a thin black inner line. Square 1024x1024. No text, no logo, no watermark. Avoid: full body, background scenery, gradient background, blurry, painterly, 3D render, realistic.
+```
+
+**Corpo inteiro**
+```
+Pixel art game sprite of a single character, full body from head to feet, side view facing right, combat-ready stance aiming the long rifle to the right. A calm, focused analyst operative with short silver-white hair and warm tan skin, a dark teal half-mask covering the lower face, a slim teal-and-white tactical suit with light armor plates, a long marking sniper rifle with a cyan scope, a small hovering analyzer drone with a cyan eye beside the shoulder. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Strong silhouette that still reads at 70 pixels tall. Centered with empty margin around it. Plain solid white background, no floor, no shadow, no frame. 1024x1024. No text, no logo, no watermark. Avoid: cropped feet, cropped weapon, facing left, front view, background, floor, shadow, 3D render, realistic.
+```
+
+**Movimentação (6 quadros)**
+```
+Pixel art sprite sheet of ONE character, 6 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: a looping walk cycle to the right, 6 frames, rifle held low and ready, drone floating along. A calm, focused analyst operative with short silver-white hair and warm tan skin, a dark teal half-mask covering the lower face, a slim teal-and-white tactical suit with light armor plates, a long marking sniper rifle with a cyan scope, a small hovering analyzer drone with a cyan eye beside the shoulder. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
+```
+
+**Ataque (5 quadros)**
+```
+Pixel art sprite sheet of ONE character, 5 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: a precision shot, 5 frames: 1 guard stance, 2 raise the rifle and the drone projects a cyan targeting line, 3 fire with a bright cyan muzzle flash, 4 recoil, 5 back to guard stance. A calm, focused analyst operative with short silver-white hair and warm tan skin, a dark teal half-mask covering the lower face, a slim teal-and-white tactical suit with light armor plates, a long marking sniper rifle with a cyan scope, a small hovering analyzer drone with a cyan eye beside the shoulder. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
 ```
 
 ---

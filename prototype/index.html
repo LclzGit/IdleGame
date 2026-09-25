@@ -508,7 +508,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.26.3</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.27</p>
 </main>
 
 <footer class="dock">
@@ -966,9 +966,12 @@ const GSTAR = {3:{hp:55, atk:10}, 4:{hp:65, atk:13}, 5:{hp:75, atk:17}, 6:{hp:90
 const GUNNERS = [
   {id:'scanner', name:'SCANNER', stars:3, role:'railgun e cachecol',
     passive:{selfAtk:.25}, ptxt:'Railgun: causa +25% de dano.'},
-  {id:'pulse', name:'TRACEROUTE', stars:4, role:'rifle de precisão',
-    passive:{crit:.4, selfAtk:.15}, ptxt:'Tiro de precisão: 40% de chance de crítico (dano ×2) e +15% de dano.',
+  {id:'pulse', name:'TRACEROUTE', stars:5, role:'rifle de precisão',
+    passive:{crit:.5, selfAtk:.35}, ptxt:'Tiro de precisão: 50% de chance de crítico (dano ×2) e +35% de dano.',
     art:{w:30, base:'#ff8a3a', line:'#0e0f12', cloth:1, draw:soldier({A:'#3a3d44', A2:'#24262c', B:'#55585f', acc:'#ff8a3a', weapon:'sniper', pack:'#2e3036', metal:'#23252a'})}},
+  {id:'heuristic', name:'HEURISTIC', stars:4, role:'fuzil de marcação e drone analisador',
+    passive:{selfAtk:.25, crit:.25}, ptxt:'Análise heurística: +25% de dano e 25% de chance de crítico (dano ×2).',
+    art:{w:30, base:'#5ce1e6', line:'#0a1014', cloth:1, draw:soldier({A:'#1e3a44', A2:'#12262e', B:'#d8e6ea', acc:'#5ce1e6', hair:'#e8eef0', skin:'#c89878', mask:'#12262e', weapon:'sniper', drone:'#2a4a54', pack:'#1e3a44', metal:'#1a2a30'})}},
   {id:'blade', name:'SHREDDER', stars:3, role:'rifle com baioneta',
     passive:{haste:.3}, ptxt:'Escaramuça: atira 30% mais rápido.',
     art:{w:30, base:'#6ee7a8', line:'#0c140f', cloth:1, draw:soldier({A:'#3e5a44', A2:'#27392b', B:'#7c9a82', weapon:'rifle', bayonet:'#d8e2dc', metal:'#26302a'})}},
@@ -982,8 +985,8 @@ const GUNNERS = [
     passive:{pierce:.6, selfAtk:.3}, ptxt:'Virote perfurante: atravessa e acerta o próximo com 60% do dano; +30% de dano.',
     shot:{c:'#b77dff'},
     art:{w:30, base:'#b77dff', line:'#0d0809', cloth:1, draw:soldier({A:'#2a1e24', A2:'#1a1216', B:'#3e2830', acc:'#e0304a', weapon:'crossbow', metal:'#231a1e'})}},
-  {id:'archer', name:'CHECKSUM', stars:5, role:'arco tático e aljava',
-    passive:{multishot:2, haste:.1}, ptxt:'Chuva de flechas: dispara 3 flechas (as extras com 50% do dano) e atira 10% mais rápido.',
+  {id:'archer', name:'CHECKSUM', stars:6, role:'arco tático e aljava',
+    passive:{multishot:2, haste:.2, selfAtk:.4, crit:.2}, ptxt:'Chuva de flechas: dispara 3 flechas (as extras com 50% do dano), atira 20% mais rápido, +40% de dano e 20% de chance de crítico.',
     shot:{style:'arrow'},
     art:{w:30, base:'#ffb454', line:'#121420', cloth:2, draw:soldier({A:'#2b3048', A2:'#1c2033', B:'#dfe3ec', acc:'#e0a040', hair:'#e8e8f0', mask:'#2a2a30', scarf:'#d8323a', quiver:'#5a4030', weapon:'bow', metal:'#3a3f5c'})}},
   {id:'lasert', name:'DEFRAG', stars:4, role:'canhão laser e esteiras',
@@ -2178,7 +2181,11 @@ Frasco: a cada 5 s cura o esquadrão inteiro (10%/s por 4 s) e envenena o vírus
 Nanobots: a melhor cura do jogo (bem mais forte e mais cedo que os outros suportes); cura o esquadrão em 2%/s e dá +20% de HP.|Nanobots: the best healing in the game (much stronger and earlier than other supports); heals the squad 2%/s and gives +20% HP.|Nanobots: la mejor curación del juego (mucho más fuerte y antes que los otros soportes); cura al escuadrón 2%/s y da +20% de vida.
 Canhão laser: o feixe atravessa a fila e acerta todos (70% nos de trás); +45% de dano e atira 10% mais rápido.|Laser cannon: the beam pierces the whole line (70% on those behind); +45% damage and fires 10% faster.|Cañón láser: el haz atraviesa la fila y golpea a todos (70% a los de atrás); +45% de daño y dispara 10% más rápido.
 Virote perfurante: atravessa e acerta o próximo com 60% do dano; +30% de dano.|Piercing bolt: passes through and hits the next enemy for 60%; +30% damage.|Virote perforante: atraviesa y golpea al siguiente con 60% del daño; +30% de daño.
-Tiro de precisão: 40% de chance de crítico (dano ×2) e +15% de dano.|Precision shot: 40% crit chance (×2 damage) and +15% damage.|Tiro de precisión: 40% de probabilidad de crítico (daño ×2) y +15% de daño.
+Tiro de precisão: 50% de chance de crítico (dano ×2) e +35% de dano.|Precision shot: 50% crit chance (×2 damage) and +35% damage.|Tiro de precisión: 50% de probabilidad de crítico (daño ×2) y +35% de daño.
+Chuva de flechas: dispara 3 flechas (as extras com 50% do dano), atira 20% mais rápido, +40% de dano e 20% de chance de crítico.|Arrow rain: fires 3 arrows (extras at 50% damage), shoots 20% faster, +40% damage and 20% crit chance.|Lluvia de flechas: dispara 3 flechas (las extra con 50% del daño), dispara 20% más rápido, +40% de daño y 20% de probabilidad de crítico.
+Análise heurística: +25% de dano e 25% de chance de crítico (dano ×2).|Heuristic analysis: +25% damage and 25% crit chance (×2 damage).|Análisis heurístico: +25% de daño y 25% de probabilidad de crítico (daño ×2).
+Assinatura aprendida: ataca 15% mais rápido.|Learned signature: attacks 15% faster.|Firma aprendida: ataca 15% más rápido.
+fuzil de marcação e drone analisador|marking rifle and analyzer drone|fusil de marcado y dron analizador
 Núcleo de fusão: devolve 100% do dano recebido, esquadrão causa +40% de dano e ganha +20% de HP; recebe 30% menos dano.|Fusion core: reflects 100% of damage taken, squad deals +40% damage and gains +20% HP; takes 30% less damage.|Núcleo de fusión: devuelve el 100% del daño recibido, el escuadrón causa +40% de daño y gana +20% de vida; recibe 30% menos daño.
 Echo-drone: regenera 5% do HP por segundo, cura o esquadrão em 2,5%/s e recebe 30% menos dano.|Echo drone: regenerates 5% HP per second, heals the squad 2.5%/s and takes 30% less damage.|Dron eco: regenera 5% de vida por segundo, cura al escuadrón 2,5%/s y recibe 30% menos daño.
 Escudo-torre: recebe 35% menos dano e o esquadrão ganha +15% de HP.|Tower shield: takes 35% less damage and the squad gains +15% HP.|Escudo torre: recibe 35% menos daño y el escuadrón gana +15% de vida.
@@ -3063,7 +3070,7 @@ const P2 = {   // segunda passiva (v2.0)
   firewall:{teamAtk:.08, t:'Firewall 2.0: esquadrão causa +8% de dano.'}, aura2:{regen:.01, t:'Auto-reparo: regenera 1% do HP por segundo.'},
   sentinel:{teamHp:.1, t:'Perímetro: esquadrão ganha +10% de HP.'}, valkyrie:{dmgRed:.1, t:'Blindagem ativa: recebe 10% menos dano.'},
   bulwark7:{teamAtk:.12, t:'Sobrecarga: esquadrão causa +12% de dano.'}, x1:{reflect:.2, t:'Contra-ataque: devolve 20% do dano recebido.'},
-  scanner:{crit:.15, t:'Varredura profunda: 15% de chance de crítico.'}, pulse:{pierce:.3, t:'Bala perfurante: atravessa e acerta o próximo com 30%.'},
+  scanner:{crit:.15, t:'Varredura profunda: 15% de chance de crítico.'}, heuristic:{haste:.15, t:'Assinatura aprendida: ataca 15% mais rápido.'}, pulse:{pierce:.3, t:'Bala perfurante: atravessa e acerta o próximo com 30%.'},
   blade:{selfAtk:.2, t:'Fio duplo: causa +20% de dano.'}, infiltrator:{haste:.15, t:'Acesso rápido: ataca 15% mais rápido.'},
   ghost:{teamAtk:.1, t:'Marcação: esquadrão causa +10% de dano.'}, nighthawk:{splash:.25, t:'Pacote em rajada: 25% do dano em todos.'},
   archer:{pierce:.5, t:'Hash perfurante: flechas atravessam com 50%.'}, lasert:{haste:.15, t:'Desfragmentação contínua: ataca 15% mais rápido.'},
@@ -3145,7 +3152,7 @@ const SUBS = {
   area:   {n:'Varredor', pl:'Varredores', c:'#ff8a3a', k:'área', d:'Área: cada tiro respinga 30% do dano em todos os vírus da tela. Brilha nas Hordas.'},
   boss:   {n:'Caça-chefes', pl:'Caça-chefes', c:'#ff3d7f', k:'chefes', d:'Chefes: +80% de dano contra chefes e +40% contra blindados. Brilha no Chefão.'},
 };
-const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', pulse:'single', scanner:'single', ghost:'boss', infiltrator:'boss', blade:'boss'};
+const SUBOF = {lasert:'area', tankm1:'area', nighthawk:'area', archer:'single', pulse:'single', heuristic:'single', scanner:'single', ghost:'boss', infiltrator:'boss', blade:'boss'};
 GUNNERS.forEach(g => g.sub = SUBOF[g.id]);
 TANKS.slice(1).forEach(x => x.art.kind = 'mech');
 charOf('tankm1').art.kind = 'veh';
@@ -5433,7 +5440,7 @@ function oddsView() {
   return `<p class="hint">Estas são as chances reais do jogo.</p>
     <p class="sub">Pacotes de download</p>
     <table class="rates"><tr><td></td><td>fase</td><td>chefe</td><td class="st6">★6</td><td>★5</td><td>★4</td></tr>${packs}</table>
-    <p class="hint">★6 (KILLSWITCH-7 e PATCHER) só sai do pacote Lendário. No Download de lançamento, metade dos resultados da raridade do agente novo é dele.</p>
+    <p class="hint">★6 (KILLSWITCH-7, CHECKSUM e PATCHER) só sai do pacote Lendário. No Download de lançamento, metade dos resultados da raridade do agente novo é dele.</p>
     <p class="sub">Itens <small>${pct2(GEAR_N)} por vírus · ${pct2(GEAR_B)} em fase de chefe</small></p>
     <table class="rates"><tr><td>Tier</td><td>fase</td><td>chefe</td></tr>${tiers}</table>
     <p class="hint">T3 ou melhor fica 25% mais comum a cada dificuldade, e a sorte soma até +50%. T6 só cai dos Chefões.</p>

@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.27: HEURISTIC e Rastreadores novos
+
+- **HEURISTIC (novo, Rastreador 4★):** +25% de dano e 25% de crítico; v2.0 ataca 15% mais rápido. Arte provisória desenhada por código; prompts em `art/prompts-arte.md`.
+- **TRACEROUTE → 5★** (50% de crítico, +35% de dano). **CHECKSUM → 6★** (3 flechas, +20% de velocidade, +40% de dano, 20% de crítico); agora sai só no pacote Lendário, como os outros ★6.
+- Rastreadores: SCANNER 3★ · HEURISTIC 4★ · TRACEROUTE 5★ · CHECKSUM 6★. Dano contra chefe no simulador: 79 mil · 92 mil · 110 mil · 192 mil.
+
 ## v1.26.3: coleção consertada
 
 - Repetidos que passaram do necessário depois da troca de estrelas (ex.: TRACEROUTE 31/4) viram versão nova ao abrir o jogo; a barra de versão não passa mais de 100% (ela vazava do cartão e criava rolagem horizontal).
