@@ -38,6 +38,18 @@ const H = 72;
       for (let x = 0; x < W; x++) st.push(x, (Hh - 1) * W + x); for (let y = 0; y < Hh; y++) st.push(y * W, y * W + W - 1);
       while (st.length) { const k = st.pop(); if (seen[k]) continue; seen[k] = 1; if (!bg(k * 4)) continue; a[k * 4 + 3] = 0; const x = k % W, y = (k / W) | 0;
         if (x > 0) st.push(k - 1); if (x < W - 1) st.push(k + 1); if (y > 0) st.push(k - W); if (y < Hh - 1) st.push(k + W); }
+      // 1b) escudos de energia, brilhos e clarões são translúcidos no desenho original: áreas claras ligadas ao fundo
+      //     (sem contorno preto no meio) viram transparência proporcional ("cor pra alfa" contra o branco).
+      //     O que fica dentro do contorno do personagem (armadura clara) não é tocado.
+      { const light = i => (a[i] + a[i + 1] + a[i + 2]) / 3 > 160 && Math.min(a[i], a[i + 1], a[i + 2]) > 95, vis = new Uint8Array(W * Hh), q = [];
+        for (let k = 0; k < W * Hh; k++) if (!a[k * 4 + 3]) { const x = k % W, y = (k / W) | 0;
+          for (const n of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < Hh - 1 ? k + W : -1]) if (n >= 0 && a[n * 4 + 3] && !vis[n] && light(n * 4)) { vis[n] = 1; q.push(n); } }
+        while (q.length) { const k = q.pop(), x = k % W, y = (k / W) | 0;
+          for (const n of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < Hh - 1 ? k + W : -1]) if (n >= 0 && a[n * 4 + 3] && !vis[n] && light(n * 4)) { vis[n] = 1; q.push(n); } }
+        for (let k = 0; k < W * Hh; k++) if (vis[k]) { const i = k * 4, al = Math.max(255 - a[i], 255 - a[i + 1], 255 - a[i + 2]) / 255;
+          if (al < .06) { a[i + 3] = 0; continue; }
+          for (let c = 0; c < 3; c++) a[i + c] = Math.max(0, Math.round(255 - (255 - a[i + c]) / al));
+          a[i + 3] = Math.round(255 * Math.min(1, al * 1.15)); } }
       // bolsões de branco presos (entre braço e corpo), só se forem grandes
       { const vis = new Uint8Array(W * Hh);
         for (let k = 0; k < W * Hh; k++) { if (vis[k] || !a[k * 4 + 3] || !bg(k * 4)) continue; const q = [k], comp = []; vis[k] = 1;

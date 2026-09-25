@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.15.1: SANDBOX-II animado
+
+- SANDBOX-II (tanque inicial) com a arte nova do autor: guarda, tiro em sequência, bolha de energia laranja com vírus encostando (atira de dentro dela) e volta à guarda. Caminhada e corpo inteiro importados.
+- `tools/import-anim.cjs` agora deixa escudos de energia, brilhos e clarões translúcidos (áreas claras ligadas ao fundo viram transparência proporcional; o que está dentro do contorno do personagem não muda). FIREWALL reimportado com o escudo hexagonal translúcido.
+- `tools/battle-gif.cjs <id>`: GIF de um tanque em batalha num cenário controlado (guarda → escudo → volta), pra conferir as animações (precisa de `npm i gifenc pngjs`).
+
 ## v1.15: FIREWALL animado
 
 - FIREWALL ganhou sprites e animações a partir da arte gerada pelo autor (`art/sprites/firewall/`):
