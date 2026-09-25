@@ -23,13 +23,19 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.26.2: menus consertados e SPECTRE 5★
+
+- **Menus quebrados no artifact:** o arquivo publicado não tinha `<!doctype html>`, então o navegador abria em modo de compatibilidade antigo (tabelas com letra gigante, espaçamentos diferentes). O build agora gera o mesmo arquivo, com doctype, pro artifact e pro repositório — os testes passam a olhar exatamente o que é publicado.
+- **Coleção:** texto da passiva nos cartões limitado a 4 linhas (o texto inteiro aparece ao passar o mouse); cartões mais baixos.
+- **SPECTRE → 5★** (Caça-chefes: SHREDDER 3★, PENTEST 4★, SPECTRE 5★). Passiva: 50% de crítico com dano ×3. No teste contra chefe, passa o CHECKSUM (que continua melhor fora dos chefes).
+
 ## v1.26.1: ★6 mais raro
 
 - Chance de ★6 no pacote Lendário: 0,6% → **0,3%** (~330 pacotes Lendários por ★6, cerca de 660 h de jogo em média). Sem garantia (pity) pra ★6, de propósito.
 
 ## v1.26: novas estrelas e agentes ★6
 
-- **Estrelas novas.** Tanques: FIREWALL 3★, SANDBOX-II 4★, KERNELGUARD-X1 4★, QUARENTENA 5★, RESTORE-9 5★, KILLSWITCH-7 **6★**. Rastreadores: SCANNER 3★, TRACEROUTE 4★, CHECKSUM 5★. Varredores: SNIFFER 3★, DEFRAG 4★, FORMAT-C 5★. Caça-chefes: SHREDDER 3★, PENTEST 4★, SPECTRE 4★. Suportes: PATCHER **6★** (demais iguais).
+- **Estrelas novas.** Tanques: FIREWALL 3★, SANDBOX-II 4★, KERNELGUARD-X1 4★, QUARENTENA 5★, RESTORE-9 5★, KILLSWITCH-7 **6★**. Rastreadores: SCANNER 3★, TRACEROUTE 4★, CHECKSUM 5★. Varredores: SNIFFER 3★, DEFRAG 4★, FORMAT-C 5★. Caça-chefes: SHREDDER 3★, PENTEST 4★, SPECTRE 5★. Suportes: PATCHER **6★** (demais iguais).
 - **★6:** atributos próprios (acima dos ★5), cor vermelha com brilho. Só saem do pacote **Lendário** (0,3% por download, abaixo do ★5 com 10%); classe sem ★6 (ataque) vira ★5. Aparece na tabela de probabilidades.
 - **KILLSWITCH-7 ★6:** devolve 100% do dano, +40% de dano e +20% de HP pro esquadrão, -30% de dano recebido. No teste, aguenta mais que qualquer ★5 e dá ~2,5× o dano do time.
 - **PATCHER ★6:** a cura mais forte do jogo, cura o esquadrão 2%/s e +20% de HP. Única que segura a luta toda no teste mais pesado.

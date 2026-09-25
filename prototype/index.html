@@ -318,6 +318,7 @@
   .chip div{display:flex; gap:4px}
   .pity{margin:8px 0 4px; color:var(--mute); font-size:11px}
   .res,.col{display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:5px}
+  .col{grid-template-columns:repeat(auto-fill, minmax(104px, 1fr))}
   .card{display:grid; justify-items:center; align-content:start; gap:2px; padding:6px 4px; background:#0b0a16; border:1px solid var(--line); text-align:center; font-size:10px; line-height:1.3}
   .card img{image-rendering:pixelated}
   img.bust{border:1px solid var(--line); background:#07060f; image-rendering:auto}
@@ -374,7 +375,8 @@
   .rres{padding:6px 8px; margin-bottom:6px; font-size:11px; border:1px solid var(--line)}
   .rres.ok{border-color:var(--green); background:#0d2018} .rres.bad{border-color:var(--pink); background:#200d16}
   .card .nm{color:var(--text); font-weight:600}
-  .card .ps{color:var(--mute)}
+  .card .ps{color:var(--mute); display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden}
+  .card .vbox small.off,.card .vbox small.on{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
   .card button{width:100%; padding:2px 4px; box-shadow:none; margin-top:3px}
   .card.lock img{filter:brightness(0); opacity:.5}
   .card.on{outline:2px solid var(--amber); outline-offset:-2px}
@@ -506,7 +508,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.26.1</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.26.2</p>
 </main>
 
 <footer class="dock">
@@ -973,8 +975,8 @@ const GUNNERS = [
   {id:'infiltrator', name:'PENTEST', stars:4, role:'rifle com mira e gancho',
     passive:{teamAtk:.2, selfAtk:.2}, ptxt:'Gancho e marcação: esquadrão causa +20% de dano e ele causa mais +20%.',
     art:{w:30, base:'#5ce1e6', line:'#101214', cloth:1, draw:soldier({A:'#2b2f33', A2:'#1c1f22', B:'#e3dcc4', acc:'#3fae6a', weapon:'rifle', scope:true, pack:'#3a4a3a', boot:'#cfc8b0', metal:'#30353a'})}},
-  {id:'ghost', name:'SPECTRE', stars:4, role:'sniper e pistola',
-    passive:{crit:.4, critX:2.5}, ptxt:'Operação fantasma: 40% de chance de crítico (dano ×2,5).',
+  {id:'ghost', name:'SPECTRE', stars:5, role:'sniper e pistola',
+    passive:{crit:.5, critX:3}, ptxt:'Operação fantasma: 50% de chance de crítico (dano ×3).',
     art:{w:30, base:'#5ce1e6', line:'#0b0d14', cloth:1, draw:soldier({A:'#262c3e', A2:'#181c28', B:'#3a4258', acc:'#ff8a3a', crest:'#e8e8f0', weapon:'sniper', metal:'#1f2330'})}},
   {id:'nighthawk', name:'SNIFFER', stars:3, role:'besta de energia',
     passive:{pierce:.6, selfAtk:.3}, ptxt:'Virote perfurante: atravessa e acerta o próximo com 60% do dano; +30% de dano.',
@@ -2185,7 +2187,7 @@ Escudo hexagonal: recebe 15% menos dano e regenera 1% do HP por segundo.|Hex shi
 Railgun: causa +25% de dano.|Railgun: deals +25% damage.|Railgun: causa +25% de daño.
 Escaramuça: atira 30% mais rápido.|Skirmish: fires 30% faster.|Escaramuza: dispara 30% más rápido.
 Gancho e marcação: esquadrão causa +20% de dano e ele causa mais +20%.|Grapple and mark: squad deals +20% damage and he deals another +20%.|Gancho y marca: el escuadrón causa +20% de daño y él causa otro +20%.
-Operação fantasma: 40% de chance de crítico (dano ×2,5).|Ghost op: 40% crit chance (×2.5 damage).|Operación fantasma: 40% de probabilidad de crítico (daño ×2,5).
+Operação fantasma: 50% de chance de crítico (dano ×3).|Ghost op: 50% crit chance (×3 damage).|Operación fantasma: 50% de probabilidad de crítico (daño ×3).
 Artilharia: cada projétil explode e acerta todos com 50% do dano; +75% de dano. A cada 5 disparos chama um ataque orbital (×3 em todos).|Artillery: every shell explodes and hits all enemies for 50%; +75% damage. Every 5 shots calls an orbital strike (×3 on all).|Artillería: cada proyectil explota y golpea a todos con 50% del daño; +75% de daño. Cada 5 disparos llama un ataque orbital (×3 a todos).
 Remendo: a cada 4 s dá ao tanque uma barreira de 40% da vida dele.|Patch: every 4 s gives the tank a barrier worth 40% of his HP.|Parche: cada 4 s da al tanque una barrera del 40% de su vida.
 Chamar alvo: esquadrão ataca 18% mais rápido (30% contra chefes).|Call target: squad attacks 18% faster (30% against bosses).|Marcar objetivo: el escuadrón ataca 18% más rápido (30% contra jefes).
