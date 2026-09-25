@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.14.2: retratos novos dos tanques
+
+- Retratos novos: FIREWALL (primeiro retrato dele), KILLSWITCH-7, QUARENTENA e RESTORE-9.
+- Tratamento: moldura recortada, fundo branco apagado (flood fill a partir das bordas, o contorno do desenho segura o corte) e fundo padrão dos cartões do jogo na cor do agente, 160×160 webp.
+- Retratos antigos guardados em `art/retratos/antigos/`. Um retrato ainda sem dono (armadura cinza com linhas laranja) está pronto em `art/retratos/sem-dono/18.webp`.
+- `tools/portrait-import.cjs` faz esse tratamento em imagens novas.
+
 ## v1.14.1: menus do mesmo tamanho e HUD sem texto vazando
 
 - Todos os menus abrem com o tamanho do painel de Agentes (a árvore do antivírus não abre mais larga; o mapa ocupa a altura toda e o resumo fica ao lado).
