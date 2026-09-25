@@ -11,7 +11,7 @@
 
 Se uma animação vier com quadros muito diferentes entre si, gere de novo pedindo só 2 ou 3 quadros por vez.
 
-Retratos e animações já prontos (não refazer): todos os tanques, SCANNER, TRACEROUTE, SHREDDER, PENTEST, SPECTRE, SNIFFER, CHECKSUM, DEFRAG. Falta: PATCHER. Refazer: FORMAT-C (seção logo abaixo).
+Retratos e animações já prontos (não refazer): todos os tanques, SCANNER, TRACEROUTE, SHREDDER, PENTEST, SPECTRE, SNIFFER, CHECKSUM, DEFRAG. Todos prontos. Refazer: FORMAT-C (seção logo abaixo).
 
 Retratos já prontos (lista antiga): FIREWALL, SANDBOX-II, QUARENTENA, RESTORE-9, KILLSWITCH-7.
 

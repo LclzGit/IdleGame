@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.17: PATCHER — elenco inteiro com arte nova
+
+- PATCHER (suporte): retrato novo e animações da arte do autor. Guarda com o cajado; **cura** um aliado ferido com a folha de cura (ergue o cajado, o orbe brilha, solta partículas); **ataca** com o pulso de apoio (finca o cajado e solta um anel de energia).
+- Com isso todos os 16 personagens têm retrato e animação novos (FORMAT-C provisório, redesenho anotado).
+- `tools/import-anim.cjs`: opções `keepPockets` (armadura branca com brilhos) e `strongGlow` (magia clara mais opaca no fundo escuro); folhas de ataque de qualquer tamanho.
+
 ## v1.16.9: FORMAT-C (provisório)
 
 - FORMAT-C com a arte enviada, **provisória**: o autor quer refazer num estilo de robô que se transforma em torreta (andador → torreta com metralhadora giratória). Prompts novos no topo de `art/prompts-arte.md`; a transformação entra como a animação de "defesa" quando os vírus encostarem.
