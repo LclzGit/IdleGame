@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.6: SNIFFER
+
+- SNIFFER: retrato novo e animações da arte do autor: guarda com a besta de energia, virote roxo com clarão, recuo com fumaça e volta à guarda.
+- `tools/import-anim.cjs`: tamanho máximo de vão branco apagado agora é proporcional ao tamanho da imagem.
+
 ## v1.16.5: SPECTRE
 
 - SPECTRE: retrato novo e animações da arte do autor: guarda com o sniper, disparo com clarão ciano e rastro laranja, recuo com fumaça e volta à guarda.

@@ -69,7 +69,7 @@ const H = 72;
             for (const n of [x > 0 ? m - 1 : -1, x < W - 1 ? m + 1 : -1, y > 0 ? m - W : -1, y < Hh - 1 ? m + W : -1]) if (n >= 0 && !vis[n] && a[n * 4 + 3] && bg(n * 4)) { vis[n] = 1; q.push(n); } }
           // grande = pintura branca (miolo de escudo), fica — a não ser que encoste no chão (vão entre as pernas fechado por brasas)
           const onFloor = comp.some(m => ((m / W) | 0) >= floorY);
-          if (comp.length > 60 && (comp.length < 1200 || onFloor)) comp.forEach(m => a[m * 4 + 3] = 0); } }
+          if (comp.length > 60 && (comp.length < W * Hh * .0035 || onFloor)) comp.forEach(m => a[m * 4 + 3] = 0); } }
       // 2) linha de chão (detectada antes de apagar o fundo): trecho não branco contínuo e longo na metade de baixo.
       //    Só apaga onde é fino (vazio 3 px acima ou abaixo), pra não cortar os pés.
       for (const y of lineRows) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (!a[i + 3]) continue;
