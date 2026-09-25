@@ -34,14 +34,23 @@ const H = 72;
       // a linha pode ter 3-4 px com o miolo tracejado: inclui as fileiras vizinhas
       for (const y of [...lineRows]) for (const dy of [-2, -1, 1, 2]) if (!lineRows.includes(y + dy) && y + dy < Hh) lineRows.push(y + dy);
       // 1) fundo branco: flood fill a partir das bordas
-      const seen = new Uint8Array(W * Hh), st = [];
+      //    Não passa a menos de 2 px do desenho (fecha frestas do contorno: o branco de dentro de um escudo branco fica),
+      //    depois avança 2 px pra limpar a borda clara em volta do contorno.
+      const lineSet = new Set(lineRows), ink = new Uint8Array(W * Hh); for (let k = 0; k < W * Hh; k++) if (!bg(k * 4) && !lineSet.has((k / W) | 0)) ink[k] = 1;   // a linha de chão não conta como desenho aqui
+      const near = new Uint8Array(W * Hh);
+      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (ink[y * W + x]) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < W && ny < Hh) near[ny * W + nx] = 1; }
+      const out = new Uint8Array(W * Hh), st = [];
       for (let x = 0; x < W; x++) st.push(x, (Hh - 1) * W + x); for (let y = 0; y < Hh; y++) st.push(y * W, y * W + W - 1);
-      while (st.length) { const k = st.pop(); if (seen[k]) continue; seen[k] = 1; if (!bg(k * 4)) continue; a[k * 4 + 3] = 0; const x = k % W, y = (k / W) | 0;
+      while (st.length) { const k = st.pop(); if (out[k] || ink[k] || (near[k] && !lineSet.has((k / W) | 0))) continue; if (!bg(k * 4) && !lineSet.has((k / W) | 0)) continue; out[k] = 1; const x = k % W, y = (k / W) | 0;
         if (x > 0) st.push(k - 1); if (x < W - 1) st.push(k + 1); if (y > 0) st.push(k - W); if (y < Hh - 1) st.push(k + W); }
+      for (let step = 0; step < 2; step++) { const add = [];
+        for (let k = 0; k < W * Hh; k++) if (!out[k] && !ink[k]) { const x = k % W, y = (k / W) | 0; if ((x > 0 && out[k - 1]) || (x < W - 1 && out[k + 1]) || (y > 0 && out[k - W]) || (y < Hh - 1 && out[k + W])) add.push(k); }
+        add.forEach(k => out[k] = 1); }
+      for (let k = 0; k < W * Hh; k++) if (out[k]) a[k * 4 + 3] = 0;
       // 1b) escudos de energia, brilhos e clarões são translúcidos no desenho original: áreas claras ligadas ao fundo
       //     (sem contorno preto no meio) viram transparência proporcional ("cor pra alfa" contra o branco).
       //     O que fica dentro do contorno do personagem (armadura clara) não é tocado.
-      { const light = i => (a[i] + a[i + 1] + a[i + 2]) / 3 > 160 && Math.min(a[i], a[i + 1], a[i + 2]) > 95, vis = new Uint8Array(W * Hh), q = [];
+      { const light = i => (a[i] + a[i + 1] + a[i + 2]) / 3 > 160 && Math.min(a[i], a[i + 1], a[i + 2]) > 95 && sat(i) > 25, vis = new Uint8Array(W * Hh), q = [];
         for (let k = 0; k < W * Hh; k++) if (!a[k * 4 + 3]) { const x = k % W, y = (k / W) | 0;
           for (const n of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < Hh - 1 ? k + W : -1]) if (n >= 0 && a[n * 4 + 3] && !vis[n] && light(n * 4)) { vis[n] = 1; q.push(n); } }
         while (q.length) { const k = q.pop(), x = k % W, y = (k / W) | 0;
@@ -55,7 +64,7 @@ const H = 72;
         for (let k = 0; k < W * Hh; k++) { if (vis[k] || !a[k * 4 + 3] || !bg(k * 4)) continue; const q = [k], comp = []; vis[k] = 1;
           while (q.length) { const m = q.pop(); comp.push(m); const x = m % W, y = (m / W) | 0;
             for (const n of [x > 0 ? m - 1 : -1, x < W - 1 ? m + 1 : -1, y > 0 ? m - W : -1, y < Hh - 1 ? m + W : -1]) if (n >= 0 && !vis[n] && a[n * 4 + 3] && bg(n * 4)) { vis[n] = 1; q.push(n); } }
-          if (comp.length > 60) comp.forEach(m => a[m * 4 + 3] = 0); } }
+          if (comp.length > 60 && comp.length < 1200) comp.forEach(m => a[m * 4 + 3] = 0); } }   // grande = pintura branca (miolo de escudo), fica
       // 2) linha de chão (detectada antes de apagar o fundo): trecho não branco contínuo e longo na metade de baixo.
       //    Só apaga onde é fino (vazio 3 px acima ou abaixo), pra não cortar os pés.
       for (const y of lineRows) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (!a[i + 3]) continue;
@@ -99,11 +108,43 @@ const H = 72;
       const nz = segs.length, zoneOf = x => { let best = 0, bd = 1e9; segs.forEach(([x0, x1], i) => { const dd = x < x0 ? x0 - x : x > x1 ? x - x1 : 0; if (dd < bd) { bd = dd; best = i; } }); return best; };
       const zw = segs.reduce((m, [x0, x1]) => m + x1 - x0 + 1, 0) / nz;
       const lab = new Int32Array(W * Hh).fill(-1), frameOf = [], comps = [];
-      for (let k = 0; k < W * Hh; k++) { if (!a[k * 4 + 3] || lab[k] >= 0) continue; const id = frameOf.length; const q = [k]; lab[k] = id; let n = 0, sx = 0, mnx = W, mxx = 0;
-        while (q.length) { const m = q.pop(), x = m % W, y = (m / W) | 0; n++; sx += x; mnx = Math.min(mnx, x); mxx = Math.max(mxx, x);
-          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= Hh) continue; const nn = ny * W + nx; if (a[nn * 4 + 3] && lab[nn] < 0) { lab[nn] = id; q.push(nn); } } }
-        // peça larga demais = personagens encostados: essa é dividida por coluna
-        frameOf.push(mxx - mnx + 1 > zw * 1.35 && nz > 1 ? -1 : zoneOf(Math.round(sx / n))); comps.push({id, n, cx: sx / n, wide: mxx - mnx + 1 > zw * 1.35}); }
+      // brilho (rajada, faísca, arco de energia): peça separada do corpo, pra não grudar no personagem vizinho que ela encosta
+      const glow = k => { const i = k * 4; return a[i + 3] > 0 && (sat(i) > 90 && Math.max(a[i], a[i + 1], a[i + 2]) > 150 || a[i + 3] < 200); };
+      // passo 1: peças normais (8 vizinhos).
+      // passo 2: peça larga demais (dois quadros encostados pela ponta de uma garra, rajada etc.) é partida:
+      //   afina a peça até ela se dividir em núcleos grandes (os corpos) e devolve cada pixel ao núcleo mais perto
+      //   andando pelo próprio desenho — a garra volta pro braço dela, não pro corpo que ela só encosta.
+      const grow = (k, id, same) => { const q = [k]; lab[k] = id; let n = 0, sx = 0, mnx = W, mxx = 0, ng = 0;
+        while (q.length) { const m = q.pop(), x = m % W, y = (m / W) | 0; n++; sx += x; mnx = Math.min(mnx, x); mxx = Math.max(mxx, x); if (glow(m)) ng++;
+          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= Hh) continue; const nn = ny * W + nx; if (a[nn * 4 + 3] && lab[nn] === -1 && same(nn)) { lab[nn] = id; q.push(nn); } } }
+        return {n, cx: sx / n, x0: mnx, x1: mxx, fx: ng / n}; };
+      const isWide = r => r.x1 - r.x0 + 1 > zw * 1.35 && nz > 1;
+      const add = (id, r, wide, split) => { frameOf[id] = wide ? -1 : zoneOf(Math.round(r.cx)); comps.push({id, ...r, wide, split}); };
+      const N4 = (m, f) => { const x = m % W; if (x > 0) f(m - 1); if (x < W - 1) f(m + 1); if (m >= W) f(m - W); if (m < W * (Hh - 1)) f(m + W); };
+      for (let k = 0; k < W * Hh; k++) { if (!a[k * 4 + 3] || lab[k] !== -1) continue; const id = frameOf.length; frameOf.push(0);
+        const r = grow(k, id, () => true);
+        if (!isWide(r)) { add(id, r, false, false); continue; }
+        const pix = []; for (let m = 0; m < W * Hh; m++) if (lab[m] === id) pix.push(m);
+        // afina até partir em 2+ núcleos grandes
+        let mask = new Uint8Array(W * Hh); pix.forEach(m => mask[m] = 1); let cores = null;
+        for (let it = 0; it < 14 && !cores; it++) {
+          const nm = new Uint8Array(W * Hh); pix.forEach(m => { if (!mask[m]) return; let keep = 1; N4(m, n => { if (!mask[n]) keep = 0; }); nm[m] = keep; }); mask = nm;
+          const cl = new Int32Array(W * Hh).fill(-1), cs = [];
+          pix.forEach(m => { if (!mask[m] || cl[m] >= 0) return; const q = [m], ci = cs.length; cl[m] = ci; const list = [];
+            while (q.length) { const u = q.pop(); list.push(u); N4(u, n => { if (mask[n] && cl[n] < 0) { cl[n] = ci; q.push(n); } }); } cs.push(list); });
+          const big = cs.filter(L => L.length > pix.length * .08);
+          if (big.length >= 2) cores = big; }
+        if (!cores) { add(id, r, true, true); continue; }
+        // devolve cada pixel ao núcleo mais perto pelo desenho (busca em largura a partir de todos os núcleos)
+        const own = new Int32Array(W * Hh).fill(-1), q = []; let qi = 0;
+        const ids = cores.map(() => { const sid = frameOf.length; frameOf.push(0); return sid; });
+        cores.forEach((L, ci) => L.forEach(m => { own[m] = ci; q.push(m); }));
+        while (qi < q.length) { const u = q[qi++]; N4(u, n => { if (lab[n] === id && own[n] < 0) { own[n] = own[u]; q.push(n); } });
+          const x = u % W; for (const n of [u - W - 1, u - W + 1, u + W - 1, u + W + 1]) if (n >= 0 && n < W * Hh && Math.abs((n % W) - x) === 1 && lab[n] === id && own[n] < 0) { own[n] = own[u]; q.push(n); } }
+        const acc = cores.map(() => ({n: 0, sx: 0, x0: W, x1: 0}));
+        pix.forEach(m => { const ci = own[m]; if (ci < 0) return; lab[m] = ids[ci]; const A = acc[ci], x = m % W; A.n++; A.sx += x; A.x0 = Math.min(A.x0, x); A.x1 = Math.max(A.x1, x); });
+        frameOf[id] = -3;
+        acc.forEach((A, ci) => { if (!A.n) return; const rr = {n: A.n, cx: A.sx / A.n, x0: A.x0, x1: A.x1}; add(ids[ci], rr, isWide(rr), true); }); }
       // âncoras = os N corpos (maiores peças). Peça solta (golpe, faísca, drone) vai pro corpo mais perto,
       // preferindo o da esquerda: todo mundo olha pra direita, então efeito solto quase sempre é do quadro à esquerda.
       const anchors = comps.filter(c => !c.wide).sort((p, q) => q.n - p.n).slice(0, nz);
@@ -112,10 +153,26 @@ const H = 72;
         const isAnchor = new Set(anchors.map(c => c.id));
         for (const c of comps) { if (c.wide) continue;
           if (isAnchor.has(c.id)) { frameOf[c.id] = anchors.findIndex(x => x.id === c.id); continue; }
+          // cabe inteira no espaço de um quadro (drone atrás da cabeça, faísca perto do corpo): fica nesse quadro
+          const zi = segs.findIndex(([z0, z1]) => c.x0 >= z0 - 2 && c.x1 <= z1 + 2);
+          if (zi >= 0 && segs.length === nz && !c.split && !(c.fx > .5)) { frameOf[c.id] = zi; continue; }   // brilho (rajada) segue a regra da esquerda
           let best = 0, bd = 1e9; anchors.forEach((an, i) => { const d = c.cx >= an.cx ? c.cx - an.cx : (an.cx - c.cx) * 2.2; if (d < bd) { bd = d; best = i; } });
           frameOf[c.id] = best; } }
       const pf = new Int16Array(W * Hh).fill(-1);
       for (let k = 0; k < W * Hh; k++) if (lab[k] >= 0) pf[k] = frameOf[lab[k]] >= 0 ? frameOf[lab[k]] : zoneOf(k % W);
+      // 4c) ponta de rajada grudada no corpo do quadro seguinte: se encosta na rajada do quadro anterior, é dela
+      if (nz > 1) {
+        const bodyL = new Array(nz).fill(W);
+        for (let k = 0; k < W * Hh; k++) { const f = pf[k]; if (f >= 0 && !glow(k)) bodyL[f] = Math.min(bodyL[f], k % W); }
+        const seenG = new Uint8Array(W * Hh);
+        for (let k = 0; k < W * Hh; k++) { if (seenG[k] || pf[k] < 1 || !glow(k)) continue; const f = pf[k], q = [k], reg = []; seenG[k] = 1;
+          while (q.length) { const u = q.pop(); reg.push(u); N4(u, n => { if (!seenG[n] && pf[n] === f && glow(n)) { seenG[n] = 1; q.push(n); } }); }
+          // encosta (até 2 px) no brilho do quadro anterior: é continuação da rajada dele
+          let touches = false;
+          for (const u of reg) { const ux = u % W, uy = (u / W) | 0;
+            for (let dy = -2; dy <= 2 && !touches; dy++) for (let dx = -2; dx <= 2 && !touches; dx++) { const nx = ux + dx, ny = uy + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= Hh) continue; const n = ny * W + nx; if (pf[n] === f - 1 && glow(n)) touches = true; }
+            if (touches) break; }
+          if (reg.length > 40 && touches) reg.forEach(u => pf[u] = f - 1); } }
       // 5) caixas, linha de chão comum e escala comum
       const box = segs.map(() => ({x0: W, x1: 0, y0: Hh, y1: 0}));
       for (let k = 0; k < W * Hh; k++) { const f = pf[k]; if (f < 0) continue; const x = k % W, y = (k / W) | 0, q = box[f]; q.x0 = Math.min(q.x0, x); q.x1 = Math.max(q.x1, x); q.y0 = Math.min(q.y0, y); q.y1 = Math.max(q.y1, y); }
