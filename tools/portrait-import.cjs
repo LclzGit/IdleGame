@@ -15,7 +15,7 @@ for(const [id,[n,gl]] of Object.entries(MAP)){
   const lum=(x,y)=>{const i=(y*W+x)*4;return (px[i]+px[i+1]+px[i+2])/3};
   // moldura: vindo de fora, pula o branco externo (se houver), depois a linha/borda escura, e para no branco de dentro
   const inward=(get,n)=>{let k=0;while(k<n/3&&get(k)>225)k++;while(k<n/3&&get(k)<=225)k++;return k;};
-  const edge=(dx,dy)=>dx<0?Math.min(inward(k=>lum(k,H>>1),W),inward(k=>lum(k,Math.round(H*.2)),W)):inward(k=>lum(W>>1,k),H);
+  const edge=(dx,dy)=>dx<0?Math.min(inward(k=>lum(k,H>>1),W),inward(k=>lum(k,Math.round(H*.2)),W)):Math.min(...[.15,.5,.85].map(f=>inward(k=>lum(Math.round(W*f),k),H)));   // topo: moldura pode ter recorte no meio
   const L=edge(-1,0)+4,T=edge(0,-1)+4,R=W-1-L,B=H-1-T;   // moldura com a mesma espessura dos dois lados
   // flood fill do branco a partir das bordas da área interna
   const seen=new Uint8Array(W*H),st=[];
