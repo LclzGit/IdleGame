@@ -506,7 +506,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.24</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.25</p>
 </main>
 
 <footer class="dock">
@@ -855,18 +855,18 @@ function mech(o) {
 const STAR = {3:{hp:130, atk:5, c:'#5ca8ff'}, 4:{hp:175, atk:7, c:'#c38cff'}, 5:{hp:230, atk:9, c:'#ffb454'}};
 const TANKS = [
   {id:'firewall', name:'FIREWALL', stars:3, role:'lâmina e escudo hexagonal',
-    passive:{dmgRed:.1}, ptxt:'Escudo hexagonal: recebe 10% menos dano.'},
+    passive:{dmgRed:.15, regen:.01}, ptxt:'Escudo hexagonal: recebe 15% menos dano e regenera 1% do HP por segundo.'},
   {id:'aura2', name:'SANDBOX-II', stars:3, role:'rifle e drone de reconhecimento',
-    passive:{teamAtk:.1}, ptxt:'Drone de reconhecimento: esquadrão causa +10% de dano.',
+    passive:{teamAtk:.15, dmgRed:.05}, ptxt:'Drone de reconhecimento: esquadrão causa +15% de dano; recebe 5% menos dano.',
     art:{w:30, base:'#4fd6c8', line:'#0d1512', cloth:2, draw:mech({A:'#2f4a3e', A2:'#1f3029', B:'#8c9a96', C:'#c08050', visor:'slit', shield:'bubble', weapon:'rifle', drone:'#3a4a44', metal:'#2a2f2e'})}},
   {id:'sentinel', name:'QUARENTENA', stars:4, role:'garra hidráulica e escudo-torre',
-    passive:{dmgRed:.2}, ptxt:'Escudo-torre: recebe 20% menos dano.',
+    passive:{dmgRed:.25, teamHp:.05}, ptxt:'Escudo-torre: recebe 25% menos dano e o esquadrão ganha +5% de HP.',
     art:{w:30, base:'#5ce1e6', line:'#0b0e16', cloth:1, draw:mech({A:'#3a4458', A2:'#262c3a', B:'#4f5a76', C:'#8a8f9c', visor:'dots', shield:'tower', shieldCol:'#4a5568', gold:'#c89b3c', weapon:'claw', metal:'#2c2f36'})}},
   {id:'valkyrie', name:'RESTORE-9', stars:4, role:'canhão de garra e echo-drone',
-    passive:{regen:.02}, ptxt:'Echo-drone: regenera 2% do HP por segundo em combate.',
+    passive:{regen:.035, teamRegen:.015, dmgRed:.1}, ptxt:'Echo-drone: regenera 3,5% do HP por segundo, cura o esquadrão em 1,5%/s e recebe 10% menos dano.',
     art:{w:30, base:'#5ce1e6', line:'#1a2238', cloth:2, draw:mech({A:'#e6e9f2', A2:'#9aa3b8', B:'#ffffff', C:'#c8913c', visor:'slit', shield:'tower', shieldCol:'#dfe4ee', gold:'#c8913c', weapon:'claw', orb:true, drone:'#e6e9f2', metal:'#8d96ad'})}},
   {id:'bulwark7', name:'KILLSWITCH-7', stars:5, role:'lâmina-canhão e escudo de engrenagem',
-    passive:{reflect:.3}, ptxt:'Núcleo de fusão: devolve 30% do dano recebido.',
+    passive:{reflect:.6, teamAtk:.2, dmgRed:.1}, ptxt:'Núcleo de fusão: devolve 60% do dano recebido, esquadrão causa +20% de dano e recebe 10% menos dano.',
     art:{w:30, base:'#ff6a2a', line:'#000000', cloth:1, draw:mech({A:'#2a2624', A2:'#1a1716', B:'#8a5a3a', C:'#c08050', coat:'#241f1d', visor:'eyes', shield:'gear', weapon:'gunblade', blade:'#b8321e', metal:'#2e2a28'})}},
   {id:'x1', name:'KERNELGUARD-X1', stars:5, role:'escudo colossal e drone Aegis',
     passive:{dmgRed:.25, teamHp:.15}, ptxt:'Aegis: recebe 25% menos dano e o esquadrão ganha +15% de HP.',
@@ -963,21 +963,21 @@ function tankMode(o) {
 const GSTAR = {3:{hp:55, atk:10}, 4:{hp:65, atk:13}, 5:{hp:75, atk:17}};
 const GUNNERS = [
   {id:'scanner', name:'SCANNER', stars:3, role:'railgun e cachecol',
-    passive:{selfAtk:.1}, ptxt:'Railgun: causa +10% de dano.'},
+    passive:{selfAtk:.25}, ptxt:'Railgun: causa +25% de dano.'},
   {id:'pulse', name:'TRACEROUTE', stars:3, role:'rifle de precisão',
-    passive:{crit:.2}, ptxt:'Tiro de precisão: 20% de chance de crítico (dano ×2).',
+    passive:{crit:.3}, ptxt:'Tiro de precisão: 30% de chance de crítico (dano ×2).',
     art:{w:30, base:'#ff8a3a', line:'#0e0f12', cloth:1, draw:soldier({A:'#3a3d44', A2:'#24262c', B:'#55585f', acc:'#ff8a3a', weapon:'sniper', pack:'#2e3036', metal:'#23252a'})}},
   {id:'blade', name:'SHREDDER', stars:3, role:'rifle com baioneta',
-    passive:{haste:.2}, ptxt:'Escaramuça: atira 20% mais rápido.',
+    passive:{haste:.3}, ptxt:'Escaramuça: atira 30% mais rápido.',
     art:{w:30, base:'#6ee7a8', line:'#0c140f', cloth:1, draw:soldier({A:'#3e5a44', A2:'#27392b', B:'#7c9a82', weapon:'rifle', bayonet:'#d8e2dc', metal:'#26302a'})}},
   {id:'infiltrator', name:'PENTEST', stars:4, role:'rifle com mira e gancho',
-    passive:{teamAtk:.12}, ptxt:'Gancho e marcação: esquadrão causa +12% de dano.',
+    passive:{teamAtk:.2, selfAtk:.2}, ptxt:'Gancho e marcação: esquadrão causa +20% de dano e ele causa mais +20%.',
     art:{w:30, base:'#5ce1e6', line:'#101214', cloth:1, draw:soldier({A:'#2b2f33', A2:'#1c1f22', B:'#e3dcc4', acc:'#3fae6a', weapon:'rifle', scope:true, pack:'#3a4a3a', boot:'#cfc8b0', metal:'#30353a'})}},
   {id:'ghost', name:'SPECTRE', stars:4, role:'sniper e pistola',
-    passive:{crit:.3, critX:2.5}, ptxt:'Operação fantasma: 30% de chance de crítico (dano ×2,5).',
+    passive:{crit:.4, critX:2.5}, ptxt:'Operação fantasma: 40% de chance de crítico (dano ×2,5).',
     art:{w:30, base:'#5ce1e6', line:'#0b0d14', cloth:1, draw:soldier({A:'#262c3e', A2:'#181c28', B:'#3a4258', acc:'#ff8a3a', crest:'#e8e8f0', weapon:'sniper', metal:'#1f2330'})}},
   {id:'nighthawk', name:'SNIFFER', stars:4, role:'besta de energia',
-    passive:{pierce:.6}, ptxt:'Virote perfurante: atravessa e acerta o próximo inimigo com 60% do dano.',
+    passive:{pierce:.6, selfAtk:.6, haste:.15}, ptxt:'Virote perfurante: atravessa e acerta o próximo com 60% do dano; +60% de dano e atira 15% mais rápido.',
     shot:{c:'#b77dff'},
     art:{w:30, base:'#b77dff', line:'#0d0809', cloth:1, draw:soldier({A:'#2a1e24', A2:'#1a1216', B:'#3e2830', acc:'#e0304a', weapon:'crossbow', metal:'#231a1e'})}},
   {id:'archer', name:'CHECKSUM', stars:5, role:'arco tático e aljava',
@@ -985,11 +985,11 @@ const GUNNERS = [
     shot:{style:'arrow'},
     art:{w:30, base:'#ffb454', line:'#121420', cloth:2, draw:soldier({A:'#2b3048', A2:'#1c2033', B:'#dfe3ec', acc:'#e0a040', hair:'#e8e8f0', mask:'#2a2a30', scarf:'#d8323a', quiver:'#5a4030', weapon:'bow', metal:'#3a3f5c'})}},
   {id:'lasert', name:'DEFRAG', stars:5, role:'canhão laser e esteiras',
-    passive:{pierce:1}, ptxt:'Canhão laser: o feixe atravessa a fila e acerta todos os inimigos (70% do dano nos de trás).',
+    passive:{pierce:1, selfAtk:.7, haste:.15}, ptxt:'Canhão laser: o feixe atravessa a fila e acerta todos (70% nos de trás); +70% de dano e atira 15% mais rápido.',
     shot:{c:'#ff3a3a', style:'laser'},
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:soldier({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', weapon:'laser', lens:'#ff3a3a', treads:true, metal:'#2e3320'})}},
   {id:'tankm1', name:'FORMAT-C', stars:5, role:'modo tanque · artilharia',
-    passive:{splash:.5, obs:5}, ptxt:'Artilharia: cada projétil explode e acerta todos os inimigos com 50% do dano. A cada 5 disparos chama um ataque orbital (×3 em todos).',
+    passive:{splash:.5, obs:5, selfAtk:.75}, ptxt:'Artilharia: cada projétil explode e acerta todos com 50% do dano; +75% de dano. A cada 5 disparos chama um ataque orbital (×3 em todos).',
     shot:{style:'shell', c:'#ffb454', x:31, y:19},
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:tankMode({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', rack:'#ff3a3a', metal:'#2e3320'})}},
 ];
@@ -999,24 +999,24 @@ GUNNERS[0].art = HERO_ART.sc;
 // burst/ocd (sobrecarga), gold/def, dodge, teamBarrier/ecd, revive.
 const PSTAR = {3:{hp:70, atk:3}, 4:{hp:80, atk:4}, 5:{hp:95, atk:5}};
 const SUPPORTS = [
-  {id:'pt', name:'PATCHER', stars:3, role:'cajado de nanobots', passive:{heal:1}, ptxt:'Nanobots: cura o agente mais ferido do esquadrão.'},
-  {id:'debugger', name:'DEBUGGER', stars:3, role:'chave inglesa e drone de reparo', passive:{barrier:.15, bcd:6}, ptxt:'Remendo: a cada 6 s dá ao tanque uma barreira de 15% da vida dele.',
+  {id:'pt', name:'PATCHER', stars:3, role:'cajado de nanobots', passive:{heal:1}, ptxt:'Nanobots: a melhor cura do jogo; cura mais forte e mais cedo que os outros suportes.'},
+  {id:'debugger', name:'DEBUGGER', stars:3, role:'chave inglesa e drone de reparo', passive:{barrier:.4, bcd:4}, ptxt:'Remendo: a cada 4 s dá ao tanque uma barreira de 40% da vida dele.',
     art:{w:30, base:'#5ce1e6', line:'#10141c', cloth:1, draw:soldier({A:'#4a5a70', A2:'#2e3a4a', B:'#8a9ab0', acc:'#5ce1e6', hair:'#d8542a', skin:'#f1c7a8', weapon:'rifle', drone:'#5a6a7a', metal:'#2a3040'})}},
-  {id:'ping', name:'PING', stars:3, role:'rádio e tablet de alvos', passive:{teamSpd:.12, bossSpd:.08}, ptxt:'Chamar alvo: esquadrão ataca 12% mais rápido (20% contra chefes).',
+  {id:'ping', name:'PING', stars:3, role:'rádio e tablet de alvos', passive:{teamSpd:.18, bossSpd:.12}, ptxt:'Chamar alvo: esquadrão ataca 18% mais rápido (30% contra chefes).',
     art:{w:30, base:'#5ca8ff', line:'#0a0e1a', cloth:1, draw:soldier({A:'#2a3a6a', A2:'#1a2448', B:'#4a5a8a', acc:'#5ca8ff', hair:'#1a1a1a', skin:'#6a4430', pack:'#223052', weapon:'rifle', metal:'#1e2638'})}},
-  {id:'crawler', name:'CRAWLER', stars:3, role:'mapa holográfico', passive:{drop:.15, chipX:.1}, ptxt:'Varredura de rotas: +15% de drop de itens e +10% de pacotes de download.',
+  {id:'crawler', name:'CRAWLER', stars:3, role:'mapa holográfico', passive:{drop:.25, chipX:.15}, ptxt:'Varredura de rotas: +25% de drop de itens e +15% de pacotes de download.',
     art:{w:30, base:'#ffb454', line:'#10121e', cloth:2, draw:soldier({A:'#2a3a6a', A2:'#1c2848', B:'#c8ccd8', acc:'#e0a040', hair:'#c8ccd8', skin:'#f1c7a8', scarf:'#2a3a6a', weapon:'bow', metal:'#3a3f5c'})}},
-  {id:'hotfix', name:'HOTFIX', stars:4, role:'frascos e mochila de reagentes', passive:{hot:.03, poison:.02, hcd:5}, ptxt:'Frasco: a cada 5 s cura o esquadrão aos poucos (3%/s por 4 s) e envenena o vírus da frente.',
+  {id:'hotfix', name:'HOTFIX', stars:4, role:'frascos e mochila de reagentes', passive:{hot:.08, poison:.03, hcd:5}, ptxt:'Frasco: a cada 5 s cura o esquadrão inteiro (8%/s por 4 s) e envenena o vírus da frente.',
     art:{w:30, base:'#6ee7a8', line:'#120e0a', cloth:1, draw:soldier({A:'#5a3e2c', A2:'#3a281c', B:'#7a8a5a', acc:'#6ee7a8', hair:'#6a4a2a', skin:'#e8b896', pack:'#5a6a6a', weapon:'crossbow', metal:'#3a3228'})}},
-  {id:'overvolt', name:'OVERVOLT', stars:4, role:'robô-bateria', passive:{burst:.4, ocd:10}, ptxt:'Sobrecarga: a cada 10 s o esquadrão causa +40% de dano por 3 s.',
+  {id:'overvolt', name:'OVERVOLT', stars:4, role:'robô-bateria', passive:{burst:.6, ocd:8}, ptxt:'Sobrecarga: a cada 8 s o esquadrão causa +60% de dano por 3 s.',
     art:{w:30, base:'#6ee7a8', line:'#0c140f', cloth:1, draw:mech({A:'#4a5230', A2:'#30361e', B:'#6e7446', C:'#6ee7a8', visor:'dots', shield:'bubble', weapon:'claw', drone:'#6ee7a8', metal:'#2e3320'})}},
-  {id:'stream', name:'STREAM', stars:4, role:'alaúde-teclado e corneta holográfica', passive:{gold:.25, def:.15}, ptxt:'Transmissão ao vivo: +25% de créditos e +15% de definições.',
+  {id:'stream', name:'STREAM', stars:4, role:'alaúde-teclado e corneta holográfica', passive:{gold:.4, def:.25}, ptxt:'Transmissão ao vivo: +40% de créditos e +25% de definições.',
     art:{w:30, base:'#c38cff', line:'#120a18', cloth:2, draw:soldier({A:'#3a6a6a', A2:'#244848', B:'#8a6ab0', acc:'#c38cff', hair:'#2a1a12', skin:'#8a5a3a', scarf:'#c38cff', quiver:'#5a4030', weapon:'bow', metal:'#2a2436'})}},
-  {id:'proxy', name:'PROXY', stars:5, role:'orbe de portal', passive:{dodge:.25}, ptxt:'Redirecionar: 25% dos ataques contra o esquadrão são desviados por um portal.',
+  {id:'proxy', name:'PROXY', stars:5, role:'orbe de portal', passive:{dodge:.35, teamAtk:.1}, ptxt:'Redirecionar: 35% dos ataques contra o esquadrão são desviados; esquadrão causa +10% de dano.',
     art:{w:30, base:'#5ca8ff', line:'#080a14', cloth:1, draw:soldier({A:'#1a1e2e', A2:'#101420', B:'#2a3a6a', acc:'#5ca8ff', hair:'#9a5ae0', skin:'#f1c7a8', weapon:'laser', lens:'#5ca8ff', metal:'#141824'})}},
-  {id:'encrypt', name:'ENCRYPT', stars:5, role:'escudo de luz sólida', passive:{teamBarrier:.2, ecd:12}, ptxt:'Criptografia: a cada 12 s o esquadrão inteiro ganha barreira de 20% da vida.',
+  {id:'encrypt', name:'ENCRYPT', stars:5, role:'escudo de luz sólida', passive:{teamBarrier:.5, ecd:6, heal:.5}, ptxt:'Criptografia: a cada 6 s o esquadrão inteiro ganha barreira de 50% da vida; cura 50% mais que um suporte comum.',
     art:{w:30, base:'#5ca8ff', line:'#0a0e18', cloth:1, draw:mech({A:'#8a92a8', A2:'#5a6278', B:'#2a3a6a', C:'#c8913c', visor:'slit', shield:'tower', shieldCol:'#5ca8ff', gold:'#c8913c', weapon:'claw', metal:'#3a4058'})}},
-  {id:'rollback', name:'ROLLBACK', stars:5, role:'lanterna de restauração', passive:{revive:.5}, ptxt:'Restaurar ponto: o primeiro agente que cair em cada fase volta com 50% da vida.',
+  {id:'rollback', name:'ROLLBACK', stars:5, role:'lanterna de restauração', passive:{revive:1, teamHp:.15, heal:.5}, ptxt:'Restaurar ponto: o primeiro agente que cair em cada fase volta com a vida cheia; esquadrão ganha +15% de HP e cura 50% mais que um suporte comum.',
     art:{w:30, base:'#ffd84a', line:'#1a140a', cloth:2, draw:soldier({A:'#e8dcc0', A2:'#b8a880', B:'#c8913c', acc:'#ffd84a', hair:'#f2f0ff', skin:'#5a3a26', scarf:'#c8913c', weapon:'bow', metal:'#6a5a3a'})}},
 ];
 const CLASSES = {
@@ -2172,6 +2172,29 @@ Núcleo de fusão: devolve 30% do dano recebido.|Fusion core: reflects 30% of da
 2.0: Sobrecarga: esquadrão causa +12% de dano.|2.0: Overload: squad deals +12% damage.|2.0: Sobrecarga: el escuadrón causa +12% de daño.
 2.0: Auto-reparo: regenera 1% do HP por segundo.|2.0: Self-repair: regenerates 1% HP per second.|2.0: Autorreparación: regenera 1% de vida por segundo.
 Drone de reconhecimento: esquadrão causa +10% de dano.|Recon drone: squad deals +10% damage.|Dron de reconocimiento: el escuadrón causa +10% de daño.
+Escudo hexagonal: recebe 15% menos dano e regenera 1% do HP por segundo.|Hex shield: takes 15% less damage and regenerates 1% HP per second.|Escudo hexagonal: recibe 15% menos daño y regenera 1% de vida por segundo.
+Drone de reconhecimento: esquadrão causa +15% de dano; recebe 5% menos dano.|Recon drone: squad deals +15% damage; takes 5% less damage.|Dron de reconocimiento: el escuadrón causa +15% de daño; recibe 5% menos daño.
+Escudo-torre: recebe 25% menos dano e o esquadrão ganha +5% de HP.|Tower shield: takes 25% less damage and the squad gains +5% HP.|Escudo torre: recibe 25% menos daño y el escuadrón gana +5% de vida.
+Echo-drone: regenera 3,5% do HP por segundo, cura o esquadrão em 1,5%/s e recebe 10% menos dano.|Echo drone: regenerates 3.5% HP per second, heals the squad 1.5%/s and takes 10% less damage.|Dron eco: regenera 3,5% de vida por segundo, cura al escuadrón 1,5%/s y recibe 10% menos daño.
+Núcleo de fusão: devolve 60% do dano recebido, esquadrão causa +20% de dano e recebe 10% menos dano.|Fusion core: reflects 60% of damage taken, squad deals +20% damage and takes 10% less damage.|Núcleo de fusión: devuelve el 60% del daño recibido, el escuadrón causa +20% de daño y recibe 10% menos daño.
+Railgun: causa +25% de dano.|Railgun: deals +25% damage.|Railgun: causa +25% de daño.
+Tiro de precisão: 30% de chance de crítico (dano ×2).|Precision shot: 30% crit chance (×2 damage).|Tiro de precisión: 30% de probabilidad de crítico (daño ×2).
+Escaramuça: atira 30% mais rápido.|Skirmish: fires 30% faster.|Escaramuza: dispara 30% más rápido.
+Gancho e marcação: esquadrão causa +20% de dano e ele causa mais +20%.|Grapple and mark: squad deals +20% damage and he deals another +20%.|Gancho y marca: el escuadrón causa +20% de daño y él causa otro +20%.
+Operação fantasma: 40% de chance de crítico (dano ×2,5).|Ghost op: 40% crit chance (×2.5 damage).|Operación fantasma: 40% de probabilidad de crítico (daño ×2,5).
+Virote perfurante: atravessa e acerta o próximo com 60% do dano; +60% de dano e atira 15% mais rápido.|Piercing bolt: passes through and hits the next enemy for 60%; +60% damage and fires 15% faster.|Virote perforante: atraviesa y golpea al siguiente con 60% del daño; +60% de daño y dispara 15% más rápido.
+Canhão laser: o feixe atravessa a fila e acerta todos (70% nos de trás); +70% de dano e atira 15% mais rápido.|Laser cannon: the beam pierces the whole line (70% on those behind); +70% damage and fires 15% faster.|Cañón láser: el haz atraviesa la fila y golpea a todos (70% a los de atrás); +70% de daño y dispara 15% más rápido.
+Artilharia: cada projétil explode e acerta todos com 50% do dano; +75% de dano. A cada 5 disparos chama um ataque orbital (×3 em todos).|Artillery: every shell explodes and hits all enemies for 50%; +75% damage. Every 5 shots calls an orbital strike (×3 on all).|Artillería: cada proyectil explota y golpea a todos con 50% del daño; +75% de daño. Cada 5 disparos llama un ataque orbital (×3 a todos).
+Nanobots: a melhor cura do jogo; cura mais forte e mais cedo que os outros suportes.|Nanobots: the best healing in the game; heals stronger and earlier than other supports.|Nanobots: la mejor curación del juego; cura más fuerte y antes que los otros soportes.
+Remendo: a cada 4 s dá ao tanque uma barreira de 40% da vida dele.|Patch: every 4 s gives the tank a barrier worth 40% of his HP.|Parche: cada 4 s da al tanque una barrera del 40% de su vida.
+Chamar alvo: esquadrão ataca 18% mais rápido (30% contra chefes).|Call target: squad attacks 18% faster (30% against bosses).|Marcar objetivo: el escuadrón ataca 18% más rápido (30% contra jefes).
+Varredura de rotas: +25% de drop de itens e +15% de pacotes de download.|Route sweep: +25% item drops and +15% download packs.|Barrido de rutas: +25% de drop de objetos y +15% de paquetes de descarga.
+Frasco: a cada 5 s cura o esquadrão inteiro (8%/s por 4 s) e envenena o vírus da frente.|Flask: every 5 s heals the whole squad (8%/s for 4 s) and poisons the front virus.|Frasco: cada 5 s cura a todo el escuadrón (8%/s durante 4 s) y envenena al virus del frente.
+Sobrecarga: a cada 8 s o esquadrão causa +60% de dano por 3 s.|Overload: every 8 s the squad deals +60% damage for 3 s.|Sobrecarga: cada 8 s el escuadrón causa +60% de daño durante 3 s.
+Transmissão ao vivo: +40% de créditos e +25% de definições.|Live stream: +40% credits and +25% definitions.|Transmisión en vivo: +40% de créditos y +25% de definiciones.
+Redirecionar: 35% dos ataques contra o esquadrão são desviados; esquadrão causa +10% de dano.|Redirect: 35% of attacks against the squad are deflected; squad deals +10% damage.|Redirigir: el 35% de los ataques contra el escuadrón se desvían; el escuadrón causa +10% de daño.
+Criptografia: a cada 6 s o esquadrão inteiro ganha barreira de 50% da vida; cura 50% mais que um suporte comum.|Encryption: every 6 s the whole squad gets a barrier worth 50% HP; heals 50% more than a regular support.|Cifrado: cada 6 s todo el escuadrón gana una barrera del 50% de la vida; cura 50% más que un soporte común.
+Restaurar ponto: o primeiro agente que cair em cada fase volta com a vida cheia; esquadrão ganha +15% de HP e cura 50% mais que um suporte comum.|Restore point: the first agent to fall each stage comes back at full HP; squad gains +15% HP and heals 50% more than a regular support.|Punto de restauración: el primer agente que cae en cada fase vuelve con la vida llena; el escuadrón gana +15% de vida y cura 50% más que un soporte común.
 2/6 · novos agentes vêm do Download|2/6 · new agents come from Download|2/6 · los agentes nuevos vienen de la Descarga
 protótipo: +pacotes|prototype: +packs|prototipo: +paquetes
 protótipo: +500 DEF|prototype: +500 DEF|prototipo: +500 DEF
@@ -3316,8 +3339,8 @@ function buyOp(n = 1) {
   return k;
 }
 const bestPow = () => { const p = power(); if (p > S.best) S.best = p; return S.best; };
-const maxHp = h => (h.def.hp + gearStat(h.def.id, 'hp')) * UP_G ** lvOf(slotAid(h.def.id)).h * (1 + (pT().teamHp || 0)) * (1 + tv('hp')) * (1 + wear(h.def.id, 'hp')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
-const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + (voltT > 0 ? pS().burst || 0 : 0)) * (1 + wear(h.def.id, 'atk')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
+const maxHp = h => (h.def.hp + gearStat(h.def.id, 'hp')) * UP_G ** lvOf(slotAid(h.def.id)).h * (1 + (pT().teamHp || 0) + (pS().teamHp || 0)) * (1 + tv('hp')) * (1 + wear(h.def.id, 'hp')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
+const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (pS().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + (voltT > 0 ? pS().burst || 0 : 0)) * (1 + wear(h.def.id, 'atk')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
 const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd') + (pS().teamSpd || 0) + (bossUp ? pS().bossSpd || 0 : 0)) / (1 + gearStat(h.def.id, 'spd') / 100 + wear(h.def.id, 'spd'));
 // Curvas de balanceamento (ajustadas com tools/balance-sim.cjs).
 const ENEMY = {hp:30, hpG:1.1, atk:4, atkG:1.095, djHp:2.5, djAtk:2};   // dj = salto por dificuldade
@@ -3551,7 +3574,7 @@ function raidTick(dt) {
   for (const u of units) {
     u.flash = Math.max(0, u.flash - dt); u.lunge = Math.max(0, u.lunge - dt * 5); u.walk = false;
     if (u.dead) continue;
-    u.hp = Math.min(u.max, u.hp + u.max * ((u.k === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
+    u.hp = Math.min(u.max, u.hp + u.max * ((u.k === 'fw' ? pT().regen || 0 : 0) + (pT().teamRegen || 0) + tv('regen')) * dt);
     // desvio das áreas de impacto e volta pro lugar
     if (u.react > 0 && (u.react -= dt) <= 0 && u.zone) {
       const z = u.zone, q = Math.random() * Math.PI * 2;
@@ -3564,9 +3587,9 @@ function raidTick(dt) {
     u.face = Math.sign(A_BOSS.x - u.x) || 1;
     u.t -= dt; if (u.t > 0) continue;
     const h = u.h;
-    if (u.k === 'pt' && pS().heal) {
-      const hurt = alive.filter(a => a.hp < a.max * .8).sort((a, b) => a.hp / a.max - b.hp / b.max)[0];
-      if (hurt) { A.shots.push({x:u.x + u.face * 8, y:u.y - 22, to:hurt, sp:140, heal:atk(h) * 4, c:'#6ee7a8'}); u.t = aCd(h); u.lunge = 1; u.act = 'heal'; continue; }
+    if (u.k === 'pt') {
+      const hl = pS().heal || 0, hurt = alive.filter(a => a.hp < a.max * (.65 + .15 * Math.min(1, hl))).sort((a, b) => a.hp / a.max - b.hp / b.max)[0];
+      if (hurt) { A.shots.push({x:u.x + u.face * 8, y:u.y - 22, to:hurt, sp:140, heal:atk(h) * (2.5 + 1.5 * hl), c:'#6ee7a8'}); u.t = aCd(h); u.lunge = 1; u.act = 'heal'; continue; }
     }
     u.t = Math.random() < wear(u.k, 'dbl') ? aCd(h) * .12 : aCd(h); u.lunge = 1; u.act = 'atk';
     if (u.k === 'fw') { aHit(atk(h), false); aBurst(A_BOSS.x - B.w * .35, u.y - 14, '#9fd0ff', 5); }
@@ -4338,7 +4361,7 @@ function raidPickOpen(id) {
 // Preparação da luta: dossiê do chefão, formação em pedestais, medidor de chance e bandeja de troca.
 // Cada agente da bandeja mostra quanto o poder do time muda se entrar no lugar do atual.
 const RP_CLS = {fw:{n:'Tanque', c:'#5ca8ff'}, sc:{n:'Ataque', c:'#ff8a3a'}, pt:{n:'Suporte', c:'#c9b8ff'}};
-const RP_TAG = {dmgRed:'aguenta pancada', reflect:'reflete dano', regen:'regenera', teamHp:'+vida do time', teamAtk:'+dano do time', heal:'cura', dodge:'esquiva',
+const RP_TAG = {teamRegen:'cura o time', revive:'revive', barrier:'barreira', teamBarrier:'barreira no time', hot:'cura o time', burst:'sobrecarga', dmgRed:'aguenta pancada', reflect:'reflete dano', regen:'regenera', teamHp:'+vida do time', teamAtk:'+dano do time', heal:'cura', dodge:'esquiva',
   bossSpd:'rápido contra chefes', teamSpd:'+velocidade do time', crit:'crítico', critX:'crítico', multishot:'multi-tiro', burst:'rajada', haste:'cadência', selfAtk:'dano alto'};
 function rpTags(T) {
   const out = [];
@@ -4651,13 +4674,13 @@ function update(dt) {
     h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
     if (h.dead) continue;
     if (!engaged) h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * .06 * dt);
-    else h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * ((h.def.id === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
+    else h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * ((h.def.id === 'fw' ? pT().regen || 0 : 0) + (pT().teamRegen || 0) + tv('regen')) * dt);
     h.t -= dt;
     if (h.t > 0) continue;
-    if (h.def.id === 'pt' && pS().heal) {
-      const hurt = alive.filter(a => !a.dead && a.hp < maxHp(a) * .8).sort((a, b) => a.hp / maxHp(a) - b.hp / maxHp(b))[0];
+    if (h.def.id === 'pt') {   // todo suporte cura; a PATCHER (heal) cura antes (abaixo de 80%) e com o dobro da força
+      const hl = pS().heal || 0, hurt = alive.filter(a => !a.dead && a.hp < maxHp(a) * (.65 + .15 * Math.min(1, hl))).sort((a, b) => a.hp / maxHp(a) - b.hp / maxHp(b))[0];
       if (hurt) {
-        const amt = atk(h) * 4;
+        const amt = atk(h) * (2.5 + 1.5 * hl);
         hurt.hp = Math.min(maxHp(hurt), hurt.hp + amt);
         burst(hurt.def.x + 15, GROUND - 16, '#6ee7a8', 6);
         float(hurt.def.x + 15, GROUND - 42, '+' + fmtN(amt), '#6ee7a8');
@@ -5514,7 +5537,7 @@ const RENDER = {
       `<button type="button" data-colc="${v}" aria-pressed="${v.startsWith('sc') ? colCls === 'sc' && 'sc:' + colSub === v : colCls === v}" style="--rc:${c}">${n}</button>`).join('');
     const X = SUBS[colSub];
     return `<div class="btabs">${tabs}</div>
-      ${colCls === 'pt' ? '<p class="hint"><b style="color:#c9b8ff">Suporte</b> · cada um tem uma habilidade própria: cura, barreira, velocidade, farm ou reviver.</p>' : ''}
+      ${colCls === 'pt' ? '<p class="hint"><b style="color:#c9b8ff">Suporte</b> · todo suporte cura um pouco quem cai abaixo de 65% da vida; além disso cada um tem uma habilidade própria: cura forte, barreira, velocidade, farm ou reviver.</p>' : ''}
       ${colCls === 'sc' ? `<p class="hint"><b style="color:${X.c}">${X.n}</b> · ${X.d} O esquadrão leva um agente de ataque; troque de classe conforme a fase.</p>` : ''}
       <p class="sub">${colCls === 'sc' ? X.pl : C.label} <small>${list.filter(x => sup || x.id in S.roster).length}/${list.length} · novos agentes vêm do Download</small></p>
       <div class="col">${col}</div>`;

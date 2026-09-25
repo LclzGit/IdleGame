@@ -23,6 +23,16 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.25: balanceamento dos agentes
+
+Medido com um simulador (jogo real rodando sem desenhar, todos no mesmo nível e com equipamento T3 da fase).
+
+- **Suportes:** todo suporte agora cura um pouco quem cai abaixo de 65% da vida. A PATCHER continua a melhor cura (mais forte e mais cedo). ENCRYPT e ROLLBACK (5★) ganharam meia cura extra e passam a proteger mais que a PATCHER. Antes, sem a PATCHER, o time morria em ~30 s contra um chefe forte; agora os suportes de defesa aguentam a luta toda e os de dano/farm (PING, OVERVOLT, CRAWLER, STREAM) trocam um pouco de sobrevivência por dano ou loot. Buffs: DEBUGGER, PING, CRAWLER, HOTFIX, OVERVOLT, STREAM, PROXY, ENCRYPT, ROLLBACK.
+- **Atiradores:** CHECKSUM sem mudança. Todos os outros subiram; os de área (SNIFFER, DEFRAG, FORMAT-C) foram os que mais subiram, e o DEFRAG limpa hordas em metade do tempo do CHECKSUM.
+- **Tanques:** KERNELGUARD sem mudança (continua o mais resistente). Os 3★ aguentam ~22 s, os 4★ ~32 s e o KERNELGUARD ~34 s num chefe forte. KILLSWITCH-7 virou o tanque de ataque (+60% de dano do time). RESTORE-9 cura o esquadrão (bom sem a PATCHER). QUARENTENA é o 4★ mais resistente.
+- Novas passivas: `teamRegen` (tanque cura o time), `teamAtk`/`teamHp` também em suportes, `heal` fracionado (meia cura).
+- Textos das passivas traduzidos (EN/ES).
+
 ## v1.24: personagens mais nítidos na barra
 
 - **Contorno escuro de 1 px** em volta de cada sprite, no tamanho do jogo: devolve a silhueta que a arte tem e que sumia ao reduzir ~12×.
