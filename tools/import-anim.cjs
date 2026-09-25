@@ -31,9 +31,12 @@ const H = 72;
       const lum = i => (a[i] + a[i + 1] + a[i + 2]) / 3, sat = i => Math.max(a[i], a[i + 1], a[i + 2]) - Math.min(a[i], a[i + 1], a[i + 2]);
       const bg = i => lum(i) > 222 && sat(i) < 30;
       const lineRows = [];
-      for (let y = Math.floor(Hh * .5); y < Hh; y++) { let best = 0, run = 0;
-        for (let x = 0; x < W; x++) { if (lum((y * W + x) * 4) < 235) { run++; best = Math.max(best, run); } else run = 0; }
-        if (best >= W * .4) lineRows.push(y); }
+      // linha de chão: no quarto de baixo, traço longo e fino (a fileira 6 px acima é quase toda branca — não é um corpo nem uma arma)
+      for (let y = Math.floor(Hh * .7); y < Hh; y++) { let best = 0, run = 0, x0 = 0, bx0 = 0;
+        for (let x = 0; x < W; x++) { if (lum((y * W + x) * 4) < 235) { if (!run) x0 = x; run++; if (run > best) { best = run; bx0 = x0; } } else run = 0; }
+        if (best < W * .4) continue;
+        let clear = 0; const yy = Math.max(0, y - 6); for (let x = bx0; x < bx0 + best; x++) if (lum((yy * W + x) * 4) >= 235) clear++;
+        if (clear > best * .55) lineRows.push(y); }
       // a linha pode ter 3-4 px com o miolo tracejado: inclui as fileiras vizinhas
       for (const y of [...lineRows]) for (const dy of [-2, -1, 1, 2]) if (!lineRows.includes(y + dy) && y + dy < Hh) lineRows.push(y + dy);
       // 1) fundo branco: flood fill a partir das bordas

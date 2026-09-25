@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.8: DEFRAG
+
+- DEFRAG: retrato novo e animações da arte do autor: guarda com o canhão rotativo, mira, feixe laser vermelho, recuo e volta à guarda; esteiras nos pés.
+- `tools/import-anim.cjs`: linha de chão só é aceita no quarto de baixo, fina e com branco logo acima (um canhão atravessando corpos encostados não é mais confundido com o chão).
+
 ## v1.16.7: CHECKSUM
 
 - CHECKSUM: retrato novo e animações da arte do autor: guarda com o arco tático, puxa a corda, solta três flechas douradas com clarão e volta à guarda.
