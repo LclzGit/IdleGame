@@ -13,7 +13,7 @@ const PAGE = path.join(require('os').tmpdir(), 'daemonbar-battle.html');
   fs.writeFileSync(PAGE, s.slice(0, i) + 'window.__t={spawn,get enemies(){return enemies},set enemies(v){enemies=v},get heroes(){return heroes}};' + s.slice(i)); }
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({viewport: {width: 1366, height: 768}});
-  await p.addInitScript(TANK => localStorage.setItem('daemonbar.v2', JSON.stringify({lv: {[TANK]: {a: 1, h: 12}}, data: 0, autoUp: false, stage: 11, maxStage: 14, roster: {firewall: 1, aura2: 1, pulse: 1}, tank: TANK, gunner: 'pulse', autoAdv: false})), TANK);
+  await p.addInitScript(TANK => localStorage.setItem('daemonbar.v2', JSON.stringify({lv: {[TANK]: {a: 1, h: 12}}, data: 0, autoUp: false, stage: 11, maxStage: 14, roster: {[TANK]: 1, aura2: 1, pulse: 1}, tank: TANK, gunner: 'pulse', autoAdv: false})), TANK);
   await p.goto('file://' + PAGE); await p.waitForTimeout(2500);
   await p.evaluate(() => { const T = window.__t; T.enemies = [];
     setTimeout(() => { for (let i = 0; i < 3; i++) { T.spawn(false); const e = T.enemies[T.enemies.length - 1]; e.hp = e.max = 1e15; e.x = 175 + i * 14; } }, 1200);

@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.15.2: QUARENTENA animado
+
+- QUARENTENA com a arte nova do autor: guarda com a garra, golpe com onda de energia, escudo-torre com vírus encostando (golpe de garra pela lateral do escudo) e volta à guarda. Caminhada e corpo inteiro importados.
+- `tools/import-anim.cjs` separa os quadros por peça conectada: o personagem com a arma vai inteiro pro quadro dele, mesmo quando a garra/espada invade o espaço do vizinho. Efeitos soltos (golpe, faísca, drone) vão pro corpo mais perto, preferindo o da esquerda (todos olham pra direita). FIREWALL e SANDBOX-II reimportados com isso.
+
 ## v1.15.1: SANDBOX-II animado
 
 - SANDBOX-II (tanque inicial) com a arte nova do autor: guarda, tiro em sequência, bolha de energia laranja com vírus encostando (atira de dentro dela) e volta à guarda. Caminhada e corpo inteiro importados.

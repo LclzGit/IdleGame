@@ -94,27 +94,44 @@ const H = 72;
         cuts.push(X1 + 1); segs = [];
         for (let i = 0; i < N; i++) { let a0 = cuts[i], a1 = cuts[i + 1] - 1; while (a0 < a1 && !colN[a0]) a0++; while (a1 > a0 && !colN[a1]) a1--; segs.push([a0, a1]); }
       }
-      // 4b) pedaços pequenos encostados na linha de corte são sobra do quadro vizinho (ponta de espada)
-      if (segs.length > 1) for (const [x0, x1] of segs) {
-        const lab = new Int32Array(W * Hh).fill(-1); let total = 0;
-        for (let y = 0; y < Hh; y++) for (let x = x0; x <= x1; x++) if (a[(y * W + x) * 4 + 3]) total++;
-        for (let y = 0; y < Hh; y++) for (let x = x0; x <= x1; x++) { const k = y * W + x; if (!a[k * 4 + 3] || lab[k] >= 0) continue;
-          const q = [k], comp = []; lab[k] = 1; let edge = false;
-          while (q.length) { const m = q.pop(); comp.push(m); const mx = m % W, my = (m / W) | 0; if (mx === x0 || mx === x1) edge = true;
-            for (const [nx, ny] of [[mx - 1, my], [mx + 1, my], [mx, my - 1], [mx, my + 1]]) { if (nx < x0 || nx > x1 || ny < 0 || ny >= Hh) continue; const n = ny * W + nx; if (a[n * 4 + 3] && lab[n] < 0) { lab[n] = 1; q.push(n); } } }
-          if (edge && comp.length < total * .04) comp.forEach(m => a[m * 4 + 3] = 0); } }
-      g.putImageData(d, 0, 0);
+      // 4b) cada peça conectada (personagem com a arma, faísca, drone) vai inteira pro quadro onde está o centro dela.
+      //     Assim uma garra ou espada que invade o espaço do vizinho continua no quadro certo.
+      const nz = segs.length, zoneOf = x => { let best = 0, bd = 1e9; segs.forEach(([x0, x1], i) => { const dd = x < x0 ? x0 - x : x > x1 ? x - x1 : 0; if (dd < bd) { bd = dd; best = i; } }); return best; };
+      const zw = segs.reduce((m, [x0, x1]) => m + x1 - x0 + 1, 0) / nz;
+      const lab = new Int32Array(W * Hh).fill(-1), frameOf = [], comps = [];
+      for (let k = 0; k < W * Hh; k++) { if (!a[k * 4 + 3] || lab[k] >= 0) continue; const id = frameOf.length; const q = [k]; lab[k] = id; let n = 0, sx = 0, mnx = W, mxx = 0;
+        while (q.length) { const m = q.pop(), x = m % W, y = (m / W) | 0; n++; sx += x; mnx = Math.min(mnx, x); mxx = Math.max(mxx, x);
+          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= Hh) continue; const nn = ny * W + nx; if (a[nn * 4 + 3] && lab[nn] < 0) { lab[nn] = id; q.push(nn); } } }
+        // peça larga demais = personagens encostados: essa é dividida por coluna
+        frameOf.push(mxx - mnx + 1 > zw * 1.35 && nz > 1 ? -1 : zoneOf(Math.round(sx / n))); comps.push({id, n, cx: sx / n, wide: mxx - mnx + 1 > zw * 1.35}); }
+      // âncoras = os N corpos (maiores peças). Peça solta (golpe, faísca, drone) vai pro corpo mais perto,
+      // preferindo o da esquerda: todo mundo olha pra direita, então efeito solto quase sempre é do quadro à esquerda.
+      const anchors = comps.filter(c => !c.wide).sort((p, q) => q.n - p.n).slice(0, nz);
+      if (nz > 1 && anchors.length === nz && anchors[nz - 1].n > anchors[0].n * .3) {
+        anchors.sort((p, q) => p.cx - q.cx);
+        const isAnchor = new Set(anchors.map(c => c.id));
+        for (const c of comps) { if (c.wide) continue;
+          if (isAnchor.has(c.id)) { frameOf[c.id] = anchors.findIndex(x => x.id === c.id); continue; }
+          let best = 0, bd = 1e9; anchors.forEach((an, i) => { const d = c.cx >= an.cx ? c.cx - an.cx : (an.cx - c.cx) * 2.2; if (d < bd) { bd = d; best = i; } });
+          frameOf[c.id] = best; } }
+      const pf = new Int16Array(W * Hh).fill(-1);
+      for (let k = 0; k < W * Hh; k++) if (lab[k] >= 0) pf[k] = frameOf[lab[k]] >= 0 ? frameOf[lab[k]] : zoneOf(k % W);
       // 5) caixas, linha de chão comum e escala comum
-      const box = segs.map(([x0, x1]) => { let y0 = Hh, y1 = 0; for (let x = x0; x <= x1; x++) for (let y = 0; y < Hh; y++) if (a[(y * W + x) * 4 + 3]) { y0 = Math.min(y0, y); y1 = Math.max(y1, y); } return {x0, x1, y0, y1}; });
+      const box = segs.map(() => ({x0: W, x1: 0, y0: Hh, y1: 0}));
+      for (let k = 0; k < W * Hh; k++) { const f = pf[k]; if (f < 0) continue; const x = k % W, y = (k / W) | 0, q = box[f]; q.x0 = Math.min(q.x0, x); q.x1 = Math.max(q.x1, x); q.y0 = Math.min(q.y0, y); q.y1 = Math.max(q.y1, y); }
       const ground = Math.max(...box.map(q => q.y1));
       const hs = box.map(q => ground - q.y0).sort((p, q) => p - q), k = H / hs[Math.floor(hs.length / 2)];   // altura mediana = 72 px
-      return box.map(q => {
+      return box.map((q, fi) => {
         const cw = q.x1 - q.x0 + 1, ch = ground - q.y0 + 1;
-        // centro dos pés: média x dos pixels opacos nos 10% de baixo da própria figura
-        let fs = 0, fn = 0; for (let y = q.y1 - Math.max(2, Math.round((q.y1 - q.y0) * .1)); y <= q.y1; y++) for (let x = q.x0; x <= q.x1; x++) if (a[(y * W + x) * 4 + 3]) { fs += x - q.x0; fn++; }
+        // só os pixels deste quadro (o vizinho não vaza pra dentro)
+        const m = document.createElement('canvas'); m.width = cw; m.height = ch; const mg = m.getContext('2d'), md = mg.createImageData(cw, ch);
+        for (let y = q.y0; y <= Math.min(ground, Hh - 1); y++) for (let x = q.x0; x <= q.x1; x++) { const kk = y * W + x; if (pf[kk] !== fi) continue; const o = ((y - q.y0) * cw + (x - q.x0)) * 4, i = kk * 4; md.data[o] = a[i]; md.data[o + 1] = a[i + 1]; md.data[o + 2] = a[i + 2]; md.data[o + 3] = a[i + 3]; }
+        mg.putImageData(md, 0, 0);
+        // centro dos pés: média x dos pixels deste quadro nos 10% de baixo da própria figura
+        let fs = 0, fn = 0; for (let y = q.y1 - Math.max(2, Math.round((q.y1 - q.y0) * .1)); y <= q.y1; y++) for (let x = q.x0; x <= q.x1; x++) if (pf[y * W + x] === fi) { fs += x - q.x0; fn++; }
         const tw = Math.max(1, Math.round(cw * k)), th = Math.max(1, Math.round(ch * k));
         const o = document.createElement('canvas'); o.width = tw; o.height = th; const og = o.getContext('2d'); og.imageSmoothingQuality = 'high';
-        og.drawImage(c, q.x0, q.y0, cw, ch, 0, 0, tw, th);
+        og.drawImage(m, 0, 0, cw, ch, 0, 0, tw, th);
         return [o.toDataURL('image/webp', .92), tw, th, Math.round((fn ? fs / fn : cw / 2) * k)];
       });
     }, [src, H, kind === 'corpo', {caminhada: 6, ataque: 5, defesa: 5, cura: 5, pulso: 4}[kind] || 0]);
