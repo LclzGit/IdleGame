@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.26.3: coleção consertada
+
+- Repetidos que passaram do necessário depois da troca de estrelas (ex.: TRACEROUTE 31/4) viram versão nova ao abrir o jogo; a barra de versão não passa mais de 100% (ela vazava do cartão e criava rolagem horizontal).
+- Coleção ordenada por estrela: ★6 sempre depois dos ★5.
+- Dica da passiva nos cartões usa a caixa do jogo (fica dentro da tela) em vez da dica do navegador.
+- Menus nunca mostram rolagem horizontal.
+
 ## v1.26.2: menus consertados e SPECTRE 5★
 
 - **Menus quebrados no artifact:** o arquivo publicado não tinha `<!doctype html>`, então o navegador abria em modo de compatibilidade antigo (tabelas com letra gigante, espaçamentos diferentes). O build agora gera o mesmo arquivo, com doctype, pro artifact e pro repositório — os testes passam a olhar exatamente o que é publicado.
