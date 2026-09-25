@@ -506,7 +506,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.23</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.24</p>
 </main>
 
 <footer class="dock">
@@ -3656,7 +3656,7 @@ function drawArenaBoss() {
 }
 function drawArena() {
   const A = raid, R = A.R, B = A.B;
-  ctx = arenaCtx; ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.imageSmoothingEnabled = false;
+  const as = +arenaCv.dataset.s || 2; ctx = arenaCtx; ctx.setTransform(as, 0, 0, as, 0, 0); ctx.imageSmoothingEnabled = false;
   ctx.drawImage(A.floor, 0, 0, AW, AH);
   arenaAmbient(R);
   for (const z of A.scorch) { ctx.fillStyle = `rgba(20,4,12,${(.5 * Math.min(1, z.life)).toFixed(2)})`; ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r * .8, z.r * .45, 0, 0, Math.PI * 2); ctx.fill(); }
@@ -4783,15 +4783,41 @@ function text(str, x, y, c, center) {
 // A animação mistura os quadros da ficha com movimento: passo com balanço e inclinação, respiração parado,
 // recuo e quadro de disparo a cada tiro, sombra nos pés. Imagens em 2× (72 px = 36 lógicos).
 const RES = 2, SHEET_IMG = {};
+let DPR = Math.min(3, window.devicePixelRatio || 1);   // tela com zoom/retina: o canvas acompanha a densidade real
 const mkSheet = ([u, w, h, fx]) => {
-  const o = {im:new Image(), w:w / RES, h:h / RES, fx:fx / RES, white:null, ok:false};
-  o.im.onload = () => {
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const g = c.getContext('2d'); g.drawImage(o.im, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h);
+  const o = {im:new Image(), w:(w + 2) / RES, h:(h + 1) / RES, fx:(fx + 1) / RES, white:null, ok:false};
+  const src = new Image();
+  src.onload = () => {
+    o.im = sheetFx(src, w, h);
+    const c = document.createElement('canvas'); c.width = o.im.width; c.height = o.im.height;
+    const g = c.getContext('2d'); g.drawImage(o.im, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
     o.white = c; o.ok = true;
   };
-  o.im.src = u; return o;
+  src.src = u; return o;
 };
+// Acabamento dos quadros no tamanho do jogo: a arte é desenhada em ~770 px e aparece com ~70, então o contorno
+// preto some e o personagem escuro se mistura com o fundo. Aqui: nitidez leve (devolve rosto/visor) e um
+// contorno escuro de 1 px em volta da figura (devolve a silhueta). Ganha 1 px de margem nos lados e em cima.
+function sheetFx(im, w, h) {
+  const c = document.createElement('canvas'); c.width = w + 2; c.height = h + 1;
+  const g = c.getContext('2d'); g.drawImage(im, 1, 1, w, h);
+  const W = c.width, Hh = c.height, d = g.getImageData(0, 0, W, Hh), a = d.data, s0 = new Uint8ClampedArray(a);
+  const al = (x, y) => x < 0 || y < 0 || x >= W || y >= Hh ? 0 : s0[(y * W + x) * 4 + 3];
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 4;
+    if (s0[i + 3] >= 200) {   // nitidez: realça a diferença pros vizinhos (só onde a figura é sólida)
+      for (let ch = 0; ch < 3; ch++) {
+        let sum = 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = ((y + dy) * W + x + dx) * 4; sum += al(x + dx, y + dy) >= 200 ? s0[j + ch] : s0[i + ch]; }
+        a[i + ch] = s0[i + ch] + (s0[i + ch] * 4 - sum) * .35;
+      }
+    } else if (s0[i + 3] < 70) {   // contorno: transparente encostado na figura
+      const side = Math.max(al(x + 1, y), al(x - 1, y), al(x, y + 1), al(x, y - 1)), diag = Math.max(al(x + 1, y + 1), al(x - 1, y - 1), al(x + 1, y - 1), al(x - 1, y + 1));
+      const k = side >= 150 ? 235 : diag >= 150 ? 130 : 0;
+      if (k) { a[i] = 6; a[i + 1] = 5; a[i + 2] = 14; a[i + 3] = Math.max(s0[i + 3], k); }
+    }
+  }
+  g.putImageData(d, 0, 0); return c;
+}
 // w = caminhada, a = [mira, disparo]; das folhas de animação completas: atk (5 quadros), def (5, tanques), cura/pulso (suporte)
 for (const id in (typeof SHEET_SPR !== 'undefined' ? SHEET_SPR : {})) {
   SHEET_IMG[id] = {};
@@ -4802,7 +4828,7 @@ const sheetReady = SI => SI && Object.values(SI).every(L => L.every(o => o.ok));
 // (perna de trás / perna da frente) que alternam: uma avança e sobe enquanto a outra fica no chão.
 function drawWalk(h, P, cyc, bob, rot) {
   const ax = h.def.x + h.def.w / 2, gy = GROUND + 1, HIP = .56;   // quadril em 56% da altura
-  const iw = P.im.naturalWidth, ih = P.im.naturalHeight, k = iw / P.w, hipY = ih * HIP, fxi = P.fx * k;
+  const iw = P.im.naturalWidth || P.im.width, ih = P.im.naturalHeight || P.im.height, k = iw / P.w, hipY = ih * HIP, fxi = P.fx * k;
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ax + 1, gy - .5, P.w * .28, 1.3, 0, 0, Math.PI * 2); ctx.fill();
   const vt = visTier(h.def.id);
   ctx.save(); ctx.translate(ax, gy);
@@ -4880,11 +4906,15 @@ function drawSheetHero(h, SI, walking) {
     rot = Math.sin(t * 1.1 + ph) * .006;
     dx = Math.sin(t * .9 + ph) * .25;
   } else P = SI.w[0];
-  const ax = h.def.x + h.def.w / 2 + dx, gy = GROUND + 1;
+  // sem esticar nem girar (isso refaz os pixels a cada quadro e borra); parado, só sobe 1 px de vez em quando
+  sx = sy = 1; rot = 0;
+  const px = 1 / (SCALE * DPR), snap = v => Math.round(v / px) * px;
+  if (!h.dead && !walking && !bob && Math.sin(t * 2.2 + ph) > .55) bob = -px * Math.max(1, Math.round(DPR));
+  const ax = snap(h.def.x + h.def.w / 2 + dx), gy = GROUND + 1;
   // sombra
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ax + 1, gy - .5, P.w * .28 * (1 + bob * .05), 1.3, 0, 0, Math.PI * 2); ctx.fill();
   const vt = visTier(h.def.id);
-  ctx.save(); ctx.translate(ax, gy + bob); ctx.rotate(rot); ctx.scale(sx, sy);
+  ctx.save(); ctx.translate(ax, snap(gy + bob)); ctx.rotate(rot); ctx.scale(sx, sy);
   if (h.dead) ctx.globalAlpha = .22 + .1 * Math.sin(t * 6);
   else if (vt >= 3) { ctx.shadowColor = RAR[vt].c; ctx.shadowBlur = vt >= 5 ? 10 : vt === 4 ? 7 : 4; }
   ctx.imageSmoothingEnabled = true;
@@ -4973,13 +5003,14 @@ function draw() {
   ctx = stripCtx; drawWorld();
   if (raid && arenaCv.isConnected) withTeam(raid.team, drawArena);
 }
+const RIM = {fw:'#5ca8ff', sc:'#ffb454', pt:'#c9b8ff'};
 function drawWorld() {
   const sc = sec(), tint = sc.tint, panic = stagePos(S.stage).d === 4, SC = sceneOf(sc.idx, tint, panic);
   // céu: escuro em cima, com a cor do setor perto do chão
   const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
   sky.addColorStop(0, '#07060f'); sky.addColorStop(1, mix('#0b0a16', panic ? '#ff5a2a' : tint, .14));
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-  const layer = (c, sp) => { const o = (scroll * sp) % BG_W; for (let x = -o; x < W; x += BG_W) ctx.drawImage(c, Math.round(x * RES) / RES, 0, BG_W, H); };
+  const layer = (c, sp) => { const o = (scroll * sp) % BG_W; for (let x = -o; x < W; x += BG_W) ctx.drawImage(c, Math.round(x * SCALE * DPR) / (SCALE * DPR), 0, BG_W, H); };
   ctx.imageSmoothingEnabled = true; layer(SC.far, .12); layer(SC.near, .4); ctx.imageSmoothingEnabled = false;
   // chão: placa de circuito com trilhas
   const fl = ctx.createLinearGradient(0, GROUND, 0, H);
@@ -5005,6 +5036,9 @@ function drawWorld() {
     const fr = walking ? Math.floor(t * 7 + h.def.x) % 2 : 0;
     const SI = SHEET_IMG[slotAid(k)];
     if (sheetReady(SI)) {
+      // luz de fundo na cor da classe: separa o personagem escuro do cenário escuro
+      if (!h.dead) { const cx = h.def.x + h.def.w / 2, cy = GROUND - 15, gl = ctx.createRadialGradient(cx, cy, 2, cx, cy, 22);
+        gl.addColorStop(0, rgba(RIM[k], .2)); gl.addColorStop(1, rgba(RIM[k], 0)); ctx.fillStyle = gl; ctx.fillRect(cx - 22, cy - 22, 44, 38); }
       const top = drawSheetHero(h, SI, walking);
       if (!h.dead) { const p = Math.max(0, h.hp / maxHp(h)), bx = h.def.x + h.def.w / 2 - 8; ctx.fillStyle = '#000'; ctx.fillRect(bx, top - 3, 16, 2); ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(bx, top - 3, Math.ceil(16 * p), 1); }
       continue;
@@ -5876,11 +5910,14 @@ function resize() {
   const w = cv.parentElement.clientWidth, sw = Math.max(160, Math.floor(w / SCALE));
   W = sw;
   // canvas em resolução dobrada: a lógica continua em W×H, mas sprites das fichas e cenário ganham detalhe
-  cv.width = sw * RES; cv.height = H * RES;
+  DPR = Math.min(3, window.devicePixelRatio || 1);
+  cv.width = Math.round(sw * SCALE * DPR); cv.height = Math.round(H * SCALE * DPR);
   cv.style.width = sw * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
-  ctx.setTransform(RES, 0, 0, RES, 0, 0);
+  ctx.setTransform(SCALE * DPR, 0, 0, SCALE * DPR, 0, 0);
   ctx.imageSmoothingEnabled = false;
+  const as = Math.max(2, Math.ceil(1.5 * DPR)); arenaCv.width = AW * as; arenaCv.height = AH * as; arenaCv.dataset.s = as;
 }
+addEventListener('resize', () => { if ((window.devicePixelRatio || 1) !== DPR) resize(); });
 new ResizeObserver(resize).observe(cv.parentElement);
 // clique no vírus dourado
 const goldHit = ev => { if (!gold) return false; const r = cv.getBoundingClientRect(), x = (ev.clientX - r.left) / SCALE, y = (ev.clientY - r.top) / SCALE; return Math.abs(x - gold.x) < 10 && Math.abs(y - gold.y) < 9; };

@@ -23,6 +23,15 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.24: personagens mais nítidos na barra
+
+- **Contorno escuro de 1 px** em volta de cada sprite, no tamanho do jogo: devolve a silhueta que a arte tem e que sumia ao reduzir ~12×.
+- **Nitidez leve** nos quadros: rosto, visor e placas da armadura voltam a aparecer.
+- **Luz de fundo** na cor da classe atrás de cada agente: personagem escuro não se mistura mais com o cenário escuro.
+- **Resolução da tela:** a barra e a arena do Chefão desenham na densidade real (Windows com zoom 125%/150%, retina), sem borrar.
+- **Parado sem esticar:** a respiração que esticava e girava o sprite (e borrava a cada quadro) virou um sobe-e-desce de 1 px; posições alinhadas ao pixel.
+- A barra continua do mesmo tamanho.
+
 ## v1.23: Oficina (recompilar T5/T6 e reforço das vagas)
 
 - Nova aba **Oficina** (menu lateral e barra).
