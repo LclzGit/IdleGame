@@ -67,11 +67,14 @@
   .taskbar .tb[aria-pressed="true"]{color:var(--text); border-bottom:2px solid var(--cyan); background:#12102a}
   .taskbar .tb img{image-rendering:auto}
   #panel.nocur .pcur{display:none}
-  .arena{display:block; width:100%; image-rendering:pixelated; border:1px solid #1f5a60; background:#07060f}
-  .rhud{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:4px 8px; margin:6px 0; font-size:11px}
-  .rhud .bar{height:6px; background:#1a1024; border:1px solid #3a1a2a} .rhud .bar i{display:block; height:100%; background:var(--rc, #ff3d7f)}
-  .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; font-size:10px}
-  .rsq div{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .rsq .bar{height:3px; background:#101c14; margin-top:2px} .rsq .bar i{display:block; height:100%; background:var(--green)}
+  .arena{display:block; width:100%; height:auto; border:1px solid #1f5a60; background:#07060f}
+  .rhud{display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:4px 8px; margin:0 0 6px; font-size:11px}
+  .rhud > div{min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+  .rhud .bar{height:6px; background:#1a1024; border:1px solid #3a1a2a; margin-top:2px} .rhud .bar i{display:block; height:100%; background:var(--rc, #ff3d7f)}
+  .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin-top:6px; font-size:10px}
+  .rcard{display:grid; grid-template-columns:28px minmax(0, 1fr); gap:6px; align-items:center; padding:3px; background:#0e0c1d; border:1px solid #2a2450; min-width:0}
+  .rcard img{border:1px solid #2a2450} .rcard b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rcard.off{opacity:.45} .rcard .bar{height:4px; background:#101c14; margin-top:3px} .rcard .bar i{display:block; height:100%; background:var(--green)}
   .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
   .cfg section:last-child{border-bottom:0}
   .cfg h3{margin:0 0 4px; font:400 11px var(--pix); letter-spacing:.08em; color:var(--cyan)}
@@ -451,7 +454,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.19</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.20</p>
 </main>
 
 <footer class="dock">
@@ -473,7 +476,7 @@
     <nav class="tabs">
       <button type="button" data-open="agent" aria-pressed="false" title="Agentes e inventário" aria-label="Agentes"><span>Agentes</span> <i id="invN"></i></button>
       <button type="button" data-open="gacha" aria-pressed="false" title="Download de agentes" aria-label="Download"><span>Download</span></button>
-      <button type="button" data-open="raid" aria-pressed="false" title="Chefões: malwares reais" aria-label="Chefões"><span>Chefões</span></button>
+      <button type="button" data-open="raid" aria-pressed="false" title="Chefões: malwares reais" aria-label="Chefões"><span>Chefões</span> <i id="rN" class="qn"></i></button>
       <button type="button" data-open="quest" aria-pressed="false" title="Contratos e presença" aria-label="Contratos"><span>Contratos</span> <i id="qN" class="qn"></i></button>
       <button type="button" class="opt2" data-open="tree" aria-pressed="false" title="Antivírus" aria-label="Antivírus"><span>Antivírus</span></button>
       <button type="button" class="opt2" data-open="stages" aria-pressed="false" title="Fases" aria-label="Fases"><span>Fases</span></button>
@@ -3328,14 +3331,288 @@ const raidReady = R => (S.raids[R.id] || 0) <= nowMs();
 const cdTxt = h => h < 24 ? `1 tentativa a cada ${h} h` : h === 24 ? '1 tentativa por dia' : h < 168 ? `1 tentativa a cada ${h / 24} dias` : h === 168 ? '1 tentativa por semana' : h < 720 ? `1 tentativa a cada ${h / 168} semanas` : '1 tentativa por mês';
 const waitTxt = ms => { const m = Math.ceil(ms / 60e3), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60); return d ? `${d}d ${h}h` : h ? `${h}h ${m % 60}min` : `${m}min`; };
 let raid = null, lastRaid = null;
-// Arena do Chefão: a luta acontece dentro da janela de Chefões. O mundo do jogo passa a ter ARENA_W de largura,
-// os agentes entram andando pela esquerda e o chefão pela direita; a barra de tarefas mostra o esquadrão em missão.
-const ARENA_W = 175, arenaCv = document.createElement('canvas'), arenaCtx = arenaCv.getContext('2d');
-arenaCv.className = 'arena'; arenaCv.width = ARENA_W * 2; arenaCv.height = 52 * 2; arenaCtx.setTransform(2, 0, 0, 2, 0, 0); arenaCtx.imageSmoothingEnabled = false;
-arenaCv.addEventListener('click', () => {});
-function raidRestore() {   // devolve o esquadrão pra barra
-  heroes.forEach(h => { if (h.bx != null) h.def.x = h.bx; });
-  resize();
+// ---------- arena do Chefão ----------
+// A luta roda numa simulação própria, vista de cima, dentro da janela de Chefões. A fase da barra de tarefas
+// continua rodando embaixo com o mesmo esquadrão; na arena lutam cópias dele com os mesmos atributos.
+const AW = 320, AH = 200, arenaCv = document.createElement('canvas'), arenaCtx = arenaCv.getContext('2d');
+arenaCv.className = 'arena'; arenaCv.width = AW * 2; arenaCv.height = AH * 2;
+const A_BOSS = {x:166, y:112}, A_FLOOR = [8, 28, 312, 194];
+const A_HOME = {fw:{x:124, y:122, f:1, gx:-12}, sc:{x:228, y:88, f:-1, gx:332}, pt:{x:78, y:146, f:1, gx:-12}};
+function arenaRnd(seed) { let s = [...seed].reduce((a, ch) => a * 31 + ch.charCodeAt(0) | 0, 7) & 0x7fffffff; return () => (s = s * 1103515245 + 12345 & 0x7fffffff) / 0x7fffffff; }
+// chão da arena, desenhado uma vez por luta: placa de circuito em ladrilhos, rack de servidores no fundo, pedestal e cristais de dados
+function arenaFloor(R) {
+  const c = document.createElement('canvas'); c.width = AW * 2; c.height = AH * 2;
+  const g = c.getContext('2d'), rnd = arenaRnd(R.id), [x0, y0, x1, y1] = A_FLOOR, ch = 16;
+  g.scale(2, 2);
+  g.fillStyle = '#06050d'; g.fillRect(0, 0, AW, AH);
+  // parede do fundo: racks de servidor
+  for (let x = 2; x < AW; x += 22) {
+    g.fillStyle = '#110f1e'; g.fillRect(x, 3, 20, y0 - 4);
+    g.fillStyle = '#1c1930'; g.fillRect(x, 3, 20, 1); g.fillRect(x, 3, 1, y0 - 4);
+    for (let y = 7; y < y0 - 3; y += 4) { g.fillStyle = '#0a0914'; g.fillRect(x + 3, y, 14, 2); g.fillStyle = '#23203a'; g.fillRect(x + 3, y, 14, .5); }
+  }
+  g.fillStyle = '#0a0914'; g.fillRect(0, 0, x0 + 2, AH); g.fillRect(x1 - 2, 0, AW - x1 + 2, AH); g.fillRect(0, y1 - 2, AW, AH - y1 + 2);
+  // piso octogonal
+  const oct = () => { g.beginPath(); g.moveTo(x0 + ch, y0); g.lineTo(x1 - ch, y0); g.lineTo(x1, y0 + ch); g.lineTo(x1, y1 - ch); g.lineTo(x1 - ch, y1); g.lineTo(x0 + ch, y1); g.lineTo(x0, y1 - ch); g.lineTo(x0, y0 + ch); g.closePath(); };
+  g.save(); oct(); g.clip();
+  const bg = g.createRadialGradient(A_BOSS.x, A_BOSS.y, 10, A_BOSS.x, A_BOSS.y, 190);
+  bg.addColorStop(0, mix('#1d1a33', R.c, .14)); bg.addColorStop(1, '#0c0b18'); g.fillStyle = bg; g.fillRect(0, 0, AW, AH);
+  for (let y = y0; y < y1; y += 12) for (let x = x0; x < x1; x += 12) {
+    g.fillStyle = `rgba(255,255,255,${(rnd() * .035).toFixed(3)})`; g.fillRect(x + .5, y + .5, 11, 11);
+    if (rnd() < .06) { g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 1, y + 1, 10, 10); }
+  }
+  g.fillStyle = rgba(R.c, .07);
+  for (let y = y0; y < y1; y += 12) g.fillRect(x0, y, x1 - x0, .5);
+  for (let x = x0; x < x1; x += 12) g.fillRect(x, y0, .5, y1 - y0);
+  // trilhas de circuito
+  g.strokeStyle = rgba(R.c, .2); g.lineWidth = .7;
+  for (let i = 0; i < 26; i++) {
+    let x = x0 + 6 + Math.floor(rnd() * 25) * 12, y = y0 + 6 + Math.floor(rnd() * 12) * 12;
+    g.beginPath(); g.moveTo(x, y);
+    for (let s = 0; s < 3; s++) { if ((s + i) % 2) x += (rnd() < .5 ? -1 : 1) * 12 * (1 + Math.floor(rnd() * 3)); else y += (rnd() < .5 ? -1 : 1) * 12 * (1 + Math.floor(rnd() * 2)); g.lineTo(x, y); }
+    g.stroke(); g.fillStyle = rgba(R.c, .35); g.fillRect(x - 1, y - 1, 2, 2);
+  }
+  // rachaduras
+  g.strokeStyle = 'rgba(0,0,0,.45)'; g.lineWidth = .6;
+  for (let i = 0; i < 7; i++) { let x = x0 + 20 + rnd() * (x1 - x0 - 40), y = y0 + 12 + rnd() * (y1 - y0 - 24); g.beginPath(); g.moveTo(x, y); for (let s = 0; s < 4; s++) { x += (rnd() - .3) * 9; y += (rnd() - .5) * 6; g.lineTo(x, y); } g.stroke(); }
+  g.restore();
+  g.strokeStyle = rgba(R.c, .55); g.lineWidth = 1; oct(); g.stroke();
+  g.strokeStyle = 'rgba(0,0,0,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x0 + ch, y0 + 1.5); g.lineTo(x1 - ch, y0 + 1.5); g.stroke();
+  // portas de entrada (esquerda e direita)
+  for (const [gx, gy] of [[x0, 134], [x1, 88]]) { g.fillStyle = '#05040a'; g.fillRect(gx - 4, gy - 12, 8, 24); g.fillStyle = rgba(R.c, .5); g.fillRect(gx - 4, gy - 12, 8, 1); g.fillRect(gx - 4, gy + 11, 8, 1); }
+  // pedestal do chefão
+  const {x:bx, y:by} = A_BOSS;
+  g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.ellipse(bx, by + 3, 40, 15, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#17152b'; g.beginPath(); g.ellipse(bx, by, 38, 14, 0, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = rgba(R.c, .45); g.lineWidth = 1; g.stroke();
+  g.fillStyle = '#100e1f'; g.beginPath(); g.ellipse(bx, by, 30, 10.5, 0, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = rgba(R.c, .25); g.lineWidth = .6;
+  for (let a = 0; a < 12; a++) { const q = a / 12 * Math.PI * 2; g.beginPath(); g.moveTo(bx + Math.cos(q) * 30, by + Math.sin(q) * 10.5); g.lineTo(bx + Math.cos(q) * 38, by + Math.sin(q) * 14); g.stroke(); }
+  // cristais de dados espalhados (longe do pedestal e dos lugares do esquadrão)
+  const homes = Object.values(A_HOME);
+  for (let n = 0, tries = 0; n < 24 && tries < 400; tries++) {
+    const x = x0 + 14 + rnd() * (x1 - x0 - 28), y = y0 + 12 + rnd() * (y1 - y0 - 20);
+    if (((x - bx) / 50) ** 2 + ((y - by) / 22) ** 2 < 1 || homes.some(p => Math.hypot(p.x - x, p.y - y) < 24)) continue;
+    const s = 3 + rnd() * 3.5, tall = s * (1.2 + rnd() * .6), base = mix('#3b4262', R.c, .22);
+    g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.ellipse(x, y + 1, s * 1.2, s * .45, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = mix(base, '#000', .35); g.beginPath(); g.moveTo(x - s, y); g.lineTo(x - s * .7, y - tall * .7); g.lineTo(x, y - tall); g.lineTo(x, y + s * .3); g.closePath(); g.fill();
+    g.fillStyle = base; g.beginPath(); g.moveTo(x, y - tall); g.lineTo(x + s * .8, y - tall * .6); g.lineTo(x + s, y); g.lineTo(x, y + s * .3); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x + .5, y - tall + 1.5, .8, tall * .5);
+    n++;
+  }
+  return c;
+}
+// animação do cenário: LEDs dos racks, pilares nos cantos, zonas corrompidas e anel do pedestal
+function arenaAmbient(R) {
+  const [x0, y0, x1, y1] = A_FLOOR;
+  for (let i = 0, x = 2; x < AW; x += 22, i++) for (let r = 0; r < 4; r++) {
+    const on = Math.sin(t * (1.3 + r * .7) + i * 1.9 + r) > .2;
+    ctx.fillStyle = on ? (r === 3 && i % 4 === 0 ? '#ff3d7f' : rgba(R.c, .9)) : '#1a1830'; ctx.fillRect(x + 16, 7.5 + r * 4, 1, 1);
+  }
+  for (const [px, py] of [[x0 + 12, y0 + 6], [x1 - 12, y0 + 6], [x0 + 12, y1 - 8], [x1 - 12, y1 - 8]]) {
+    ctx.fillStyle = '#15132a'; ctx.fillRect(px - 3, py - 14, 6, 14); ctx.fillStyle = '#23203a'; ctx.fillRect(px - 3, py - 14, 6, 1);
+    const a = .55 + .35 * Math.sin(t * 3 + px);
+    const gl = ctx.createRadialGradient(px, py - 16, 0, px, py - 16, 10); gl.addColorStop(0, rgba(R.c, .5 * a)); gl.addColorStop(1, rgba(R.c, 0));
+    ctx.fillStyle = gl; ctx.fillRect(px - 10, py - 26, 20, 20); ctx.fillStyle = rgba(R.c, a); ctx.fillRect(px - 1.5, py - 17.5, 3, 3);
+  }
+  // zonas corrompidas: pixels quentes piscando no chão (como fogo digital)
+  for (const [zx, zy, zr] of [[56, 70, 18], [262, 164, 16]]) {
+    const gl = ctx.createRadialGradient(zx, zy, 0, zx, zy, zr); gl.addColorStop(0, 'rgba(255,90,42,.28)'); gl.addColorStop(1, 'rgba(255,61,127,0)');
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.ellipse(zx, zy, zr, zr * .55, 0, 0, Math.PI * 2); ctx.fill();
+    for (let k = 0; k < 14; k++) {
+      const q = k * 2.399 + Math.floor(t * 6 + k) * .9, d = ((k * 37 + Math.floor(t * 5)) % 10) / 10;
+      ctx.fillStyle = k % 3 ? 'rgba(255,138,58,.8)' : 'rgba(255,61,127,.8)';
+      ctx.fillRect(zx + Math.cos(q) * zr * d, zy + Math.sin(q) * zr * .5 * d - ((t * 9 + k * 3) % 5), 1.5, 1.5);
+    }
+  }
+  const {x:bx, y:by} = A_BOSS, p = .4 + .3 * Math.sin(t * 2.2);
+  ctx.strokeStyle = rgba(R.c, p); ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(bx, by, 34 + Math.sin(t * 2.2), 12.5, 0, 0, Math.PI * 2); ctx.stroke();
+}
+
+function arenaUnit(k) {
+  const def = HERO_DEF.find(d => d.id === k), h = {def}, H0 = A_HOME[k];
+  return {k, h, x:H0.gx, y:H0.y, hx:H0.x, hy:H0.y, face:H0.f, hp:maxHp(h), max:maxHp(h), t:.4 + Math.random() * .5, dead:false, flash:0, lunge:0, act:'', walk:false, mv:null, react:0};
+}
+const aCd = h => { const b = bossUp; bossUp = true; const c = cdOf(h); bossUp = b; return c; };   // habilidades "contra chefes" valem na arena
+function aFloat(x, y, txt, c) { raid.fl.push({x, y, txt, c, life:1}); }
+function aBurst(x, y, c, n) { if (CFG.fx === 'low') n = Math.ceil(n / 3); for (let i = 0; i < n; i++) raid.parts.push({x, y, vx:(Math.random() - .5) * 70, vy:(Math.random() - .5) * 50 - 12, life:.4 + Math.random() * .4, c}); }
+// dano no chefão: as mesmas regras do dano em chefes na barra (talentos, vacina, subclasse do DPS)
+function aHit(d, dps) {
+  const B = raid.B; if (B.hp <= 0) return;
+  d *= (1 + tv('boss') + glob('boss')) * (1 + vaccine('boss'));
+  if (dps) { const sb = dpsSub(); if (sb === 'boss') d *= 1.8; else if (sb === 'single') d *= 1.35; }
+  B.hp -= d; if (!(B.fcd > 0)) { B.flash = .08; B.fcd = .22; }
+  if (CFG.dmg) aFloat(A_BOSS.x + (Math.random() - .5) * 20, A_BOSS.y - B.h - 6, fmtN(d), '#e7e3ff');
+  if (B.hp <= 0) { B.hp = 0; aBurst(A_BOSS.x, A_BOSS.y - B.h / 2, raid.R.c, 70); SND.play('clear'); raidFinish(true); }
+}
+function aHurt(u, dmg) {
+  const dg = tv('dodge') + (pS().dodge || 0);
+  if (dg && Math.random() < dg) { aFloat(u.x, u.y - 34, 'BLOQUEADO', '#5ca8ff'); SND.play('block'); return; }
+  dmg *= (u.k === 'fw' ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(u.k, 'red') / 100) * (1 - wear(u.k, 'red'));
+  u.hp -= dmg; u.flash = .12; aBurst(u.x, u.y - 14, '#ff3d7f', 4);
+  if (u.k === 'fw' && pT().reflect) aHit(dmg * pT().reflect, false);
+  if (u.hp <= 0) { u.hp = 0; u.dead = true; SND.play('down'); aFloat(u.x, u.y - 36, 'OFF', '#8f89b8'); }
+}
+function raidFinish(win, why) { if (raid.over) return; raid.over = win ? 1.8 : 1.2; raid.win = win; raid.why = why; raid.msg = {txt:win ? 'ELIMINADO!' : why === 'time' ? 'TEMPO ESGOTADO' : 'ESQUADRÃO CAIU', c:win ? raid.R.c : '#ff3d7f', life:2}; }
+function raidTick(dt) {
+  const A = raid, B = A.B;
+  for (let i = A.parts.length - 1; i >= 0; i--) { const p = A.parts[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 90 * dt; p.life -= dt; if (p.life <= 0) A.parts.splice(i, 1); }
+  for (let i = A.fl.length - 1; i >= 0; i--) { const f = A.fl[i]; f.y -= 14 * dt; f.life -= dt; if (f.life <= 0) A.fl.splice(i, 1); }
+  for (let i = A.scorch.length - 1; i >= 0; i--) if ((A.scorch[i].life -= dt) <= 0) A.scorch.splice(i, 1);
+  if (A.msg && (A.msg.life -= dt) <= 0) A.msg = null;
+  B.flash = Math.max(0, B.flash - dt); B.fcd = (B.fcd || 0) - dt; B.lunge = Math.max(0, B.lunge - dt * 4);
+  if (A.over) { A.over -= dt; if (A.over <= 0) raidEnd(A.win, A.why); return; }
+  const units = A.units;
+  if (A.intro) {   // entrada: o chefão materializa no pedestal e o esquadrão chega pelas portas
+    A.bIn = Math.min(1, A.bIn + dt / 1.6); let done = A.bIn >= 1;
+    for (const u of units) {
+      const dx = u.hx - u.x; u.walk = Math.abs(dx) > .5; u.face = Math.sign(dx) || A_HOME[u.k].f;
+      u.x += Math.sign(dx) * Math.min(Math.abs(dx), 52 * dt); if (u.walk) done = false; else u.face = A_HOME[u.k].f;
+    }
+    if (done) { A.intro = false; A.msg = {txt:'LUTA!', c:A.R.c, life:1.2}; SND.play('boss'); }
+    return;
+  }
+  A.time += dt;
+  if (A.time >= RAID_TIME) return raidFinish(false, 'time');
+  const alive = units.filter(u => !u.dead);
+  if (!alive.length) return raidFinish(false, 'down');
+  const rage = RAID_TIME - A.time < 20;   // reta final: o chefão acelera
+  for (const u of units) {
+    u.flash = Math.max(0, u.flash - dt); u.lunge = Math.max(0, u.lunge - dt * 5); u.walk = false;
+    if (u.dead) continue;
+    u.hp = Math.min(u.max, u.hp + u.max * ((u.k === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
+    // desvio das áreas de impacto e volta pro lugar
+    if (u.react > 0 && (u.react -= dt) <= 0 && u.zone) {
+      const z = u.zone, q = Math.random() * Math.PI * 2;
+      u.mv = {x:Math.max(A_FLOOR[0] + 12, Math.min(A_FLOOR[2] - 12, z.x + Math.cos(q) * (z.r + 9))), y:Math.max(A_FLOOR[1] + 20, Math.min(A_FLOOR[3] - 6, z.y + Math.sin(q) * (z.r + 9) * .6))};
+    }
+    const goal = u.mv || {x:u.hx, y:u.hy}, dx = goal.x - u.x, dy = goal.y - u.y, dist = Math.hypot(dx, dy);
+    if (dist > .6) { const sp = Math.min(dist, (u.mv ? 62 : 34) * dt); u.x += dx / dist * sp; u.y += dy / dist * sp; u.walk = true; if (Math.abs(dx) > .5) u.face = Math.sign(dx); }
+    else if (!u.mv) u.face = A_HOME[u.k].f;
+    if (u.walk) continue;   // andando não ataca
+    u.face = Math.sign(A_BOSS.x - u.x) || 1;
+    u.t -= dt; if (u.t > 0) continue;
+    const h = u.h;
+    if (u.k === 'pt' && pS().heal) {
+      const hurt = alive.filter(a => a.hp < a.max * .8).sort((a, b) => a.hp / a.max - b.hp / b.max)[0];
+      if (hurt) { A.shots.push({x:u.x + u.face * 8, y:u.y - 22, to:hurt, sp:140, heal:atk(h) * 4, c:'#6ee7a8'}); u.t = aCd(h); u.lunge = 1; u.act = 'heal'; continue; }
+    }
+    u.t = Math.random() < wear(u.k, 'dbl') ? aCd(h) * .12 : aCd(h); u.lunge = 1; u.act = 'atk';
+    if (u.k === 'fw') { aHit(atk(h), false); aBurst(A_BOSS.x - B.w * .35, u.y - 14, '#9fd0ff', 5); }
+    else if (u.k === 'sc') {
+      const G = pG(), sh = equipped('sc').shot || {}, crit = Math.random() < (G.crit || 0) + tv('crit') + glob('crit'), d = atk(h) * (crit ? G.critX || 2 : 1);
+      A.shots.push({x:u.x + u.face * 14, y:u.y - 19, sp:sh.style === 'laser' ? 420 : 220, dmg:d, crit, dps:true, c:sh.c || '#ffb454'}); SND.play('shot');
+      for (let m = 1; m <= (G.multishot || 0); m++) A.shots.push({x:u.x + u.face * 12, y:u.y - 19 + (m % 2 ? -4 : 4), sp:220, dmg:d * .5, dps:true, c:sh.c || '#ffb454'});
+    }
+    else A.shots.push({x:u.x + u.face * 8, y:u.y - 22, sp:150, dmg:atk(h), c:'#6ee7a8'});
+  }
+  // projéteis: dos agentes vão no chefão; do chefão, no alvo; orbes de cura, no aliado
+  for (let i = A.shots.length - 1; i >= 0; i--) {
+    const s = A.shots[i], tx = s.to ? s.to.x : A_BOSS.x, ty = s.to ? s.to.y - 16 : A_BOSS.y - B.h * .5, dx = tx - s.x, dy = ty - s.y, d = Math.hypot(dx, dy), st = s.sp * dt;
+    if (d > st + (s.to ? 1 : B.w * .3)) { s.x += dx / d * st; s.y += dy / d * st; continue; }
+    A.shots.splice(i, 1);
+    if (s.heal) { if (!s.to.dead) { s.to.hp = Math.min(s.to.max, s.to.hp + s.heal); aFloat(s.to.x, s.to.y - 36, '+' + fmtN(s.heal), '#6ee7a8'); aBurst(s.to.x, s.to.y - 14, '#6ee7a8', 6); } }
+    else if (s.boss) { if (!s.to.dead) aHurt(s.to, s.dmg); }
+    else { if (s.crit) aFloat(A_BOSS.x, A_BOSS.y - B.h - 14, 'CRIT', '#ffb454'); aBurst(s.x, s.y, s.c, 3); aHit(s.dmg, s.dps); }
+  }
+  if (A.over) return;
+  // chefão: golpe no tanque (ou em quem estiver de pé) e, de tempos em tempos, áreas de impacto marcadas no chão
+  B.t -= dt * (rage ? 1.35 : 1);
+  if (B.t <= 0) {
+    B.t = B.cd; B.lunge = 1;
+    const tank = alive.find(u => u.k === 'fw'), tg = tank || pick(alive);
+    A.shots.push({x:A_BOSS.x + (tg.x < A_BOSS.x ? -B.w * .3 : B.w * .3), y:A_BOSS.y - B.h * .5, to:tg, sp:200, boss:true, dmg:B.atk, c:A.R.c});
+  }
+  B.st -= dt * (rage ? 1.35 : 1);
+  if (B.st <= 0) {
+    B.st = 6.5; const tg = alive.slice().sort(() => Math.random() - .5).slice(0, Math.min(2, alive.length));
+    for (const u of tg) { const z = {x:u.x, y:u.y - 2, r:15, w:1.4, tot:1.4}; A.zones.push(z); u.zone = z; u.react = .3 + Math.random() * .7; }
+    SND.play('block');
+  }
+  for (let i = A.zones.length - 1; i >= 0; i--) {
+    const z = A.zones[i]; if ((z.w -= dt) > 0) continue;
+    A.zones.splice(i, 1); A.scorch.push({x:z.x, y:z.y, r:z.r, life:3});
+    for (let k = 0; k < 14; k++) aBurst(z.x + (Math.random() - .5) * z.r * 1.6, z.y + (Math.random() - .5) * z.r * .8, k % 2 ? '#ff3d7f' : A.R.c, 1);
+    for (const u of units) {
+      if (u.zone === z) { u.zone = null; setTimeout(() => { if (u.mv && !u.zone) u.mv = null; }, 500); }
+      if (!u.dead && ((u.x - z.x) / z.r) ** 2 + ((u.y - z.y) / (z.r * .6)) ** 2 < 1) aHurt(u, B.atk * 1.6);
+    }
+  }
+}
+// sprite de agente na arena (as mesmas folhas da barra, menores, virando pro lado do alvo)
+function drawArenaUnit(u) {
+  const aid = slotAid(u.k), SI = SHEET_IMG[aid], k = 1.05;
+  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(u.x, u.y, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
+  let top = u.y - 30;
+  if (sheetReady(SI)) {
+    let P, L = u.lunge;
+    if (u.dead) P = SI.a[0];
+    else if (u.walk) P = SI.w.length >= 4 ? SI.w[((Math.floor(t * 9 + u.hx) % SI.w.length) + SI.w.length) % SI.w.length] : SI.w[0];
+    else if (u.act === 'heal' && L > 0 && SI.heal) P = SI.heal[L > .75 ? 1 : L > .5 ? 2 : L > .25 ? 3 : 4];
+    else if (L > 0 && SI.atk && u.k !== 'sc') { const n = SI.atk.length; P = n === 5 ? (L > .66 ? SI.atk[2] : L > .33 ? SI.atk[3] : L > .05 ? SI.atk[4] : SI.atk[1]) : SI.atk[Math.min(n - 1, 1 + Math.floor((1 - L) * (n - 1)))]; }
+    else if (L > .35) P = SI.a[SI.a[1] ? 1 : 0];
+    else P = SI.atk ? SI.atk[0] : SI.a[0];
+    const bob = u.walk && SI.w.length < 4 ? -Math.abs(Math.sin(t * 8 + u.hx)) : 0, dx = u.k === 'fw' ? u.lunge * 5 * u.face : -u.lunge * 1.5 * u.face;
+    ctx.save(); ctx.translate(u.x + dx, u.y + bob); ctx.scale(u.face * k, k);
+    if (u.dead) ctx.globalAlpha = .25 + .1 * Math.sin(t * 6);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(P.im, -P.fx, -P.h, P.w, P.h);
+    if (!u.dead && u.flash > 0 && P.white) { ctx.globalAlpha = .45; ctx.drawImage(P.white, -P.fx, -P.h, P.w, P.h); }
+    ctx.restore(); ctx.globalAlpha = 1; ctx.imageSmoothingEnabled = false;
+    top = u.y - P.h * k;
+  } else {
+    const im = heroSpr(u.k).n[0][0]; ctx.save(); ctx.translate(u.x, u.y); ctx.scale(u.face * k, k); if (u.dead) ctx.globalAlpha = .25; ctx.drawImage(im, -im.width / 2, -im.height); ctx.restore(); ctx.globalAlpha = 1;
+  }
+  if (!u.dead) { const p = u.hp / u.max; ctx.fillStyle = '#000'; ctx.fillRect(u.x - 8, top - 4, 16, 2.5); ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(u.x - 8, top - 4, 16 * p, 1.5); }
+}
+function drawArenaBoss() {
+  const A = raid, B = A.B, R = A.R, spr = SPR['raid:' + R.id], s = B.sc, {x, y} = A_BOSS;
+  const dead = A.over && A.win, a = A.intro ? A.bIn : dead ? Math.max(0, A.over / 1.8) : 1;
+  const hov = Math.sin(t * 2) * 1.2, lx = -B.lunge * 3 * (A.units.some(u => u.k === 'fw' && !u.dead) ? 1 : 0);
+  ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.ellipse(x, y, B.w * .42, 5, 0, 0, Math.PI * 2); ctx.fill();
+  const gx = x - B.w / 2 + lx, gy = y - B.h - 2 + hov;
+  // entrada e morte: o sprite aparece/some em faixas deslocadas (glitch)
+  const glitch = A.intro || dead;
+  ctx.globalAlpha = a;
+  if (glitch) for (let r = 0; r < spr.height; r++) { const off = Math.random() < (1 - a) * .8 ? (Math.random() - .5) * 14 * (1 - a) : 0; ctx.drawImage(spr, 0, r, spr.width, 1, gx + off, gy + r * s, B.w, s); }
+  else ctx.drawImage(spr, gx, gy, B.w, B.h);
+  if (B.flash > 0 && A.bw) { ctx.globalAlpha = .55; ctx.drawImage(A.bw, gx, gy, B.w, B.h); }
+  ctx.globalAlpha = 1;
+  // placa com o nome e a vida
+  const nm = R.n; ctx.font = '8px Silkscreen, monospace'; const tw = ctx.measureText(nm).width + 10, py = gy - 16;
+  ctx.fillStyle = 'rgba(8,7,16,.85)'; ctx.fillRect(x - tw / 2, py, tw, 10); ctx.strokeStyle = rgba(R.c, .7); ctx.lineWidth = .6; ctx.strokeRect(x - tw / 2 + .3, py + .3, tw - .6, 9.4);
+  text(nm, x, py + 1, R.c, true);
+  const bw = 44, p = B.hp / B.max; ctx.fillStyle = '#000'; ctx.fillRect(x - bw / 2, py + 11, bw, 3); ctx.fillStyle = R.c; ctx.fillRect(x - bw / 2, py + 11, bw * p, 2);
+}
+function drawArena() {
+  const A = raid, R = A.R, B = A.B;
+  ctx = arenaCtx; ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(A.floor, 0, 0, AW, AH);
+  arenaAmbient(R);
+  for (const z of A.scorch) { ctx.fillStyle = `rgba(20,4,12,${(.5 * Math.min(1, z.life)).toFixed(2)})`; ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r * .8, z.r * .45, 0, 0, Math.PI * 2); ctx.fill(); }
+  for (const z of A.zones) {   // área marcada: o círculo de dentro cresce até explodir
+    const p = 1 - z.w / z.tot, pul = .5 + .5 * Math.sin(t * 20);
+    ctx.fillStyle = `rgba(255,61,127,${(.12 + .18 * p).toFixed(2)})`; ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r, z.r * .6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = `rgba(255,61,127,${(.6 + .4 * pul).toFixed(2)})`; ctx.lineWidth = .8; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,138,58,.35)'; ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r * p, z.r * .6 * p, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  // ordem por profundidade (quem está mais embaixo na tela fica na frente)
+  const list = A.units.map(u => ({y:u.y, d:() => drawArenaUnit(u)})); list.push({y:A_BOSS.y, d:drawArenaBoss});
+  list.sort((a, b) => a.y - b.y).forEach(o => o.d());
+  for (const s of A.shots) {
+    ctx.fillStyle = s.c; ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(s.x, s.y, s.boss ? 3.2 : 2.4, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.fillStyle = s.boss ? '#fff' : s.heal ? '#d8ffe9' : '#fff6d8'; ctx.fillRect(s.x - .8, s.y - .8, 1.6, 1.6);
+  }
+  for (const p of A.parts) { ctx.globalAlpha = Math.min(1, p.life * 2.5); ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, 1.5, 1.5); } ctx.globalAlpha = 1;
+  for (const f of A.fl) { ctx.globalAlpha = Math.min(1, f.life * 2); text(f.txt, f.x, f.y, f.c, true); } ctx.globalAlpha = 1;
+  // faixa do topo: CHEFE + tempo (fica vermelha na reta final)
+  const left = Math.max(0, RAID_TIME - A.time), rage = !A.intro && left < 20, lbl = `CHEFE  ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
+  ctx.font = '8px Silkscreen, monospace'; const bw = ctx.measureText(lbl).width + 26, bx = AW / 2 - bw / 2;
+  ctx.fillStyle = rage && Math.sin(t * 10) > 0 ? '#c8173f' : '#8e1631'; ctx.beginPath(); ctx.moveTo(bx - 6, 3); ctx.lineTo(bx + bw + 6, 3); ctx.lineTo(bx + bw, 15); ctx.lineTo(bx, 15); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ff6a8e'; ctx.fillRect(bx - 4, 3, bw + 8, .8); ctx.fillStyle = '#4a0b1c'; ctx.fillRect(bx, 14.2, bw, .8);
+  text(lbl, AW / 2, 5, '#fff2d6', true);
+  if (A.intro) text('O ESQUADRÃO ESTÁ ENTRANDO…', AW / 2, AH - 14, '#8f89b8', true);
+  if (A.msg) { ctx.globalAlpha = Math.min(1, A.msg.life * 2); ctx.fillStyle = 'rgba(6,5,13,.7)'; ctx.fillRect(0, AH / 2 - 12, AW, 20); text(A.msg.txt, AW / 2, AH / 2 - 6, A.msg.c, true); ctx.globalAlpha = 1; }
+  ctx = stripCtx;
 }
 let stT = 0, farmLeft = 0;
 let t = 0, scroll = 0, spawnT = 1, spawned = 0, bossUp = false, banner = null, speed = 1, autoT = 0, fails = 0, obsCount = 0;
@@ -3819,7 +4096,6 @@ function tryRevive(h) {
   return true;
 }
 function startStage(s, msg) {
-  if (raid) { raid = null; raidRestore(); }   // escolher outra fase no meio de um chefão abandona a luta (a tentativa já foi gasta)
   S.stage = s; S.kills = 0; spawned = 0; bossUp = false; enemies = []; shots = []; spawnT = 1.5; stT = 0;
   heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); h.shield = 0; }); supReset();
   showBanner(msg || stageLabel(s) + ' ' + STYPES[stageType(s)].n.toUpperCase(), STYPES[stageType(s)].c);
@@ -3853,22 +4129,18 @@ function startRaid(id) {
   const R = raidOf(id);
   if (!R || !raidOpen(R) || !raidReady(R) || raid) return;
   S.raids[R.id] = nowMs() + R.cd * 3600e3;   // a tentativa é gasta ao entrar
-  raid = {R, back:S.stage, intro:true};
-  W = ARENA_W;
-  heroes.forEach((h, i) => { h.bx = h.bx ?? h.def.x; h.def.x = h.bx - 125 - i * 6; });   // começam fora da arena, à esquerda
-  const d = stagePos(Math.min(R.L, CAMPAIGN + 60)).d, sz = 3, spr = SPR['raid:' + R.id];
-  enemies = []; shots = []; spawned = 0; stT = 0; bossUp = true;
-  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
+  const d = stagePos(Math.min(R.L, CAMPAIGN + 60)).d, spr = SPR['raid:' + R.id], sc = Math.min(3.4, 52 / spr.height);
   const hp = ENEMY.hp * ENEMY.hpG ** R.L * ENEMY.djHp ** d * 60;
-  enemies.push({tn:'raid:' + R.id, raid:true, boss:true, w:spr.width * sz, h:spr.height * sz, x:ARENA_W + 4, hp, max:hp,
-    atk:ENEMY.atk * ENEMY.atkG ** R.L * ENEMY.djAtk ** d * 2.2, cd:1.4, t:1.5, armored:false, reward:0, flash:0, lunge:0, atStop:false});
-  showBanner(`!! ${R.n} (${R.y}) !!`, R.c);
-  say(`Chefão <span style="color:${R.c}">${R.n}</span> iniciado. Próxima tentativa em ${waitTxt(R.cd * 3600e3)}.`, true);
+  const bw = document.createElement('canvas'); bw.width = spr.width; bw.height = spr.height;
+  const g = bw.getContext('2d'); g.drawImage(spr, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#fff'; g.fillRect(0, 0, bw.width, bw.height);
+  raid = {R, intro:true, bIn:0, time:0, over:0, floor:arenaFloor(R), bw, units:['fw', 'sc', 'pt'].map(arenaUnit), shots:[], parts:[], fl:[], zones:[], scorch:[], msg:null,
+    B:{hp, max:hp, atk:ENEMY.atk * ENEMY.atkG ** R.L * ENEMY.djAtk ** d * 2.2, cd:1.4, t:1.5, st:4, sc, w:spr.width * sc, h:spr.height * sc, flash:0, lunge:0}};
+  say(`Chefão <span style="color:${R.c}">${R.n}</span> iniciado na janela de Chefões. Próxima tentativa em ${waitTxt(R.cd * 3600e3)}.`, true);
   openPanel('raid', true); save();
 }
 function raidEnd(win, why) {
   const R = raid.R, out = [];
-  raid = null; raidRestore();
+  raid = null;
   if (win) {
     const lv = Math.min(R.L, S.maxStage) + 1, tot = R.w.reduce((a, b) => a + b, 0);
     for (let i = 0; i < R.items; i++) {
@@ -3893,26 +4165,25 @@ function raidEnd(win, why) {
     say(`<span style="color:${R.c}">${R.n}</span> escapou (${why === 'time' ? 'tempo esgotado' : why === 'quit' ? 'luta abandonada' : 'esquadrão derrubado'}). Tentativa gasta.`, true);
   }
   lastRaid = {id:R.id, win, out, at:nowMs()};
-  const back = S.stage; enemies = []; startStage(back, win ? `${R.n} ELIMINADO` : `${R.n} ESCAPOU`);
   if (openP === 'raid') renderPanel();
   save();
 }
 function raidFightView() {
   const R = raid.R;
-  return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y}</small>
-      <div class="bar"><i id="rHp"></i></div></div><b id="rT"></b></div>
+  const cards = raid.units.map((u, i) => `<div class="rcard"><img src="${bustOf(slotAid(u.k))}" width="28" height="28" alt=""><div><b>${u.h.def.name}</b><div class="bar"><i id="rq${i}"></i></div></div></div>`).join('');
+  return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y} · poder ${fmtN(raidPow(R))}</small>
+      <div class="bar"><i id="rHp"></i></div></div><b id="rHpT"></b></div>
     <div id="arenaHost"></div>
-    <div class="rsq" id="rSq"></div>
-    <div class="opts"><span class="hint" id="rMsg"></span><button type="button" data-raidquit>Abandonar luta</button></div>`;
+    <div class="rsq">${cards}</div>
+    <div class="opts"><span class="hint">A fase continua rodando na barra enquanto isso.</span><button type="button" data-raidquit>Abandonar luta</button></div>`;
 }
 function raidLive() {
+  const rn = $('#rN'); if (rn) rn.textContent = raid ? '!' : '';
   if (!raid || openP !== 'raid') return;
-  const e = enemies[0], hp = $('#rHp'), tt = $('#rT'), sq = $('#rSq'), m = $('#rMsg');
-  if (hp) hp.style.width = (e ? Math.max(0, e.hp / e.max) * 100 : 0) + '%';
-  const left = Math.max(0, RAID_TIME - stT);
-  if (tt) tt.textContent = `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
-  if (sq) sq.innerHTML = heroes.map(h => `<div>${h.def.name}<div class="bar"><i style="width:${h.dead ? 0 : h.hp / maxHp(h) * 100}%"></i></div></div>`).join('');
-  if (m) m.textContent = raid.intro ? 'O esquadrão está chegando…' : 'Derrube o chefão antes do tempo acabar.';
+  const B = raid.B, hp = $('#rHp'), ht = $('#rHpT');
+  if (hp) hp.style.width = Math.max(0, B.hp / B.max) * 100 + '%';
+  if (ht) ht.textContent = Math.ceil(Math.max(0, B.hp / B.max) * 100) + '%';
+  raid.units.forEach((u, i) => { const el = $('#rq' + i); if (el) { el.style.width = (u.dead ? 0 : u.hp / u.max * 100) + '%'; el.parentElement.parentElement.parentElement.classList.toggle('off', u.dead); } });
 }
 function raidView() {
   if (raid) return raidFightView();
@@ -4077,7 +4348,7 @@ const AI_LINES = {
 };
 function metaTick(dt) {
   goldT -= dt;
-  if (!gold && goldT <= 0 && !raid) { gold = {x: W + 6, y: 10, life: 12}; showBanner('VÍRUS DOURADO! CLIQUE NELE', '#ffd84a'); }
+  if (!gold && goldT <= 0) { gold = {x: W + 6, y: 10, life: 12}; showBanner('VÍRUS DOURADO! CLIQUE NELE', '#ffd84a'); }
   if (gold) { gold.life -= dt; gold.x -= (W + 20) / 12 * dt; if (gold.life <= 0 || gold.x < -10) { gold = null; } if (!gold) goldT = 300 + Math.random() * 420; }
   chatT -= dt;
   if (chatT <= 0) {
@@ -4157,17 +4428,10 @@ function codexView() {
 
 function update(dt) {
   t += dt; stT += dt;
-  if (raid && raid.intro) {   // entrada: agentes andam até a posição, o chefão vem da direita; o relógio da luta não corre
-    stT -= dt; let done = true;
-    for (const h of heroes) { h.def.x = Math.min(h.bx, h.def.x + 55 * dt); if (h.def.x < h.bx) done = false; }
-    const e = enemies[0], stop = heroes.reduce((a, h) => Math.max(a, h.bx + h.def.w), 0) + 2;
-    if (e) { e.x = Math.max(stop, e.x - 32 * dt); if (e.x > stop) done = false; }
-    if (done) { raid.intro = false; showBanner('LUTA!', raid.R.c); SND.play('boss'); }
-    return;
-  }
-  if (stT > (raid ? RAID_TIME : STAGE_TIME)) { if (raid) raidEnd(false, 'time'); else rollback('time'); return; }
+  if (raid) raidTick(dt);   // a luta do Chefão roda em paralelo, na janela de Chefões
+  if (stT > STAGE_TIME) { rollback('time'); return; }
   const alive = heroes.filter(h => !h.dead);
-  if (!alive.length) { if (raid) raidEnd(false); else rollback(); return; }
+  if (!alive.length) { rollback(); return; }
   // Os vírus param sempre na linha do tanque (o agente mais à frente), mesmo se ele cair: ninguém passa por cima
   // de um agente caído. Quem cai fica fora até a próxima fase (ainda não existe suporte que revive).
   const front = alive.reduce((a, h) => h.def.x > a.def.x ? h : a);
@@ -4506,24 +4770,8 @@ function drawCore(sc, panic) {
   if (danger && Math.sin(t * 8) > 0) text('!', cx + 1, top - 20, '#ff3d7f', true);
 }
 function draw() {
-  if (!raid) { ctx = stripCtx; drawWorld(); return; }
-  ctx = arenaCtx; drawWorld();
-  ctx = stripCtx; drawAway();
-}
-// Barra de tarefas durante o Chefão: núcleo sozinho, aviso do esquadrão em missão e a vida do chefão
-function drawAway() {
-  const sw = cv.width / RES, R = raid.R, e = enemies[0], sc = sec();
-  ctx.setTransform(RES, 0, 0, RES, 0, 0);
-  const sky = ctx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#07060f'); sky.addColorStop(1, mix('#0b0a16', R.c, .22));
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, sw, H);
-  ctx.fillStyle = rgba(R.c, .5); ctx.fillRect(0, GROUND, sw, 1);
-  const W0 = W; W = sw; drawCore(sc, false); W = W0;
-  const cx = sw / 2;
-  text(raid.intro ? 'ESQUADRÃO A CAMINHO' : 'ESQUADRÃO EM COMBATE', cx, 8, '#e7e3ff', true);
-  text(R.n, cx, 18, R.c, true);
-  if (e) { const bw = Math.min(160, sw * .4), p = Math.max(0, e.hp / e.max); ctx.fillStyle = '#000'; ctx.fillRect(cx - bw / 2, 30, bw, 3); ctx.fillStyle = R.c; ctx.fillRect(cx - bw / 2, 30, bw * p, 3); }
-  const left = Math.max(0, RAID_TIME - stT); text(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`, cx, 36, '#8f89b8', true);
-  if (Math.sin(t * 4) > 0) text('abrir chefões ›', sw - 44, 40, '#8f89b8', true);
+  ctx = stripCtx; drawWorld();
+  if (raid && arenaCv.isConnected) drawArena();
 }
 function drawWorld() {
   const sc = sec(), tint = sc.tint, panic = stagePos(S.stage).d === 4, SC = sceneOf(sc.idx, tint, panic);
@@ -4550,10 +4798,10 @@ function drawWorld() {
     ctx.fillStyle = rgba(tint, .25 + .65 * a * a); ctx.fillRect(nx, GROUND + 2, 1, 1);
   }
 
-  if (!raid) drawCore(sc, panic);
+  drawCore(sc, panic);
   for (const h of heroes) {
     const k = h.def.id;
-    const walking = !!(raid && raid.intro && h.bx != null && h.def.x < h.bx - .5);   // só andam entrando na arena do Chefão
+    const walking = false;
     const fr = walking ? Math.floor(t * 7 + h.def.x) % 2 : 0;
     const SI = SHEET_IMG[slotAid(k)];
     if (sheetReady(SI)) {
@@ -5385,11 +5633,11 @@ function renderHud() {
   bonusCache = null;
   const s = sec();
   document.querySelector('.dock').style.setProperty('--sec', s.tint);
-  $('#stgBtn').textContent = raid ? `CHEFÃO · ${raid.R.n}` : stageLabel(S.stage) + ' · ' + ST().n.toUpperCase();
-  $('#stgBtn').title = raid ? `${raid.R.n} (${raid.R.y})` : `${stageLabel(S.stage)} · ${s.name} · ${ST().n}. Clique pra escolher a fase.`;
+  $('#stgBtn').textContent = stageLabel(S.stage) + ' · ' + ST().n.toUpperCase();
+  $('#stgBtn').title = `${stageLabel(S.stage)} · ${s.name} · ${ST().n}. Clique pra escolher a fase.`;
   $('#secBar').style.width = (bossUp ? 100 : S.kills / ST().count * 100) + '%';
-  const left = Math.max(0, (raid ? RAID_TIME : STAGE_TIME) - stT);
-  $('#secTxt').textContent = (raid ? raid.R.n : bossUp ? 'BOSS' : S.kills + '/' + ST().count) + ` · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
+  const left = Math.max(0, STAGE_TIME - stT);
+  $('#secTxt').textContent = (bossUp ? 'BOSS' : S.kills + '/' + ST().count) + ` · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
   $('#def').textContent = fmtN(S.def);
   $('#data').textContent = fmtNum(S.data);
   $('#pow').textContent = fmtN(power());
@@ -5413,7 +5661,7 @@ function offline(ms) {
 
 function resize() {
   const w = cv.parentElement.clientWidth, sw = Math.max(160, Math.floor(w / SCALE));
-  W = raid ? ARENA_W : sw;   // durante o Chefão o mundo tem a largura da arena
+  W = sw;
   // canvas em resolução dobrada: a lógica continua em W×H, mas sprites das fichas e cenário ganham detalhe
   cv.width = sw * RES; cv.height = H * RES;
   cv.style.width = sw * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
@@ -5423,7 +5671,7 @@ function resize() {
 new ResizeObserver(resize).observe(cv.parentElement);
 // clique no vírus dourado
 const goldHit = ev => { if (!gold) return false; const r = cv.getBoundingClientRect(), x = (ev.clientX - r.left) / SCALE, y = (ev.clientY - r.top) / SCALE; return Math.abs(x - gold.x) < 10 && Math.abs(y - gold.y) < 9; };
-cv.addEventListener('click', ev => { if (raid) { openPanel('raid', true); return; } if (goldHit(ev)) catchGold(); });
+cv.addEventListener('click', ev => { if (goldHit(ev)) catchGold(); });
 cv.addEventListener('mousemove', ev => { cv.style.cursor = goldHit(ev) ? 'pointer' : ''; });
 resize();
 

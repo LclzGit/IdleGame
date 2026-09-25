@@ -23,6 +23,15 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.20: arena do Chefão (vista de cima) e fase rodando junto
+
+- A luta contra o chefão agora é uma arena vista de cima dentro da janela de Chefões: piso de placa de circuito, racks de servidor no fundo, cristais de dados, zonas corrompidas e o chefão no pedestal central com nome e vida.
+- Faixa vermelha no topo com **CHEFE** e o tempo; nos últimos 20 s ela pisca e o chefão fica mais rápido.
+- O esquadrão entra pelas portas da arena. O tanque golpeia de perto, o DPS atira do outro lado e o suporte cura com orbes.
+- O chefão ataca o tanque e marca áreas de impacto no chão. Os agentes tentam sair delas antes da explosão.
+- **A fase da barra não pausa mais**: ela continua rodando embaixo enquanto a luta acontece. O ícone de Chefões mostra um "!" durante a luta.
+- Cartões do esquadrão com retrato e vida embaixo da arena, e o botão **Abandonar luta**.
+
 ## v1.19: chefão na janela de Chefões
 
 - Ao clicar em **Enfrentar**, a luta abre dentro da própria janela de Chefões (mesmo tamanho dos outros menus): arena com o chefão, barra de vida, tempo e a vida de cada agente.
