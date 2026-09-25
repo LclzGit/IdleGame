@@ -23,6 +23,16 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.18: suportes trocáveis
+
+- O slot de suporte agora é trocável como tanque e ataque: **Download · Suportes** (mesmas chances e garantias), aba Suportes na Coleção com versões e segunda passiva, botão "trocar agente" no painel.
+- 9 suportes novos além da PATCHER (inicial), cada um com uma habilidade:
+  - ★3 **DEBUGGER** (barreira de 15% no tanque a cada 6 s), **PING** (+12% vel. de ataque, +20% contra chefe), **CRAWLER** (+15% drop de itens, +10% pacotes).
+  - ★4 **HOTFIX** (frasco a cada 5 s: cura 3%/s por 4 s e envenena o vírus da frente), **OVERVOLT** (+40% de dano por 3 s a cada 10 s), **STREAM** (+25% créditos, +15% definições).
+  - ★5 **PROXY** (desvia 25% dos ataques), **ENCRYPT** (barreira de 20% no esquadrão a cada 12 s), **ROLLBACK** (revive o primeiro agente que cair na fase com 50% da vida).
+- Barreira aparece como anel ciano; sobrecarga e veneno com partículas verdes; textos flutuantes REMENDO / SOBRECARGA / CRIPTOGRAFADO / RESTAURADO.
+- Arte provisória desenhada por código até chegarem as imagens (prompts em `art/prompts-suportes.md`). Conquista nova: "Equipe de apoio".
+
 ## v1.17: PATCHER — elenco inteiro com arte nova
 
 - PATCHER (suporte): retrato novo e animações da arte do autor. Guarda com o cajado; **cura** um aliado ferido com a folha de cura (ergue o cajado, o orbe brilha, solta partículas); **ataca** com o pulso de apoio (finca o cajado e solta um anel de energia).

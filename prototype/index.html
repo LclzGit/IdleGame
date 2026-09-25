@@ -446,7 +446,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.17</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.18</p>
 </main>
 
 <footer class="dock">
@@ -932,16 +932,38 @@ const GUNNERS = [
     art:{w:30, base:'#ffb454', line:'#10120a', cloth:1, draw:tankMode({A:'#4a5230', A2:'#30361e', B:'#6e7446', acc:'#c98a3a', rack:'#ff3a3a', metal:'#2e3320'})}},
 ];
 GUNNERS[0].art = HERO_ART.sc;
-// Suportes: por enquanto só o PATCHER. Aparece na Coleção; novos suportes entram aqui e no Download.
+// Suportes: um por esquadrão, trocável como tanque e ataque. Cada um tem uma habilidade própria (ver supportTick em logic.js).
+// passive: heal (cura), barrier/bcd (barreira no tanque), teamSpd/bossSpd, drop/chipX, hot/poison/hcd (frasco),
+// burst/ocd (sobrecarga), gold/def, dodge, teamBarrier/ecd, revive.
+const PSTAR = {3:{hp:70, atk:3}, 4:{hp:80, atk:4}, 5:{hp:95, atk:5}};
 const SUPPORTS = [
-  {id:'pt', name:'PATCHER', stars:3, role:'cajado de nanobots', ptxt:'Nanobots: cura o agente mais ferido do esquadrão.'},
+  {id:'pt', name:'PATCHER', stars:3, role:'cajado de nanobots', passive:{heal:1}, ptxt:'Nanobots: cura o agente mais ferido do esquadrão.'},
+  {id:'debugger', name:'DEBUGGER', stars:3, role:'chave inglesa e drone de reparo', passive:{barrier:.15, bcd:6}, ptxt:'Remendo: a cada 6 s dá ao tanque uma barreira de 15% da vida dele.',
+    art:{w:30, base:'#5ce1e6', line:'#10141c', cloth:1, draw:soldier({A:'#4a5a70', A2:'#2e3a4a', B:'#8a9ab0', acc:'#5ce1e6', hair:'#d8542a', skin:'#f1c7a8', weapon:'rifle', drone:'#5a6a7a', metal:'#2a3040'})}},
+  {id:'ping', name:'PING', stars:3, role:'rádio e tablet de alvos', passive:{teamSpd:.12, bossSpd:.08}, ptxt:'Chamar alvo: esquadrão ataca 12% mais rápido (20% contra chefes).',
+    art:{w:30, base:'#5ca8ff', line:'#0a0e1a', cloth:1, draw:soldier({A:'#2a3a6a', A2:'#1a2448', B:'#4a5a8a', acc:'#5ca8ff', hair:'#1a1a1a', skin:'#6a4430', pack:'#223052', weapon:'rifle', metal:'#1e2638'})}},
+  {id:'crawler', name:'CRAWLER', stars:3, role:'mapa holográfico', passive:{drop:.15, chipX:.1}, ptxt:'Varredura de rotas: +15% de drop de itens e +10% de pacotes de download.',
+    art:{w:30, base:'#ffb454', line:'#10121e', cloth:2, draw:soldier({A:'#2a3a6a', A2:'#1c2848', B:'#c8ccd8', acc:'#e0a040', hair:'#c8ccd8', skin:'#f1c7a8', scarf:'#2a3a6a', weapon:'bow', metal:'#3a3f5c'})}},
+  {id:'hotfix', name:'HOTFIX', stars:4, role:'frascos e mochila de reagentes', passive:{hot:.03, poison:.02, hcd:5}, ptxt:'Frasco: a cada 5 s cura o esquadrão aos poucos (3%/s por 4 s) e envenena o vírus da frente.',
+    art:{w:30, base:'#6ee7a8', line:'#120e0a', cloth:1, draw:soldier({A:'#5a3e2c', A2:'#3a281c', B:'#7a8a5a', acc:'#6ee7a8', hair:'#6a4a2a', skin:'#e8b896', pack:'#5a6a6a', weapon:'crossbow', metal:'#3a3228'})}},
+  {id:'overvolt', name:'OVERVOLT', stars:4, role:'robô-bateria', passive:{burst:.4, ocd:10}, ptxt:'Sobrecarga: a cada 10 s o esquadrão causa +40% de dano por 3 s.',
+    art:{w:30, base:'#6ee7a8', line:'#0c140f', cloth:1, draw:mech({A:'#4a5230', A2:'#30361e', B:'#6e7446', C:'#6ee7a8', visor:'dots', shield:'bubble', weapon:'claw', drone:'#6ee7a8', metal:'#2e3320'})}},
+  {id:'stream', name:'STREAM', stars:4, role:'alaúde-teclado e corneta holográfica', passive:{gold:.25, def:.15}, ptxt:'Transmissão ao vivo: +25% de créditos e +15% de definições.',
+    art:{w:30, base:'#c38cff', line:'#120a18', cloth:2, draw:soldier({A:'#3a6a6a', A2:'#244848', B:'#8a6ab0', acc:'#c38cff', hair:'#2a1a12', skin:'#8a5a3a', scarf:'#c38cff', quiver:'#5a4030', weapon:'bow', metal:'#2a2436'})}},
+  {id:'proxy', name:'PROXY', stars:5, role:'orbe de portal', passive:{dodge:.25}, ptxt:'Redirecionar: 25% dos ataques contra o esquadrão são desviados por um portal.',
+    art:{w:30, base:'#5ca8ff', line:'#080a14', cloth:1, draw:soldier({A:'#1a1e2e', A2:'#101420', B:'#2a3a6a', acc:'#5ca8ff', hair:'#9a5ae0', skin:'#f1c7a8', weapon:'laser', lens:'#5ca8ff', metal:'#141824'})}},
+  {id:'encrypt', name:'ENCRYPT', stars:5, role:'escudo de luz sólida', passive:{teamBarrier:.2, ecd:12}, ptxt:'Criptografia: a cada 12 s o esquadrão inteiro ganha barreira de 20% da vida.',
+    art:{w:30, base:'#5ca8ff', line:'#0a0e18', cloth:1, draw:mech({A:'#8a92a8', A2:'#5a6278', B:'#2a3a6a', C:'#c8913c', visor:'slit', shield:'tower', shieldCol:'#5ca8ff', gold:'#c8913c', weapon:'claw', metal:'#3a4058'})}},
+  {id:'rollback', name:'ROLLBACK', stars:5, role:'lanterna de restauração', passive:{revive:.5}, ptxt:'Restaurar ponto: o primeiro agente que cair em cada fase volta com 50% da vida.',
+    art:{w:30, base:'#ffd84a', line:'#1a140a', cloth:2, draw:soldier({A:'#e8dcc0', A2:'#b8a880', B:'#c8913c', acc:'#ffd84a', hair:'#f2f0ff', skin:'#5a3a26', scarf:'#c8913c', weapon:'bow', metal:'#6a5a3a'})}},
 ];
 const CLASSES = {
   fw: {label:'Tanques', one:'tanque', list:TANKS, key:'tank', stars:STAR, idx:2},
   sc: {label:'Agentes de ataque', one:'ataque', list:GUNNERS, key:'gunner', stars:GSTAR, idx:1},
+  pt: {label:'Suportes', one:'suporte', list:SUPPORTS, key:'support', stars:PSTAR, idx:0},
 };
-const charOf = id => TANKS.find(x => x.id === id) || GUNNERS.find(x => x.id === id);
-const clsOf = id => TANKS.some(x => x.id === id) ? 'fw' : 'sc';
+const charOf = id => TANKS.find(x => x.id === id) || GUNNERS.find(x => x.id === id) || SUPPORTS.find(x => x.id === id);
+const clsOf = id => TANKS.some(x => x.id === id) ? 'fw' : SUPPORTS.some(x => x.id === id) ? 'pt' : 'sc';
 const tankOf = id => TANKS.find(x => x.id === id) || TANKS[0];
 const heroCache = {};
 // Sprites na raridade visual `tier` (-1 = sem módulo): [pernas][pano]. `aid` é um agente ou um tanque.
@@ -1001,7 +1023,7 @@ function spriteFor(aid, tier, look) {
   }
   return heroCache[key] = {n, w, glow};
 }
-const slotAid = k => k === 'fw' ? S.tank : k === 'sc' ? S.gunner : k;
+const slotAid = k => k === 'fw' ? S.tank : k === 'sc' ? S.gunner : k === 'pt' ? (S.support || 'pt') : k;
 const heroSpr = k => spriteFor(slotAid(k), visTier(k), lookOf(k));
 const portraitCache = {};
 function portraitOf(aid, tier, look) {
@@ -2955,6 +2977,11 @@ const P2 = {   // segunda passiva (v2.0)
   ghost:{teamAtk:.1, t:'Marcação: esquadrão causa +10% de dano.'}, nighthawk:{splash:.25, t:'Pacote em rajada: 25% do dano em todos.'},
   archer:{pierce:.5, t:'Hash perfurante: flechas atravessam com 50%.'}, lasert:{haste:.15, t:'Desfragmentação contínua: ataca 15% mais rápido.'},
   tankm1:{crit:.15, t:'Formatação rápida: 15% de chance de crítico.'},
+  pt:{teamHp:.08, t:'Nanobots 2.0: esquadrão ganha +8% de HP.'}, debugger:{barrier:.1, t:'Remendo duplo: barreira 10% mais forte.'},
+  ping:{teamSpd:.08, t:'Rede dedicada: +8% de velocidade de ataque.'}, crawler:{gold:.15, t:'Rota lucrativa: +15% de créditos.'},
+  hotfix:{hot:.02, t:'Fórmula concentrada: cura mais 2%/s.'}, overvolt:{burst:.2, t:'Supercapacitor: sobrecarga +20% mais forte.'},
+  stream:{drop:.15, t:'Patrocínio: +15% de drop de itens.'}, proxy:{dodge:.1, t:'Rota espelho: desvia mais 10% dos ataques.'},
+  encrypt:{teamBarrier:.1, t:'Chave de 4096 bits: barreira 10% mais forte.'}, rollback:{revive:.3, t:'Snapshot completo: volta com +30% de vida.'},
 };
 const verOf = id => S.ver[id] || (S.ver[id] = {v:0, d:0});
 const verTxt = id => `v${(1 + verOf(id).v / 10).toFixed(1)}`;
@@ -2992,11 +3019,11 @@ const inStd = T => nowMs() - relMs(T) >= REL_FEAT;   // já entrou nos Downloads
 const inShop = T => nowMs() - relMs(T) >= REL_SHOP;
 const isBase = T => !T.rel && !(S.demoRel && S.demoRel.id === T.id);   // agentes padrão, que começam no jogo
 function launch() {
-  const L = [...TANKS, ...GUNNERS].filter(T => relMs(T) && released(T) && !inStd(T)).sort((a, b) => relMs(b) - relMs(a))[0];
+  const L = [...TANKS, ...GUNNERS, ...SUPPORTS].filter(T => relMs(T) && released(T) && !inStd(T)).sort((a, b) => relMs(b) - relMs(a))[0];
   return L ? {T:L, until:relMs(L) + REL_FEAT} : null;
 }
 const banCls = b => b === 'L' ? (launch() ? clsOf(launch().T.id) : 'fw') : b;
-const upcoming = () => [...TANKS, ...GUNNERS].filter(T => !released(T)).sort((a, b) => relMs(a) - relMs(b));
+const upcoming = () => [...TANKS, ...GUNNERS, ...SUPPORTS].filter(T => !released(T)).sort((a, b) => relMs(a) - relMs(b));
 const dm = ms => new Date(ms).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
 function featView() {
   const L = launch(), up = upcoming();
@@ -3142,7 +3169,7 @@ const gearChance = (boss = bossStage()) => (boss ? GEAR_B : GEAR_N) * (1 + tv('d
 const weaponChance = () => gearChance() * W_SHARE * (1 + glob('wdrop') + tv('wdrop'));
 const bossStage = (s = S.stage) => stageType(s) === 'boss';
 // Pacotes são negociáveis na Steam: nenhum bônus altera a chance (oferta previsível e justa).
-const chipChance = (r, boss = bossStage()) => boss ? CHIPS[r].boss : CHIPS[r].drop;
+const chipChance = (r, boss = bossStage()) => (boss ? CHIPS[r].boss : CHIPS[r].drop) * (1 + (pS().chipX || 0));
 const bonusTxt = (k, v) => `${k === 'red' ? '-' : '+'}${+v.toFixed(1)}% ${BN[k]}`;
 function setCounts(cls) {
   const c = {};
@@ -3166,11 +3193,12 @@ function bonuses() {
   return bonusCache = B;
 }
 const wear = (cls, k) => (bonuses().w[cls][k] || 0) / 100;
-const glob = k => (bonuses().g[k] || 0) / 100;
+const SUP_G = {gold:'gold', def:'def', idrop:'drop'};   // chaves de bônus que o suporte também dá
+const glob = k => (bonuses().g[k] || 0) / 100 + (SUP_G[k] ? pS()[SUP_G[k]] || 0 : 0);
 
 const S0 = {data:0, stage:0, maxStage:0, kills:0, gear:{fw:{}, sc:{}, pt:{}},
   inv:[{k:'chip', r:0, n:10}, {k:'chip', r:1, n:2}], lv:{}, tree:{}, def:0, autoUp:true, autoEq:true, autoAdv:true, autoComp:true, last:0,
-  tank:'aura2', gunner:'pulse', roster:{aura2:1, pulse:1}, pity:{fw:{}, sc:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}, op:0, best:0, raids:{}, ver:{}, frag:0, buff:{}, toff:0,
+  tank:'aura2', gunner:'pulse', support:'pt', roster:{aura2:1, pulse:1, pt:1}, pity:{fw:{}, sc:{}, pt:{}}, ipity:{p4:0, p5:0}, upl:{slots:[0, 0, 0, 0], steam:[]}, op:0, best:0, raids:{}, ver:{}, frag:0, buff:{}, toff:0,
   setores:0, fmtN:0, peak:0, ctr:{}, pres:{last:-1, n:0}, stat:{}, kc:{}, rw:{}, ach:{}, seenT:-1};
 let S = load();
 function load() {
@@ -3181,9 +3209,10 @@ function load() {
       // saves antigos tinham um único módulo por personagem: descarta e começa os equipamentos do zero
       for (const c of ['fw', 'sc', 'pt']) if (!st.gear[c] || typeof st.gear[c] !== 'object' || 'b' in st.gear[c]) st.gear[c] = {};
       st.inv = st.inv.filter(x => x.k === 'chip' || x.type);
-      for (const c of ['fw', 'sc']) if (typeof st.pity[c] !== 'object') st.pity[c] = {};
+      for (const c of ['fw', 'sc', 'pt']) if (typeof st.pity[c] !== 'object') st.pity[c] = {};
       if (!st.ipity) st.ipity = {p4:0, p5:0};
       if (!st.upl) st.upl = {slots:[0, 0, 0, 0], steam:[]};
+      st.support = st.support || 'pt'; st.roster.pt = 1; if (!(st.support in st.roster)) st.support = 'pt';
       st.op = st.op || 0; st.best = st.best || 0; st.raids = st.raids || {}; st.ver = st.ver || {}; st.frag = st.frag || 0; st.buff = st.buff || {}; st.toff = st.toff || 0;
       for (const k of ['setores', 'fmtN', 'peak']) st[k] = st[k] || 0; delete st.season; for (const k of ['ctr', 'stat', 'kc', 'rw', 'ach']) st[k] = st[k] || {}; st.pres = st.pres || {last:-1, n:0}; if (st.seenT === undefined) st.seenT = -1;
       for (const id in OLD_TREE) if (st.tree[id]) { for (let l = 0; l < st.tree[id]; l++) st.def += Math.floor(OLD_TREE[id] * 1.6 ** l); delete st.tree[id]; }
@@ -3198,7 +3227,7 @@ function save() { if (noSave) return; S.last = nowMs(); try { localStorage.setIt
 const dpsSub = () => equipped('sc').sub;
 
 const equipped = cls => charOf(S[CLASSES[cls].key]) || CLASSES[cls].list[0];
-const pT = () => pas(equipped('fw')), pG = () => pas(equipped('sc'));
+const pT = () => pas(equipped('fw')), pG = () => pas(equipped('sc')), pS = () => pas(equipped('pt'));
 const lvOf = aid => S.lv[aid] || (S.lv[aid] = {a:0, h:0});
 const starsOf = aid => (charOf(aid) || {stars:3}).stars;
 const upCost = (aid, k) => Math.floor(UPBASE[starsOf(aid)] * UP_COST ** lvOf(aid)[k] * (1 - Math.min(.5, glob('upc'))));
@@ -3222,8 +3251,8 @@ function buyOp(n = 1) {
 }
 const bestPow = () => { const p = power(); if (p > S.best) S.best = p; return S.best; };
 const maxHp = h => (h.def.hp + gearStat(h.def.id, 'hp')) * UP_G ** lvOf(slotAid(h.def.id)).h * (1 + (pT().teamHp || 0)) * (1 + tv('hp')) * (1 + wear(h.def.id, 'hp')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
-const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + wear(h.def.id, 'atk')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
-const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd')) / (1 + gearStat(h.def.id, 'spd') / 100 + wear(h.def.id, 'spd'));
+const atk = h => (h.def.atk + gearStat(h.def.id, 'atk')) * UP_G ** lvOf(slotAid(h.def.id)).a * (1 + (pT().teamAtk || 0) + (pG().teamAtk || 0) + (h.def.id === 'sc' ? pG().selfAtk || 0 : 0)) * (1 + tv('dmg')) * (1 + (voltT > 0 ? pS().burst || 0 : 0)) * (1 + wear(h.def.id, 'atk')) * opMul() * verMul(slotAid(h.def.id)) * colMul() * preMul();
+const cdOf = h => h.def.cd * (h.def.id === 'sc' ? 1 - (pG().haste || 0) : 1) / (1 + tv('spd') + (pS().teamSpd || 0) + (bossUp ? pS().bossSpd || 0 : 0)) / (1 + gearStat(h.def.id, 'spd') / 100 + wear(h.def.id, 'spd'));
 // Curvas de balanceamento (ajustadas com tools/balance-sim.cjs).
 const ENEMY = {hp:30, hpG:1.1, atk:4, atkG:1.095, djHp:2.5, djAtk:2};   // dj = salto por dificuldade
 const rewardAt = L => 3 * 1.08 ** L;
@@ -3243,6 +3272,7 @@ const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed
 
 // ---------- runtime ----------
 let heroes, enemies = [], shots = [], parts = [], floats = [], espits = [];
+let voltT = 0, supT = {}, hotT = 0, revived = false;   // habilidades de suporte (ver supportTick)
 // Cada fase tem tempo limite: sem isso, fases difíceis viram lutas eternas e o ritmo de
 // fases concluídas (de onde vêm os pacotes) despenca.
 const STAGE_TIME = 150, RAID_TIME = 90;
@@ -3740,10 +3770,43 @@ function buyNode(id) {
 }
 
 // ---------- fases ----------
+// ---------- habilidades de suporte ----------
+function supReset() { voltT = 0; supT = {}; hotT = 0; revived = false; }
+const supHero = () => heroOf('pt');
+function supportTick(dt, engaged) {
+  const P = pS(), sh = supHero();
+  voltT = Math.max(0, voltT - dt); hotT = Math.max(0, hotT - dt);
+  if (!sh || sh.dead) return;
+  const every = (k, cd) => { supT[k] = (supT[k] || 0) + dt; if (supT[k] >= cd) { supT[k] = 0; return true; } return false; };
+  const alive = heroes.filter(h => !h.dead), act = () => { sh.lunge = 1; sh.act = 'heal'; };
+  if (P.barrier && engaged && every('b', P.bcd)) {   // DEBUGGER: barreira no tanque
+    const t = heroOf('fw'); if (t && !t.dead) { t.shield = Math.max(t.shield || 0, maxHp(t) * P.barrier); float(t.def.x + 15, GROUND - 44, 'REMENDO', '#5ce1e6'); act(); }
+  }
+  if (P.teamBarrier && engaged && every('e', P.ecd)) {   // ENCRYPT: barreira em todos
+    alive.forEach(h => h.shield = Math.max(h.shield || 0, maxHp(h) * P.teamBarrier)); float(sh.def.x + 15, GROUND - 44, 'CRIPTOGRAFADO', '#5ca8ff'); act();
+  }
+  if (P.burst && engaged && every('o', P.ocd)) { voltT = 3; float(sh.def.x + 15, GROUND - 44, 'SOBRECARGA', '#6ee7a8'); act(); SND.play('boss'); }
+  if (P.hot && engaged && every('h', P.hcd)) {   // HOTFIX: frasco
+    hotT = 4; act();
+    const e = enemies[0]; if (e && !e.boss) e.poison = 4;
+    burst(sh.def.x + 40, GROUND - 20, '#6ee7a8', 10);
+  }
+  if (hotT > 0) alive.forEach(h => h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * P.hot * dt));
+  for (const e of enemies) if (e.poison > 0) { e.poison -= dt; e.hp -= e.max * (P.poison || .02) * dt; if (e.hp <= 0) { kill(e); break; } }
+}
+// ROLLBACK: o primeiro agente que cair na fase volta com parte da vida
+function tryRevive(h) {
+  const P = pS(), sh = supHero();
+  if (!P.revive || revived || !sh || (sh.dead && sh !== h)) return false;
+  revived = true; h.dead = false; h.hp = maxHp(h) * Math.min(1, P.revive);
+  float(h.def.x + 15, GROUND - 44, 'RESTAURADO', '#ffd84a'); burst(h.def.x + 15, GROUND - 16, '#ffd84a', 20); sh.lunge = 1; sh.act = 'heal';
+  say(`${h.def.name} caiu e foi restaurado pelo ${equipped('pt').name}.`, true);
+  return true;
+}
 function startStage(s, msg) {
   raid = null;   // escolher outra fase no meio de um chefão abandona a luta (a tentativa já foi gasta)
   S.stage = s; S.kills = 0; spawned = 0; bossUp = false; enemies = []; shots = []; spawnT = 1.5; stT = 0;
-  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); });
+  heroes.forEach(h => { h.dead = false; h.hp = maxHp(h); h.shield = 0; }); supReset();
   showBanner(msg || stageLabel(s) + ' ' + STYPES[stageType(s)].n.toUpperCase(), STYPES[stageType(s)].c);
   if (openP === 'stages') renderPanel();
   save();
@@ -4029,6 +4092,7 @@ const ACH = [
   {id:'t6', n:'Acesso root', d:'Consiga um item T6 Root.', ok:() => S.seenT >= 5, rw:{frag:100}},
   {id:'tanks', n:'Parede de fogo', d:'Tenha todos os tanques padrão (os que começam no jogo).', ok:() => TANKS.filter(isBase).every(T => T.id in S.roster), rw:{raro:1}},
   {id:'atk', n:'Arsenal completo', d:'Tenha todos os agentes de ataque padrão (os que começam no jogo).', ok:() => GUNNERS.filter(isBase).every(T => T.id in S.roster), rw:{raro:1}},
+  {id:'sup', n:'Equipe de apoio', d:'Tenha todos os suportes padrão (os que começam no jogo).', ok:() => SUPPORTS.filter(isBase).every(T => T.id in S.roster), rw:{raro:1}},
   {id:'v20', n:'Atualização completa', d:'Deixe um agente na v2.0.', ok:() => Object.values(S.ver).some(v => v.v >= 10), rw:{frag:50}},
   {id:'v20x5', n:'Tudo em dia', d:'Deixe 5 agentes na v2.0.', ok:() => Object.values(S.ver).filter(v => v.v >= 10).length >= 5, rw:{frag:200}},
   {id:'ctr', n:'Rotina de segurança', d:'Conclua 30 contratos.', ok:() => (S.stat.ctr || 0) >= 30, rw:{frag:60}},
@@ -4074,6 +4138,7 @@ function update(dt) {
     e.flash = Math.max(0, e.flash - dt); e.fcd = (e.fcd || 0) - dt; e.lunge = Math.max(0, e.lunge - dt * 6);
   }
   const engaged = enemies.length > 0 && enemies[0].atStop;
+  supportTick(dt, engaged);
 
   for (const h of heroes) {
     h.flash = Math.max(0, h.flash - dt); h.lunge = Math.max(0, h.lunge - dt * 6);
@@ -4082,7 +4147,7 @@ function update(dt) {
     else h.hp = Math.min(maxHp(h), h.hp + maxHp(h) * ((h.def.id === 'fw' ? pT().regen || 0 : 0) + tv('regen')) * dt);
     h.t -= dt;
     if (h.t > 0) continue;
-    if (h.def.id === 'pt') {
+    if (h.def.id === 'pt' && pS().heal) {
       const hurt = alive.filter(a => !a.dead && a.hp < maxHp(a) * .8).sort((a, b) => a.hp / maxHp(a) - b.hp / maxHp(b))[0];
       if (hurt) {
         const amt = atk(h) * 4;
@@ -4141,13 +4206,13 @@ function update(dt) {
     e.t -= dt;
     if (e.t <= 0) {
       e.t = e.cd; e.lunge = 1;
-      const dodged = tv('dodge') && Math.random() < tv('dodge');
+      const dg = tv('dodge') + (pS().dodge || 0), dodged = dg && Math.random() < dg;
       if (dodged) { float(front.def.x + 15, GROUND - 40, 'BLOQUEADO', '#5ca8ff'); SND.play('block'); }
       const isTank = front.def.id === 'fw', dmg = e.atk * (1 - KC_RED * kcLv(e.tn)) * (isTank ? 1 - (pT().dmgRed || 0) : 1) * (1 - tv('red')) * (1 - gearStat(front.def.id, 'red') / 100) * (1 - wear(front.def.id, 'red'));
-      if (!dodged) { front.hp -= dmg; front.flash = .1; }
+      if (!dodged) { let left = dmg; if (front.shield > 0) { const ab = Math.min(front.shield, left); front.shield -= ab; left -= ab; } front.hp -= left; front.flash = .1; }
       burst(front.def.x + front.def.w - 2, GROUND - 16, '#ff3d7f', 3);
       if (front !== line) espits.push({x:e.x, tx:front.def.x + front.def.w - 2, y:GROUND - e.h * .6, t:0});   // tanque caído: o vírus cospe à distância
-      if (front.hp <= 0) { front.dead = true; front.hp = 0; SND.play('down'); say(`${front.def.name} caiu. Volta na próxima fase.`); }
+      if (front.hp <= 0) { front.dead = true; front.hp = 0; SND.play('down'); if (!tryRevive(front)) say(`${front.def.name} caiu. Volta na próxima fase.`); }
       if (isTank && pT().reflect) hit(e, dmg * pT().reflect);
     }
   }
@@ -4451,7 +4516,20 @@ function draw() {
     ctx.fillStyle = p > .35 ? '#6ee7a8' : '#ff3d7f'; ctx.fillRect(bx, y - 3, Math.ceil(16 * p), 1);
   }
 
+  // barreiras (DEBUGGER/ENCRYPT), sobrecarga (OVERVOLT) e vírus envenenados (HOTFIX)
+  for (const h of heroes) {
+    if (h.dead) continue;
+    const cx = h.def.x + h.def.w / 2, cy = GROUND - 16;
+    if (h.shield > 0) {
+      const a = Math.min(1, h.shield / (maxHp(h) * .1));
+      ctx.strokeStyle = rgba('#5ce1e6', .35 + .25 * Math.sin(t * 5) * a); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(cx, cy, 13, 19, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = rgba('#5ce1e6', .08 * a); ctx.fill();
+    }
+    if (voltT > 0 && Math.random() < .5) { ctx.fillStyle = '#6ee7a8'; ctx.fillRect(cx - 10 + Math.random() * 20, cy - 16 + Math.random() * 30, 1, 1); }
+  }
   for (const e of enemies) {
+    if (e.poison > 0 && Math.random() < .4) { ctx.fillStyle = '#6ee7a8'; ctx.fillRect(e.x + Math.random() * e.w, GROUND - Math.random() * e.h, 1, 1); }
     const x = Math.round(e.x - e.lunge * 3), y = GROUND - e.h;
     if (ESPR[e.tn]) {   // inimigos novos: 2 quadros + movimento (pulo, amassada, avanço no ataque)
       const moving = !e.atStop, ph = e.x * .13, sp = e.boss ? 5 : e.tn === 'worm' ? 7 : 10;
@@ -4564,7 +4642,7 @@ function equip(id) {
   S[CLASSES[cls].key] = id; applySlots();
   const h = heroOf(cls);
   if (!h.dead) h.hp = maxHp(h);
-  say(`${cls === 'sc' ? SUBS[charOf(id).sub].n : 'Tanque'} ativo: ${charOf(id).name}`, true);
+  say(`${cls === 'sc' ? SUBS[charOf(id).sub].n : cls === 'pt' ? 'Suporte' : 'Tanque'} ativo: ${charOf(id).name}`, true);
   renderPanel(); save();
 }
 
@@ -4687,7 +4765,7 @@ function agentTop() {
     <div class="cmds">
       <button type="button" id="ua-${k}" data-up="${k}:a"></button>
       <button type="button" id="uh-${k}" data-up="${k}:h"></button>
-      ${k === 'pt' ? '' : `<button type="button" data-swap="${k}">&gt; trocar agente</button>`}
+      <button type="button" data-swap="${k}">&gt; trocar agente</button>
     </div>
   </div>
   <div class="sets">${setsOn.length ? setsOn.map(x => setTxt(k, x)).join('<br>') : ''}</div>`;
@@ -4867,7 +4945,7 @@ const RENDER = {
         `<button type="button" data-prev="${v}" aria-pressed="${(previewTier ?? -9) === v}" style="--rc:${v < 0 ? 'var(--text)' : RAR[v].c}">${n}</button>`).join('')}</div>`,
 
   col: () => {
-    const sup = colCls === 'pt', C = sup ? {label:'Suportes', list:SUPPORTS} : CLASSES[colCls], list = (colCls === 'sc' ? C.list.filter(T => T.sub === colSub) : C.list).filter(released);
+    const sup = false, C = CLASSES[colCls], list = (colCls === 'sc' ? C.list.filter(T => T.sub === colSub) : C.list).filter(released);
     const col = list.map(T => {
       const own = sup || T.id in S.roster, on = sup || S[C.key] === T.id;
       return `<div class="card s${T.stars}${own ? '' : ' lock'}${on ? ' on' : ''}" title="${T.ptxt}">
@@ -4884,7 +4962,7 @@ const RENDER = {
       `<button type="button" data-colc="${v}" aria-pressed="${v.startsWith('sc') ? colCls === 'sc' && 'sc:' + colSub === v : colCls === v}" style="--rc:${c}">${n}</button>`).join('');
     const X = SUBS[colSub];
     return `<div class="btabs">${tabs}</div>
-      ${sup ? '<p class="hint"><b style="color:#c9b8ff">Suporte</b> · cura e protege o esquadrão. Por enquanto o PATCHER é o único; novos suportes vão chegar pelo Download.</p>' : ''}
+      ${colCls === 'pt' ? '<p class="hint"><b style="color:#c9b8ff">Suporte</b> · cada um tem uma habilidade própria: cura, barreira, velocidade, farm ou reviver.</p>' : ''}
       ${colCls === 'sc' ? `<p class="hint"><b style="color:${X.c}">${X.n}</b> · ${X.d} O esquadrão leva um agente de ataque; troque de classe conforme a fase.</p>` : ''}
       <p class="sub">${colCls === 'sc' ? X.pl : C.label} <small>${list.filter(x => sup || x.id in S.roster).length}/${list.length} · novos agentes vêm do Download</small></p>
       <div class="col">${col}</div>`;
@@ -4901,6 +4979,7 @@ const RENDER = {
     return `<div class="btabs">
         <button type="button" data-ban="fw" aria-pressed="${gBanner === 'fw'}">Download · Tanques</button>
         <button type="button" data-ban="sc" aria-pressed="${gBanner === 'sc'}">Download · Ataque</button>
+        <button type="button" data-ban="pt" aria-pressed="${gBanner === 'pt'}">Download · Suportes</button>
         ${launch() ? `<button type="button" class="banL" data-ban="L" aria-pressed="${gBanner === 'L'}">Lançamento · ${launch().T.name}</button>` : ''}
       </div>${featView()}
       <div class="chips">${CHIPS.map((c, r) => { const n = chipCount(r); return `<div class="chip" style="--rc:${c.c}">

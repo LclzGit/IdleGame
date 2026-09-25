@@ -14,7 +14,7 @@ Cada suporte tem **uma função própria**, pra escolha ser uma decisão (hoje a
 | ★★★★ | **HOTFIX** | alquimista com mochila de frascos | joga um frasco que cura o esquadrão aos poucos (4 s) e envenena os vírus da frente. |
 | ★★★★ | **OVERVOLT** | robô-bateria | a cada 10 s descarrega energia no esquadrão: +40% de dano por 3 s. |
 | ★★★★ | **STREAM** | bardo com instrumento | +25% de créditos e +15% de definições enquanto estiver no esquadrão. |
-| ★★★★★ | **PROXY** | teleportadora | 25% dos ataques contra o esquadrão são desviados; a cada 15 s troca o tanque por uma cópia holográfica por 2 s. |
+| ★★★★★ | **PROXY** | teleportadora | 25% dos ataques contra o esquadrão são desviados por um portal. |
 | ★★★★★ | **ENCRYPT** | cavaleiro com escudo de luz | barreira no esquadrão inteiro que absorve 20% da vida máxima, recarrega a cada 12 s. |
 | ★★★★★ | **ROLLBACK** | sábia com lanterna | revive o primeiro agente que cair em cada fase com 50% da vida (o único suporte que revive). |
 
@@ -22,7 +22,7 @@ Cada suporte tem **uma função própria**, pra escolha ser uma decisão (hoje a
 
 **Destaque:** ROLLBACK resolve o "ninguém revive" que deixamos anotado lá atrás — um agente caído hoje só volta na próxima fase.
 
-**No jogo** (quando formos implementar): o suporte vira um slot trocável como tanque e ataque, entra no Download com as mesmas raridades, e a PATCHER continua como suporte inicial (★3). 3 por raridade, igual aos atiradores.
+**No jogo (já implementado na v1.18):** o suporte vira um slot trocável como tanque e ataque, entra no Download com as mesmas raridades, e a PATCHER continua como suporte inicial (★3). 3 por raridade, igual aos atiradores.
 
 ## Como usar
 
@@ -219,7 +219,7 @@ Pixel art sprite sheet of ONE character, 4 frames in a single horizontal row, ev
 
 ## PROXY ★★★★★ — teleportadora
 
-**Redirecionar:** 25% dos ataques contra o esquadrão são desviados; a cada 15 s troca o tanque por uma cópia holográfica por 2 s.
+**Redirecionar:** 25% dos ataques contra o esquadrão são desviados por um portal.
 
 **Retrato**
 ```
