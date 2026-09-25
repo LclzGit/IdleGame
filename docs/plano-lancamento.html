@@ -51,73 +51,104 @@
   ol.q{padding-left:20px} ol.q li{margin:8px 0; color:var(--ink2)} ol.q b{color:var(--ink)}
   code{font:13px var(--mono); background:var(--surface); border:1px solid var(--line); padding:1px 5px}
   .small{font-size:13px; color:var(--muted)}
+  .arch{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin:14px 0}
+  .box{background:var(--surface); border:1px solid var(--line); padding:12px 14px}
+  .box h3{font:600 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+  .box ul{margin:0; padding-left:18px; font-size:14px; color:var(--ink2)} .box li{margin:3px 0}
+  .flow{font:13px/1.7 var(--mono); background:var(--surface); border:1px solid var(--line); padding:12px 14px; overflow-x:auto; white-space:pre; color:var(--ink2)}
+  ul{color:var(--ink2)} li{margin:4px 0}
 </style>
 <body><div class="wrap">
-<div class="eyebrow">DAEMON BAR · PLANO DE LANÇAMENTO</div>
-<h1>Itens na Steam, progressão e como evitar os problemas de economia</h1>
-<p class="lede">Adotamos o modelo de itens e a progressão do TBH, que já funcionam. Este plano separa o que fica só no jogo do que pode ir pro mercado e lista as proteções que precisam estar prontas antes de abrir o comércio.</p>
-<p class="small">Os tempos vêm da simulação de 168 h (<code>tools/balance-sim.cjs</code>), com um jogador idle que avança sozinho. São estimativas, não medidas com jogadores reais.</p>
+<div class="eyebrow">DAEMON BAR · PLANO DE LANÇAMENTO · v2</div>
+<h1>Itens na Steam, o jogo em Godot e como segurar trapaça e bots</h1>
+<p class="lede">Adotamos o modelo de itens e a progressão do TBH. O protótipo continua em HTML e o jogo final vai ser feito em Godot. Este plano mostra o que vai pro mercado, como impedir que alguém fabrique itens e como conter contas em massa.</p>
+<p class="small">Os tempos vêm da simulação de 168 h (<code>tools/balance-sim.cjs</code>) com um jogador idle automático. São estimativas, não medições com jogadores reais.</p>
 
 <div class="tiles">
-<div class="tile"><div class="n">~120 h</div><div class="l">pra concluir as 4 dificuldades (120 fases)</div></div>
+<div class="tile"><div class="n">6 tiers</div><div class="l">T6 Root (grená) só cai em fase de Chefão</div></div>
 <div class="tile"><div class="n">~24 dias</div><div class="l">pra garantia ★5 do Raro jogando 24/7</div></div>
-<div class="tile"><div class="n">~0,3/h</div><div class="l">pacotes Raros por hora</div></div>
-<div class="tile"><div class="n">4 × 8 h</div><div class="l">espaços de envio pra Steam</div></div>
+<div class="tile"><div class="n">T5 · T6</div><div class="l">bloqueados pra venda no lançamento</div></div>
+<div class="tile"><div class="n">0</div><div class="l">drops negociáveis decididos no PC do jogador</div></div>
 </div>
 
-<h2>1. Modelo de itens: o que vai pro mercado</h2>
+<h2>1. O que vai pro mercado</h2>
 <div class="tbl"><table>
 <tr><th>Coisa</th><th>Negociável?</th><th>Por quê</th></tr>
-<tr><td>Pacotes de download (Comum, Raro, Lendário)</td><td><span class="pill ok">SIM</span></td><td>É o produto principal do mercado. As taxas de drop não recebem bônus de sorte, então todo mundo tem a mesma chance.</td></tr>
-<tr><td>Itens T4 Zero-Day</td><td><span class="pill ok">SIM</span></td><td>São raros o bastante pra ter valor, mas caem o suficiente pra ter oferta.</td></tr>
-<tr><td>Itens T5 Quântico</td><td><span class="pill warn">DEPOIS</span></td><td>Ficam bloqueados no lançamento. Só liberamos depois de ver quanto T5 entra por semana com jogadores reais.</td></tr>
-<tr><td>Itens T1–T3</td><td><span class="pill crit">NÃO</span></td><td>Existem demais. Iriam inundar o mercado e virar lixo de R$ 0,03.</td></tr>
-<tr><td>Itens saídos do Compilador</td><td><span class="pill crit">NÃO</span></td><td>O Compilador transforma itens abundantes em raros. Se o resultado fosse negociável, ele viraria uma máquina de fabricar T4/T5 pro mercado.</td></tr>
-<tr><td>Agentes, níveis, árvore, créditos</td><td><span class="pill crit">NÃO</span></td><td>É progresso da conta. Vender progresso vira pay-to-win.</td></tr>
+<tr><td>Pacotes de download (Comum, Raro, Lendário)</td><td><span class="pill ok">SIM</span></td><td>É o principal produto do mercado. Nenhum bônus mexe na chance deles.</td></tr>
+<tr><td>Itens T4 Zero-Day</td><td><span class="pill ok">SIM</span></td><td>Raros o bastante pra ter valor e comuns o bastante pra ter oferta.</td></tr>
+<tr><td>Itens T5 Quântico</td><td><span class="pill warn">DEPOIS</span></td><td>Bloqueados no lançamento. Liberamos quando soubermos quantos entram por semana com jogadores reais.</td></tr>
+<tr><td>Itens T6 Root</td><td><span class="pill warn">DEPOIS</span></td><td>É o item de venda de maior valor. Só cai de chefe e o dono escolhe as 3 passivas uma vez, no valor máximo. Pode ir pro mercado com as passivas em branco, e quem comprar escolhe. Bloqueado no lançamento, como o T5.</td></tr>
+<tr><td>T1–T3, itens compilados, agentes e progresso</td><td><span class="pill crit">NÃO</span></td><td>Existem em excesso, sairiam de uma máquina de fabricar (o Compilador) ou seriam venda de progresso, que é pay-to-win.</td></tr>
 </table></div>
+<p><b>Central de Upload:</b> são 4 espaços de envio, e cada um fica 8 h ocupado depois de usado, o que dá no máximo 12 itens por dia por conta. Item que volta do mercado fica 7 dias preso ao jogo.</p>
 
-<h3>Central de Upload (a ponte com a Steam)</h3>
+<h2>2. Protótipo em HTML, jogo em Godot</h2>
+<p>O HTML serve pra testar ideias e balanceamento. O jogo final em Godot reaproveita as regras (tabelas de chance, curvas, fases), mas não a arquitetura: no protótipo o próprio navegador sorteia tudo e guarda no <code>localStorage</code>. Isso tem que mudar antes de qualquer item ir pra Steam.</p>
+
+<h3>Risco nº 1: o jogador fabricar itens</h3>
+<p>Se o drop acontece no PC do jogador, dá pra editar o save, a memória ou o relógio e gerar pacotes à vontade. Em Godot isso é ainda mais fácil, porque o executável é simples de descompilar. A regra é: <b>o cliente nunca decide nada que vale dinheiro.</b></p>
+
+<div class="arch">
+<div class="box"><h3>Cliente (Godot)</h3><ul>
+<li>Desenha a barra, as lutas e os menus.</li>
+<li>Simula a luta localmente, só pra mostrar na tela.</li>
+<li>Guarda o que não é negociável: níveis, árvore, créditos, itens T1–T3.</li>
+<li>Manda um "sinal de vida" a cada 60 s: fase, fases concluídas, poder.</li>
+<li>Steam pelo plugin <b>GodotSteam</b>.</li>
+</ul></div>
+<div class="box"><h3>Servidor do jogo</h3><ul>
+<li>Confirma quem é o jogador pelo ticket de login da Steam.</li>
+<li>Guarda o equipamento e o poder "oficiais" da conta.</li>
+<li>Confere se as fases concluídas cabem no tempo passado e no poder da conta.</li>
+<li><b>Sorteia no servidor</b> os pacotes e os T4+.</li>
+<li>Aplica os tetos por hora e por dia.</li>
+</ul></div>
+<div class="box"><h3>Steam Inventory Service</h3><ul>
+<li>Guarda os itens negociáveis: os itemdefs.</li>
+<li>Só o servidor, com a chave de publicador, cria itens.</li>
+<li>Os geradores por tempo de jogo podem ter um limite próprio da Steam (intervalo e máximo por janela), como segunda trava.</li>
+</ul></div>
+</div>
+
+<div class="flow">cliente: "concluí a fase Crítico 2-10 (Chefão)"   ──▶  servidor
+servidor: essa conta aguenta essa fase?  cabe no tempo desde o último sinal?
+          dentro do teto do dia?  sessão única ativa?
+     sim ──▶ sorteia o drop no servidor ──▶ cria o item no inventário Steam
+     não ──▶ ignora e marca a conta pra revisão (sem avisar)
+cliente: mostra o pacote que o servidor confirmou</div>
+
 <ul>
-<li><b>4 espaços de envio.</b> Cada um fica ocupado por <b>8 h</b> depois de usado, o que dá no máximo 12 envios por dia por conta. Esse teto limita o que uma conta farmada por bot consegue despejar no mercado.</li>
-<li><b>Trava de 7 dias</b> pro item que volta da Steam pro jogo. Isso impede ficar trocando itens entre contas pra contornar os limites.</li>
-<li>A tooltip de cada item diz se ele é negociável ou o motivo de estar vinculado.</li>
+<li><b>Relógio do servidor:</b> o ganho offline e o tempo de fase contam pelo relógio do servidor, com teto de 12 h offline. Mudar o relógio do PC não adianta.</li>
+<li><b>Sem botão de velocidade</b> na versão final. O 1×/5×/20× do protótipo sai.</li>
+<li><b>Itens negociáveis moram na Steam, não no save.</b> Se alguém apagar ou editar o save, perde progresso local, mas não cria nem duplica item de mercado.</li>
+<li><b>Contas marcadas ficam só com o jogo local:</b> jogam normalmente, mas param de receber itens negociáveis. É melhor que banir na hora e ensinar ao trapaceiro o que foi detectado.</li>
+<li><b>Custo do servidor:</b> é baixo, porque ele não simula lutas, só confere números e sorteia. Um servidor pequeno (Go ou Node, com Postgres) aguenta dezenas de milhares de contas idle, porque o sinal chega a cada 60 s.</li>
 </ul>
 
-<h2>2. Progressão (copiada do TBH)</h2>
-<ul>
-<li>5 dificuldades × 3 atos × 10 fases: Normal, Avançado, Crítico, Zero-Day e, depois, a torre infinita <b>Kernel Panic</b>.</li>
-<li>Em cada ato, a 5ª e a 10ª fase são Chefão. As outras alternam entre Horda e Blindados.</li>
-<li>Cada dificuldade aumenta a chance de T3+ em 25%. Isso dá um motivo pra subir, e não só farmar o começo.</li>
-<li>Cada fase tem 150 s de limite. Se o esquadrão não aguenta, recua, farma e tenta de novo, que é o ciclo de "parede" do TBH.</li>
-</ul>
-<div class="tbl"><table>
-<tr><th>Perfil</th><th>Tempo por dia</th><th>Onde está em 1 mês</th><th>Pacotes Raros por mês</th></tr>
-<tr><td>Tryhard (PC ligado 24/7)</td><td class="num">24 h</td><td>Kernel Panic desde o 5º dia</td><td class="num">~210</td></tr>
-<tr><td>Médio (expediente de trabalho)</td><td class="num">8 h</td><td>Kernel Panic</td><td class="num">~70</td></tr>
-<tr><td>Casual</td><td class="num">3 h</td><td>Zero-Day</td><td class="num">~27</td></tr>
-</table></div>
-<p>O casual não chega na garantia de 180 do Raro em um mês. Três coisas seguram ele no jogo:</p>
-<ul>
-<li>A chance base de ★5 no Raro é 2%, então ele tira ~1 ★5 por sorte, antes da garantia.</li>
-<li>A garantia fica guardada e não expira.</li>
-<li>Ele pode <b>comprar pacotes no mercado</b> dos tryhards. É isso que faz o mercado funcionar pros dois lados.</li>
-</ul>
+<h2>3. Bots e contas em massa</h2>
+<p>Um jogo idle é fácil de rodar em 100 máquinas virtuais. Nenhuma trava sozinha resolve, então a ideia é empilhar várias. Cada uma deixa a conta extra mais cara ou menos lucrativa.</p>
+<div class="find"><span class="pill crit">BASE</span><div><h3>Cada conta custa dinheiro</h3><p>Jogo pago, sem versão grátis que dê drops. A conta mais importante: <b>o valor esperado dos drops negociáveis de uma conta num mês tem que ser menor que o preço do jogo</b>. Isso é o que torna a fazenda de contas não lucrativa, e dá pra ajustar pelo preço e pelos tetos.</p></div></div>
+<div class="find"><span class="pill crit">BASE</span><div><h3>Carência antes do primeiro drop negociável</h3><p>Os drops negociáveis só começam depois de algumas horas de jogo e de a conta chegar na dificuldade Avançado. Isso passa da janela de reembolso da Steam (2 h), então comprar, farmar e pedir reembolso não funciona. A conta nova também leva dias até começar a render.</p></div></div>
+<div class="find"><span class="pill warn">TETO</span><div><h3>Limites por conta</h3><p>Teto de pacotes por dia no servidor, os 4 espaços × 8 h do Upload e, se for o caso, o limite de janela da própria Steam. Um bot 24/7 rende no máximo o mesmo que um tryhard honesto.</p></div></div>
+<div class="find"><span class="pill warn">SESSÃO</span><div><h3>Uma sessão viva por conta</h3><p>Uma sessão ativa por vez, validada pelo ticket da Steam. Contas emprestadas pelo Compartilhamento Familiar não recebem drops negociáveis, já que a Steam avisa quando a licença é emprestada.</p></div></div>
+<div class="find"><span class="pill ok">DETECÇÃO</span><div><h3>Padrões suspeitos</h3><p>Muitas contas no mesmo IP ou hardware, contas que nunca abrem menus, sinais regulares demais, e todas enviando tudo pra Steam no mesmo minuto. A reação é cortar os drops negociáveis da conta sem avisar, e revisar à mão antes de banir.</p></div></div>
+<div class="find"><span class="pill ok">MERCADO</span><div><h3>Regras da própria Steam</h3><p>O Mercado da Comunidade já exige Steam Guard, compras mínimas na conta e travas de troca. Isso não substitui as nossas travas, mas encarece a conta descartável.</p></div></div>
 
-<h2>3. Riscos e proteções</h2>
-<div class="find"><span class="pill crit">CRÍTICO</span><div><h3>Drop decidido no cliente = item falso no mercado</h3><p>Se o jogo decide o drop no PC do jogador, qualquer um edita o save ou a memória e gera pacotes à vontade. No protótipo tudo é local.</p><div class="fix"><b>Proteção:</b> itens negociáveis só existem quando o servidor concede, pelo <b>Steam Inventory Service</b> (itemdefs + regras de drop no servidor), com um servidor próprio validando o ritmo de fases e o tempo decorrido. O save local serve só pra progresso.</div></div></div>
-<div class="find"><span class="pill crit">CRÍTICO</span><div><h3>Bots e contas em massa</h3><p>Um jogo idle é fácil de rodar em 100 máquinas virtuais. Cada conta farmando 24/7 é pura oferta no mercado.</p><div class="fix"><b>Proteção:</b> o jogo é pago (sem conta grátis). Os 4 espaços × 8 h limitam cada conta. O drop por hora tem teto no servidor. Cada conta tem uma quantidade mínima de horas antes de liberar o Upload. Detectamos padrões anormais, como muitas contas no mesmo IP ou hardware.</div></div></div>
-<div class="find"><span class="pill warn">ALTO</span><div><h3>Inflação: itens demais, preço caindo pra zero</h3><p>Todo item negociável que entra e nunca sai derruba o preço com o tempo.</p><div class="fix"><b>Proteção:</b> sumidouros de itens. Abrir um pacote consome o pacote. O Compilador consome 5 itens e o resultado não volta pro mercado. T1–T3 nunca entram. T5 só é liberado quando os dados mostrarem que dá.</div></div></div>
-<div class="find"><span class="pill warn">ALTO</span><div><h3>Mudar taxas depois do lançamento</h3><p>Mexer nas taxas de drop com itens já à venda quebra a confiança de quem comprou.</p><div class="fix"><b>Proteção:</b> fechar as taxas num beta fechado, sem mercado, e publicar as probabilidades no jogo. Depois do lançamento, só adicionar coisas novas (pacotes e itens novos), nunca piorar o que já existe.</div></div></div>
-<div class="find"><span class="pill warn">ALTO</span><div><h3>Aceleração de tempo e relógio</h3><p>O protótipo tem um botão de velocidade de teste, e o cálculo offline confia no relógio do PC.</p><div class="fix"><b>Proteção:</b> remover o botão na versão final e calcular o tempo offline pelo relógio do servidor, com teto (por exemplo, 12 h).</div></div></div>
-<div class="find"><span class="pill ok">MÉDIO</span><div><h3>Regras da Valve e jurídico</h3><p>Caixas pagas com item aleatório têm restrição em alguns países.</p><div class="fix"><b>Proteção:</b> pacotes só caem jogando e nunca são vendidos por dinheiro direto pelo jogo. Mostrar as probabilidades. Consultar um advogado antes de abrir o mercado.</div></div></div>
+<h2>4. Probabilidades publicadas</h2>
+<p>O protótipo agora tem o painel <b>Chances</b>. Ele mostra as chances dos pacotes e o que cada um baixa, com as garantias; a chance de item por vírus; os pesos de cada tier (a base e o valor atual com dificuldade e sorte); as chances do Compilador; e a faixa de cada passiva por tier. Tudo lido das mesmas constantes que fazem o sorteio, então a tela nunca fica diferente do jogo. Alguns países exigem essa divulgação em sistemas com item aleatório, e ela também passa confiança pra quem compra no mercado.</p>
 
-<h2>4. Cronograma</h2>
+<h2>5. Riscos que ficam pra depois</h2>
+<div class="find"><span class="pill ok">DEPOIS</span><div><h3>Inflação de itens</h3><p>Fora do foco agora, como combinado. Pra quando voltar: abrir pacote consome o pacote, o Compilador consome 5 itens e o resultado fica na conta, e T5 e T6 só são liberados com dados de oferta.</p></div></div>
+<div class="find"><span class="pill warn">ALTO</span><div><h3>Mudar taxas depois do lançamento</h3><p>Fechar as taxas no beta fechado, sem mercado. Depois do lançamento, só adicionar coisas novas, nunca piorar o que já existe.</p></div></div>
+<div class="find"><span class="pill ok">MÉDIO</span><div><h3>Jurídico</h3><p>Pacotes só caem jogando e nunca são vendidos pelo jogo. Mesmo assim, um advogado precisa revisar antes de abrir o mercado.</p></div></div>
+
+<h2>6. Cronograma</h2>
 <ol class="q">
-<li><b>Agora: protótipo (v1.2).</b> Balanceamento simulado, Central de Upload simulada, taxas definidas.</li>
-<li><b>Jogo de verdade.</b> Portar pra um app de janela fixa na barra de tarefas (Electron/Tauri ou Godot), com arte final, som e save na nuvem.</li>
-<li><b>Servidor.</b> Login Steam, drops validados, Steam Inventory Service com itemdefs, relógio do servidor e teto de drop.</li>
-<li><b>Beta fechado sem mercado.</b> Medir as horas reais até cada dificuldade, a quantidade de pacotes por semana e a retenção dos casuais. Ajustar as taxas aqui, e só aqui.</li>
-<li><b>Lançamento (acesso antecipado).</b> Mercado aberto pra pacotes e T4. T5 bloqueado.</li>
-<li><b>Pós-lançamento.</b> Liberar T5 se a oferta permitir, adicionar novos banners e atos e monitorar os preços toda semana.</li>
+<li><b>Agora: protótipo HTML (v1.3).</b> Balanceamento, T6 Root, 3 classes de ataque, ranking e painel de chances.</li>
+<li><b>Porta pro Godot.</b> Janela fixa na barra de tarefas, arte final, GodotSteam. Tudo continua local, sem mercado.</li>
+<li><b>Servidor.</b> Login Steam, sinal de vida, sorteio no servidor, tetos, itemdefs no Steam Inventory Service, ranking oficial.</li>
+<li><b>Beta fechado sem mercado.</b> Medir horas reais por dificuldade, pacotes por semana, retenção dos casuais e tentativas de trapaça.</li>
+<li><b>Lançamento (acesso antecipado).</b> Mercado aberto pra pacotes e T4. T5 e T6 bloqueados.</li>
+<li><b>Pós-lançamento.</b> Liberar T5 e depois T6 conforme os dados. Um agente novo a cada 2 semanas (em destaque no Download e na loja de fragmentos 4 semanas depois) e um chefão convidado diferente por semana.</li>
 </ol>
 </div></body></html>
