@@ -23,6 +23,19 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.15: FIREWALL animado
+
+- FIREWALL ganhou sprites e animações a partir da arte gerada pelo autor (`art/sprites/firewall/`):
+  - **Guarda** parado esperando os vírus (quadro 1 da folha de ataque).
+  - **Ataque** em sequência: mira → golpe com arco de energia → recuo → volta à guarda.
+  - **Defesa**: com vírus encostando nele, levanta o escudo hexagonal, fica firme atrás dele e golpeia protegido; quando os vírus somem, abaixa o escudo.
+  - Caminhada (6 quadros) e corpo inteiro já importados, pra entrada na fase e telas de Coleção/Download.
+- Brilho de dano dos agentes mais suave (antes o personagem ficava todo branco).
+- Novas ferramentas:
+  - `tools/import-anim.cjs <id>`: lê `art/sprites/<id>/{corpo,caminhada,ataque,defesa,cura,pulso}.jpg`, tira o fundo branco e a linha de chão, separa os quadros (mesmo encostados), mesma escala e mesmo chão pra folha toda, grava `frames.json` e `preview.png`.
+  - `tools/anim-gif.cjs <id>`: um GIF por animação (precisa de `npm i gifenc`).
+- Qualquer agente que ganhar `atk`/`def` no `SHEET_SPR` usa essas animações automaticamente; os outros continuam como antes.
+
 ## v1.14.3: retrato do SANDBOX-II
 
 - SANDBOX-II ganhou o retrato novo (armadura cinza com linhas laranja), no mesmo tratamento dos outros. O antigo foi pra `art/retratos/antigos/`.
