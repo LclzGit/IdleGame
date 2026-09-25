@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.21: escolher o time do Chefão
+
+- **Enfrentar** agora abre a montagem do time antes da luta: uma coluna para Tanque, Ataque e Suporte, com todos os agentes que você tem.
+- O poder do time escolhido aparece ao lado do poder recomendado, em verde, amarelo ou vermelho.
+- O time do Chefão é separado: o time da barra não muda. O jogo lembra o último time usado.
+- A tentativa só é gasta ao clicar em **Iniciar luta**; **Voltar** sai sem gastar.
+
 ## v1.20: arena do Chefão (vista de cima) e fase rodando junto
 
 - A luta contra o chefão agora é uma arena vista de cima dentro da janela de Chefões: piso de placa de circuito, racks de servidor no fundo, cristais de dados, zonas corrompidas e o chefão no pedestal central com nome e vida.

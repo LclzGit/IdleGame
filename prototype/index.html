@@ -74,6 +74,13 @@
   .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin-top:6px; font-size:10px}
   .rcard{display:grid; grid-template-columns:28px minmax(0, 1fr); gap:6px; align-items:center; padding:3px; background:#0e0c1d; border:1px solid #2a2450; min-width:0}
   .rcard img{border:1px solid #2a2450} .rcard b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rpow{font-size:11px; margin:0 0 6px} .rpow .ok{color:var(--green)} .rpow .warn{color:var(--amber)} .rpow .bad{color:#ff3d7f}
+  .rpick{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px}
+  .rpcol{display:flex; flex-direction:column; gap:4px; min-width:0; max-height:300px; overflow-y:auto}
+  .rpcol > b{font-size:10px; text-transform:uppercase}
+  .rpag{display:grid; grid-template-columns:26px minmax(0, 1fr) auto; gap:5px; align-items:center; padding:3px; text-align:left; background:#0e0c1d; border:1px solid #2a2450; min-width:0; font-size:10px}
+  .rpag span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .rpag small{color:var(--amber)}
+  .rpag.on{border-color:var(--cyan); background:#10223a}
   .rcard.off{opacity:.45} .rcard .bar{height:4px; background:#101c14; margin-top:3px} .rcard .bar i{display:block; height:100%; background:var(--green)}
   .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
   .cfg section:last-child{border-bottom:0}
@@ -454,7 +461,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.20</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.21</p>
 </main>
 
 <footer class="dock">
@@ -3429,9 +3436,21 @@ function arenaAmbient(R) {
   ctx.strokeStyle = rgba(R.c, p); ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(bx, by, 34 + Math.sin(t * 2.2), 12.5, 0, 0, Math.PI * 2); ctx.stroke();
 }
 
+// Time do Chefão: pode ser diferente do time da barra. Os atributos saem das mesmas contas, trocando os
+// agentes dos postos só enquanto a arena calcula ou desenha (e voltando logo depois).
+const RSLOT = {fw:'tank', sc:'gunner', pt:'support'};
+const ownedOf = cls => CLASSES[cls].list.filter(c => S.roster[c.id]);
+function withTeam(team, fn) {
+  if (!team) return fn();
+  const old = {tank:S.tank, gunner:S.gunner, support:S.support};
+  for (const k in RSLOT) if (team[k] && S.roster[team[k]]) S[RSLOT[k]] = team[k];
+  applySlots();
+  try { return fn(); } finally { Object.assign(S, old); applySlots(); }
+}
+const teamPow = team => withTeam(team, power);
 function arenaUnit(k) {
   const def = HERO_DEF.find(d => d.id === k), h = {def}, H0 = A_HOME[k];
-  return {k, h, x:H0.gx, y:H0.y, hx:H0.x, hy:H0.y, face:H0.f, hp:maxHp(h), max:maxHp(h), t:.4 + Math.random() * .5, dead:false, flash:0, lunge:0, act:'', walk:false, mv:null, react:0};
+  return {k, h, aid:slotAid(k), name:def.name, x:H0.gx, y:H0.y, hx:H0.x, hy:H0.y, face:H0.f, hp:maxHp(h), max:maxHp(h), t:.4 + Math.random() * .5, dead:false, flash:0, lunge:0, act:'', walk:false, mv:null, react:0};
 }
 const aCd = h => { const b = bossUp; bossUp = true; const c = cdOf(h); bossUp = b; return c; };   // habilidades "contra chefes" valem na arena
 function aFloat(x, y, txt, c) { raid.fl.push({x, y, txt, c, life:1}); }
@@ -3541,7 +3560,7 @@ function raidTick(dt) {
 }
 // sprite de agente na arena (as mesmas folhas da barra, menores, virando pro lado do alvo)
 function drawArenaUnit(u) {
-  const aid = slotAid(u.k), SI = SHEET_IMG[aid], k = 1.05;
+  const aid = u.aid, SI = SHEET_IMG[aid], k = 1.05;
   ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(u.x, u.y, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
   let top = u.y - 30;
   if (sheetReady(SI)) {
@@ -4125,7 +4144,7 @@ function rollback(why) {
 }
 
 // ---------- chefões ----------
-function startRaid(id) {
+function startRaid(id, team) {
   const R = raidOf(id);
   if (!R || !raidOpen(R) || !raidReady(R) || raid) return;
   S.raids[R.id] = nowMs() + R.cd * 3600e3;   // a tentativa é gasta ao entrar
@@ -4133,8 +4152,9 @@ function startRaid(id) {
   const hp = ENEMY.hp * ENEMY.hpG ** R.L * ENEMY.djHp ** d * 60;
   const bw = document.createElement('canvas'); bw.width = spr.width; bw.height = spr.height;
   const g = bw.getContext('2d'); g.drawImage(spr, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#fff'; g.fillRect(0, 0, bw.width, bw.height);
-  raid = {R, intro:true, bIn:0, time:0, over:0, floor:arenaFloor(R), bw, units:['fw', 'sc', 'pt'].map(arenaUnit), shots:[], parts:[], fl:[], zones:[], scorch:[], msg:null,
+  raid = {R, intro:true, bIn:0, time:0, over:0, floor:arenaFloor(R), bw, team, units:withTeam(team, () => ['fw', 'sc', 'pt'].map(arenaUnit)), shots:[], parts:[], fl:[], zones:[], scorch:[], msg:null,
     B:{hp, max:hp, atk:ENEMY.atk * ENEMY.atkG ** R.L * ENEMY.djAtk ** d * 2.2, cd:1.4, t:1.5, st:4, sc, w:spr.width * sc, h:spr.height * sc, flash:0, lunge:0}};
+  raidPick = null;
   say(`Chefão <span style="color:${R.c}">${R.n}</span> iniciado na janela de Chefões. Próxima tentativa em ${waitTxt(R.cd * 3600e3)}.`, true);
   openPanel('raid', true); save();
 }
@@ -4170,7 +4190,7 @@ function raidEnd(win, why) {
 }
 function raidFightView() {
   const R = raid.R;
-  const cards = raid.units.map((u, i) => `<div class="rcard"><img src="${bustOf(slotAid(u.k))}" width="28" height="28" alt=""><div><b>${u.h.def.name}</b><div class="bar"><i id="rq${i}"></i></div></div></div>`).join('');
+  const cards = raid.units.map((u, i) => `<div class="rcard"><img src="${bustOf(u.aid)}" width="28" height="28" alt=""><div><b>${u.name}</b><div class="bar"><i id="rq${i}"></i></div></div></div>`).join('');
   return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y} · poder ${fmtN(raidPow(R))}</small>
       <div class="bar"><i id="rHp"></i></div></div><b id="rHpT"></b></div>
     <div id="arenaHost"></div>
@@ -4185,8 +4205,25 @@ function raidLive() {
   if (ht) ht.textContent = Math.ceil(Math.max(0, B.hp / B.max) * 100) + '%';
   raid.units.forEach((u, i) => { const el = $('#rq' + i); if (el) { el.style.width = (u.dead ? 0 : u.hp / u.max * 100) + '%'; el.parentElement.parentElement.parentElement.classList.toggle('off', u.dead); } });
 }
+let raidPick = null;   // {id, team}: tela de montar o time antes de entrar
+function raidPickOpen(id) {
+  const R = raidOf(id); if (!R || !raidOpen(R) || !raidReady(R) || raid) return;
+  const last = S.rteam || {}, team = {};
+  for (const k in RSLOT) team[k] = last[k] && S.roster[last[k]] ? last[k] : S[RSLOT[k]];
+  raidPick = {id, team}; renderPanel();
+}
+function raidPickView() {
+  const R = raidOf(raidPick.id), T = raidPick.team, pw = teamPow(T), rp = raidPow(R), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad';
+  const col = k => `<div class="rpcol"><b class="hint">${CLASSES[k].one}</b>${ownedOf(k).map(c => `<button type="button" class="rpag${T[k] === c.id ? ' on' : ''}" data-rtm="${k}:${c.id}" aria-pressed="${T[k] === c.id}" title="${c.name} · ${c.stars}★"><img src="${bustOf(c.id)}" width="26" height="26" alt=""><span>${c.name}</span><small>${c.stars}★</small></button>`).join('')}</div>`;
+  return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y}</small>
+      <div class="hint">Monte o time pra esta luta. O time da barra não muda.</div></div><span></span></div>
+    <div class="rpow">poder do time <b class="${cls}">${fmtN(pw)}</b> · recomendado <b>${fmtN(rp)}</b></div>
+    <div class="rpick">${col('fw')}${col('sc')}${col('pt')}</div>
+    <div class="opts"><button type="button" data-rback>Voltar</button><button type="button" data-rstart>Iniciar luta</button></div>`;
+}
 function raidView() {
   if (raid) return raidFightView();
+  if (raidPick) return raidPickView();
   const pw = power(), now = nowMs();
   const res = lastRaid && now - lastRaid.at < 10 * 60e3 ? `<div class="rres ${lastRaid.win ? 'ok' : 'bad'}"><b>${raidOf(lastRaid.id).n}</b> ${lastRaid.win ? 'eliminado: ' + lastRaid.out.join(' · ') : 'escapou. A tentativa foi gasta.'}</div>` : '';
   const G = guestRaid(), nextWeek = ((weekIdx() + 1) * 7 - 3) * DAY + new Date().getTimezoneOffset() * 6e4 - now;
@@ -4428,7 +4465,7 @@ function codexView() {
 
 function update(dt) {
   t += dt; stT += dt;
-  if (raid) raidTick(dt);   // a luta do Chefão roda em paralelo, na janela de Chefões
+  if (raid) withTeam(raid.team, () => raidTick(dt));   // a luta do Chefão roda em paralelo, na janela de Chefões
   if (stT > STAGE_TIME) { rollback('time'); return; }
   const alive = heroes.filter(h => !h.dead);
   if (!alive.length) { rollback(); return; }
@@ -4771,7 +4808,7 @@ function drawCore(sc, panic) {
 }
 function draw() {
   ctx = stripCtx; drawWorld();
-  if (raid && arenaCv.isConnected) drawArena();
+  if (raid && arenaCv.isConnected) withTeam(raid.team, drawArena);
 }
 function drawWorld() {
   const sc = sec(), tint = sc.tint, panic = stagePos(S.stage).d === 4, SC = sceneOf(sc.idx, tint, panic);
@@ -5575,7 +5612,10 @@ $('#pBody').addEventListener('click', e => {
   else if (d.week !== undefined) { S.toff += 7 * DAY; ctrSync(); renderPanel(); save(); }
   else if (d.ach) claimAch(d.ach);
   else if (d.cdx) { codexTab = d.cdx; renderPanel(); }
-  else if (d.raid) startRaid(d.raid);
+  else if (d.raid) raidPickOpen(d.raid);
+  else if (d.rtm) { const [k, id] = d.rtm.split(':'); if (raidPick && S.roster[id]) { raidPick.team[k] = id; renderPanel(); } }
+  else if (d.rback !== undefined) { raidPick = null; renderPanel(); }
+  else if (d.rstart !== undefined) { if (raidPick) { S.rteam = {...raidPick.team}; startRaid(raidPick.id, S.rteam); } }
   else if (d.raidquit !== undefined) { if (raid) raidEnd(false, 'quit'); }
   else if (d.raidreset !== undefined) { S.raids = {}; renderPanel(); save(); }
   else if (d.rkt) { rankTab = d.rkt; renderPanel(); }
