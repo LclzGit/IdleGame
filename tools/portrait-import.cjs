@@ -14,15 +14,38 @@ for(const [id,[n,gl]] of Object.entries(MAP)){
   // área interna da moldura: da linha do meio, anda do centro pra fora até achar a moldura escura depois do branco
   const lum=(x,y)=>{const i=(y*W+x)*4;return (px[i]+px[i+1]+px[i+2])/3};
   // moldura: vindo de fora, pula o branco externo (se houver), depois a linha/borda escura, e para no branco de dentro
-  const inward=(get,n)=>{let k=0;while(k<n/3&&get(k)>225)k++;while(k<n/3&&get(k)<=225)k++;return k;};
+  // moldura dupla: se outra linha escura vem logo depois (até 10% da imagem), pula ela também
+  const inward=(get,n)=>{let k=0;while(k<n/3&&get(k)>225)k++;while(k<n/3&&get(k)<=225)k++;
+    for(let r=0;r<2;r++){let j=k;while(j<k+n*.1&&get(j)>225)j++;if(j>=k+n*.1)break;k=j;while(k<n/3&&get(k)<=225)k++;}return k;};
   const edge=(dx,dy)=>dx<0?Math.min(inward(k=>lum(k,H>>1),W),inward(k=>lum(k,Math.round(H*.2)),W)):Math.min(...[.15,.5,.85].map(f=>inward(k=>lum(Math.round(W*f),k),H)));   // topo: moldura pode ter recorte no meio
-  const L=edge(-1,0)+4,T=edge(0,-1)+4,R=W-1-L,B=H-1-T;   // moldura com a mesma espessura dos dois lados
+  const L=edge(-1,0)+4,T=edge(0,-1)+4;
+  // direita e baixo medidos de verdade; se o personagem encosta na moldura (medida falha), espelha o lado oposto
+  const rr=inward(k=>lum(W-1-k,H>>1),W), bb=Math.min(...[.15,.85].map(f=>inward(k=>lum(Math.round(W*f),H-1-k),H)));
+  const R=rr<W/3-1?W-1-rr-4:W-1-L, B=bb<H/3-1?H-1-bb-4:H-1-T;   // moldura com a mesma espessura dos dois lados
   // flood fill do branco a partir das bordas da área interna
   const seen=new Uint8Array(W*H),st=[];
-  const push=(x,y)=>{if(x<L||x>R||y<T||y>B)return;const k=y*W+x;if(seen[k])return;if(!white(k*4))return;seen[k]=1;st.push(k)};
-  // sementes: branco numa faixa de 30 px junto da moldura (cantos fechados pela linha da moldura também saem)
-  for(let y=T;y<=B;y++)for(let x=L;x<=R;x++)if(x-L<30||R-x<30||y-T<30||B-y<30)push(x,y);
-  while(st.length){const k=st.pop(),x=k%W,y=(k/W)|0;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
+  // não passa a menos de 3 px do desenho (frestas no contorno não deixam o fundo entrar no cabelo/armadura brancos)
+  const nearInk=new Uint8Array(W*H);
+  for(let y=T;y<=B;y++)for(let x=L;x<=R;x++)if(!white((y*W+x)*4))for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<W&&ny<H)nearInk[ny*W+nx]=1;}
+  const push=(x,y)=>{if(x<L||x>R||y<T||y>B)return;const k=y*W+x;if(seen[k])return;if(!white(k*4)||nearInk[k])return;seen[k]=1;st.push(k)};
+    // cada região branca encostada na borda é medida: só sai se for grande (o fundo) ou estiver num canto.
+  // Branco pequeno encostado na borda é desenho (cabelo branco que sai da moldura, por exemplo).
+  const area=(R-L+1)*(B-T+1), near=(x,y)=>Math.min(x-L,R-x)<60&&Math.min(y-T,B-y)<60;
+  const tryRegion=(x0,y0)=>{const k0=y0*W+x0;if(seen[k0]||!white(k0*4))return;const reg=[];st.push(k0);seen[k0]=1;let corner=false;
+    while(st.length){const k=st.pop(),x=k%W,y=(k/W)|0;reg.push(k);if(near(x,y))corner=true;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
+    if(!(reg.length>area*.015||corner))reg.forEach(k=>seen[k]=2);};
+  for(let x=L;x<=R;x++){tryRegion(x,T);tryRegion(x,B)} for(let y=T;y<=B;y++){tryRegion(L,y);tryRegion(R,y)}
+  for(let k=0;k<W*H;k++)if(seen[k]===2)seen[k]=0;
+  // vãos internos (entre as pontas de um cachecol, braço e corpo): branco liso e grande é fundo; branco com sombra é desenho
+  {const lab=new Uint8Array(W*H);
+   for(let y=T;y<=B;y++)for(let x=L;x<=R;x++){const k0=y*W+x;if(seen[k0]||lab[k0]||!white(k0*4)||nearInk[k0])continue;
+     const q=[k0],reg=[];lab[k0]=1;let sm=0,sq=0;
+     while(q.length){const k=q.pop();reg.push(k);const l=lum(k%W,(k/W)|0);sm+=l;sq+=l*l;const x2=k%W,y2=(k/W)|0;
+       for(const n of [k-1,k+1,k-W,k+W]){const nx=n%W,ny=(n/W)|0;if(nx<L||nx>R||ny<T||ny>B)continue;if(!lab[n]&&!seen[n]&&white(n*4)&&!nearInk[n]){lab[n]=1;q.push(n)}}}
+     const m=sm/reg.length,sd=Math.sqrt(Math.max(0,sq/reg.length-m*m));
+     if(reg.length>area*.003&&m>242&&sd<4)reg.forEach(k=>seen[k]=1);}}
+  // volta os 3 px até o contorno
+  for(let step=0;step<3;step++){const add=[];for(let y=T;y<=B;y++)for(let x=L;x<=R;x++){const k=y*W+x;if(seen[k]||!white(k*4))continue;if(seen[k-1]===1||seen[k+1]===1||seen[k-W]===1||seen[k+W]===1)add.push(k)}add.forEach(k=>seen[k]=1)}
   // halo claro do jpeg encostado no fundo também sai
   for(let pass=0;pass<2;pass++){const add=[];for(let y=T;y<=B;y++)for(let x=L;x<=R;x++){const k=y*W+x;if(seen[k])continue;const i=k*4;
     if((px[i]+px[i+1]+px[i+2])/3>170&&(seen[k-1]||seen[k+1]||seen[k-W]||seen[k+W]))add.push(k)} add.forEach(k=>seen[k]=1)}

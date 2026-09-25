@@ -9,6 +9,9 @@ const fs = require('fs'), path = require('path');
 const id = process.argv[2];
 if (!id) { console.log('uso: node tools/import-anim.cjs <id>'); process.exit(1); }
 const dir = path.resolve(__dirname, '../art/sprites', id);
+// opções por personagem (art/sprites/<id>/import.json): {"keepWhite": false} apaga vãos brancos de qualquer tamanho
+// (arco com corda); o padrão guarda vãos grandes, que costumam ser o miolo branco de um escudo.
+const OPT = (() => { try { return JSON.parse(fs.readFileSync(path.join(dir, 'import.json'), 'utf8')); } catch (e) { return {}; } })();
 const KINDS = ['corpo', 'caminhada', 'ataque', 'defesa', 'cura', 'pulso'];
 const H = 72;
 
@@ -20,7 +23,7 @@ const H = 72;
     if (!f) continue;
     const mime = f.endsWith('png') ? 'png' : f.endsWith('webp') ? 'webp' : 'jpeg';
     const src = `data:image/${mime};base64,` + fs.readFileSync(f).toString('base64');
-    const frames = await p.evaluate(async ([src, H, single, N]) => {
+    const frames = await p.evaluate(async ([src, H, single, N, keepWhite]) => {
       const im = new Image(); im.src = src; await im.decode();
       const W = im.width, Hh = im.height, c = document.createElement('canvas'); c.width = W; c.height = Hh;
       const g = c.getContext('2d'); g.drawImage(im, 0, 0);
@@ -69,7 +72,7 @@ const H = 72;
             for (const n of [x > 0 ? m - 1 : -1, x < W - 1 ? m + 1 : -1, y > 0 ? m - W : -1, y < Hh - 1 ? m + W : -1]) if (n >= 0 && !vis[n] && a[n * 4 + 3] && bg(n * 4)) { vis[n] = 1; q.push(n); } }
           // grande = pintura branca (miolo de escudo), fica — a não ser que encoste no chão (vão entre as pernas fechado por brasas)
           const onFloor = comp.some(m => ((m / W) | 0) >= floorY);
-          if (comp.length > 60 && (comp.length < W * Hh * .0035 || onFloor)) comp.forEach(m => a[m * 4 + 3] = 0); } }
+          if (comp.length > 60 && (comp.length < W * Hh * .0035 || onFloor || !keepWhite)) comp.forEach(m => a[m * 4 + 3] = 0); } }
       // 2) linha de chão (detectada antes de apagar o fundo): trecho não branco contínuo e longo na metade de baixo.
       //    Só apaga onde é fino (vazio 3 px acima ou abaixo), pra não cortar os pés.
       for (const y of lineRows) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (!a[i + 3]) continue;
@@ -197,7 +200,7 @@ const H = 72;
         og.drawImage(m, 0, 0, cw, ch, 0, 0, tw, th);
         return [o.toDataURL('image/webp', .92), tw, th, Math.round((fn ? fs / fn : cw / 2) * k)];
       });
-    }, [src, H, kind === 'corpo', {caminhada: 6, ataque: 5, defesa: 5, cura: 5, pulso: 4}[kind] || 0]);
+    }, [src, H, kind === 'corpo', {caminhada: 6, ataque: 5, defesa: 5, cura: 5, pulso: 4}[kind] || 0, OPT.keepWhite !== false]);
     out[kind] = frames;
     preview.push(`<div style="margin:6px;color:#aaa;font:12px sans-serif">${kind} (${frames.length})<br>` + frames.map(([u, w, h, fx]) => `<span style="display:inline-block;position:relative;margin:2px;background:#16142c"><img src="${u}" width="${w * 2}" height="${h * 2}" style="image-rendering:pixelated;display:block"><i style="position:absolute;left:${fx * 2}px;bottom:0;width:2px;height:8px;background:#f0f"></i></span>`).join('') + '</div>');
     console.log(kind, frames.length, 'quadros', frames.map(f => f[1] + 'x' + f[2]).join(' '));

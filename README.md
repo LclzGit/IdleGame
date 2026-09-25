@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.7: CHECKSUM
+
+- CHECKSUM: retrato novo e animações da arte do autor: guarda com o arco tático, puxa a corda, solta três flechas douradas com clarão e volta à guarda.
+- `tools/import-anim.cjs`: opção por personagem em `art/sprites/<id>/import.json` (`{"keepWhite": false}` apaga o branco preso entre arco e corda).
+- `tools/portrait-import.cjs`: moldura dupla, lados direito/baixo medidos de verdade, fundo não entra por frestas do contorno (cabelo branco fica) e vão de branco liso entre peças (cachecol) sai.
+
 ## v1.16.6: SNIFFER
 
 - SNIFFER: retrato novo e animações da arte do autor: guarda com a besta de energia, virote roxo com clarão, recuo com fumaça e volta à guarda.
