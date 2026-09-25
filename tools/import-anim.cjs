@@ -59,12 +59,17 @@ const H = 72;
           if (al < .06) { a[i + 3] = 0; continue; }
           for (let c = 0; c < 3; c++) a[i + c] = Math.max(0, Math.round(255 - (255 - a[i + c]) / al));
           a[i + 3] = Math.round(255 * Math.min(1, al * 1.15)); } }
+      // altura do chão: linha desenhada, ou o pixel mais baixo do desenho (brasas no chão podem esconder a linha)
+      let inkBottom = 0; for (let k = 0; k < W * Hh; k++) if (ink[k]) inkBottom = Math.max(inkBottom, (k / W) | 0);
+      const floorY = (lineRows.length ? Math.min(...lineRows) : inkBottom) - 14;
       // bolsões de branco presos (entre braço e corpo), só se forem grandes
       { const vis = new Uint8Array(W * Hh);
         for (let k = 0; k < W * Hh; k++) { if (vis[k] || !a[k * 4 + 3] || !bg(k * 4)) continue; const q = [k], comp = []; vis[k] = 1;
           while (q.length) { const m = q.pop(); comp.push(m); const x = m % W, y = (m / W) | 0;
             for (const n of [x > 0 ? m - 1 : -1, x < W - 1 ? m + 1 : -1, y > 0 ? m - W : -1, y < Hh - 1 ? m + W : -1]) if (n >= 0 && !vis[n] && a[n * 4 + 3] && bg(n * 4)) { vis[n] = 1; q.push(n); } }
-          if (comp.length > 60 && comp.length < 1200) comp.forEach(m => a[m * 4 + 3] = 0); } }   // grande = pintura branca (miolo de escudo), fica
+          // grande = pintura branca (miolo de escudo), fica — a não ser que encoste no chão (vão entre as pernas fechado por brasas)
+          const onFloor = comp.some(m => ((m / W) | 0) >= floorY);
+          if (comp.length > 60 && (comp.length < 1200 || onFloor)) comp.forEach(m => a[m * 4 + 3] = 0); } }
       // 2) linha de chão (detectada antes de apagar o fundo): trecho não branco contínuo e longo na metade de baixo.
       //    Só apaga onde é fino (vazio 3 px acima ou abaixo), pra não cortar os pés.
       for (const y of lineRows) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (!a[i + 3]) continue;

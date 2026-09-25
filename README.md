@@ -23,6 +23,11 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.15.4: KILLSWITCH-7 animado
+
+- KILLSWITCH-7 com a arte nova do autor: guarda com a lâmina-canhão, corte com rastro vermelho, escudo de engrenagem com vírus encostando (disparo pela borda do escudo) e volta à guarda. Brasas nos pés preservadas.
+- `tools/import-anim.cjs`: vão branco entre as pernas fechado por brasas agora é reconhecido como fundo (encosta no chão), sem apagar o miolo branco de escudos; altura do chão vem do desenho quando a linha não existe.
+
 ## v1.15.3: RESTORE-9 animado
 
 - RESTORE-9 com a arte nova do autor: guarda, rajada verde do canhão de garra, escudo-torre branco com moldura dourada (rajada por cima do escudo) e volta à guarda. Drone acompanha em todos os quadros.
