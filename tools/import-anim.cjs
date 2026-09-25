@@ -171,7 +171,8 @@ const H = 72;
         for (let k = 0; k < W * Hh; k++) { const f = pf[k]; if (f >= 0 && !glow(k)) bodyL[f] = Math.min(bodyL[f], k % W); }
         const seenG = new Uint8Array(W * Hh);
         for (let k = 0; k < W * Hh; k++) { if (seenG[k] || pf[k] < 1 || !glow(k)) continue; const f = pf[k], q = [k], reg = []; seenG[k] = 1;
-          while (q.length) { const u = q.pop(); reg.push(u); N4(u, n => { if (!seenG[n] && pf[n] === f && glow(n)) { seenG[n] = 1; q.push(n); } }); }
+          const hot = n => glow(n) || Math.min(a[n * 4], a[n * 4 + 1], a[n * 4 + 2]) > 235;   // núcleo branco da rajada
+          while (q.length) { const u = q.pop(); reg.push(u); N4(u, n => { if (!seenG[n] && pf[n] === f && hot(n)) { seenG[n] = 1; q.push(n); } }); }
           // encosta (até 2 px) no brilho do quadro anterior: é continuação da rajada dele
           let touches = false;
           for (const u of reg) { const ux = u % W, uy = (u / W) | 0;

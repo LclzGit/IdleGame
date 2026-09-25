@@ -23,6 +23,13 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.1: SCANNER (primeiro agente de ataque com arte nova)
+
+- SCANNER: retrato novo e animações da arte do autor: guarda com o railgun, mira, disparo com raio ciano, recuo e volta à guarda. Caminhada e corpo inteiro importados.
+- `tools/import-anim.cjs`: o núcleo branco de uma rajada que invade o quadro seguinte volta pro quadro de quem atirou.
+- `tools/portrait-import.cjs`: o fundo branco é limpo a partir de uma faixa junto da moldura (cantos fechados pela linha da moldura também saem).
+- `tools/battle-gif.cjs <tanque> [ataque]` grava também o agente de ataque.
+
 ## v1.16: KERNELGUARD-X1 — todos os tanques com arte nova
 
 - KERNELGUARD-X1: retrato novo (o antigo foi pra `art/retratos/antigos/`) e animações da arte do autor: guarda com o rifle de antebraço e o drone Aegis, disparo ciano, escudo colossal hexagonal com vírus encostando (tiro pela fresta) e volta à guarda.

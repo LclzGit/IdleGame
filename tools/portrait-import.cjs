@@ -20,7 +20,8 @@ for(const [id,[n,gl]] of Object.entries(MAP)){
   // flood fill do branco a partir das bordas da área interna
   const seen=new Uint8Array(W*H),st=[];
   const push=(x,y)=>{if(x<L||x>R||y<T||y>B)return;const k=y*W+x;if(seen[k])return;if(!white(k*4))return;seen[k]=1;st.push(k)};
-  for(let x=L;x<=R;x++){push(x,T);push(x,B)} for(let y=T;y<=B;y++){push(L,y);push(R,y)}
+  // sementes: branco numa faixa de 30 px junto da moldura (cantos fechados pela linha da moldura também saem)
+  for(let y=T;y<=B;y++)for(let x=L;x<=R;x++)if(x-L<30||R-x<30||y-T<30||B-y<30)push(x,y);
   while(st.length){const k=st.pop(),x=k%W,y=(k/W)|0;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
   // halo claro do jpeg encostado no fundo também sai
   for(let pass=0;pass<2;pass++){const add=[];for(let y=T;y<=B;y++)for(let x=L;x<=R;x++){const k=y*W+x;if(seen[k])continue;const i=k*4;
