@@ -23,6 +23,12 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16: KERNELGUARD-X1 — todos os tanques com arte nova
+
+- KERNELGUARD-X1: retrato novo (o antigo foi pra `art/retratos/antigos/`) e animações da arte do autor: guarda com o rifle de antebraço e o drone Aegis, disparo ciano, escudo colossal hexagonal com vírus encostando (tiro pela fresta) e volta à guarda.
+- Os 6 tanques agora têm retrato e animações novos: FIREWALL, SANDBOX-II, QUARENTENA, RESTORE-9, KILLSWITCH-7, KERNELGUARD-X1.
+- `tools/portrait-import.cjs` reconhece retratos sem a moldura escura externa (só a linha cinza arredondada).
+
 ## v1.15.4: KILLSWITCH-7 animado
 
 - KILLSWITCH-7 com a arte nova do autor: guarda com a lâmina-canhão, corte com rastro vermelho, escudo de engrenagem com vírus encostando (disparo pela borda do escudo) e volta à guarda. Brasas nos pés preservadas.

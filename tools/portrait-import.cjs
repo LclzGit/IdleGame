@@ -13,13 +13,9 @@ for(const [id,[n,gl]] of Object.entries(MAP)){
   const white=i=>px[i]>222&&px[i+1]>222&&px[i+2]>222&&Math.max(px[i],px[i+1],px[i+2])-Math.min(px[i],px[i+1],px[i+2])<30;
   // área interna da moldura: da linha do meio, anda do centro pra fora até achar a moldura escura depois do branco
   const lum=(x,y)=>{const i=(y*W+x)*4;return (px[i]+px[i+1]+px[i+2])/3};
-  const edge=(dx,dy)=>{let x=W>>1,y=Math.round(H*.12);if(dy){x=Math.round(W*.12);y=H>>1}
-    // procura o primeiro pixel branco perto da borda, vindo de fora
-    if(dx<0){for(let k=0;k<W/3;k++) if(lum(k,H>>1)>225||lum(k,Math.round(H*.2))>225) return k;}
-    if(dx>0){for(let k=W-1;k>W*2/3;k--) if(lum(k,H>>1)>225||lum(k,Math.round(H*.2))>225) return k;}
-    if(dy<0){for(let k=0;k<H/3;k++) if(lum(W>>1,k)>225||lum(Math.round(W*.15),k)>225) return k;}
-    if(dy>0){for(let k=H-1;k>H*2/3;k--) if(lum(Math.round(W*.15),k)>225||lum(Math.round(W*.85),k)>225||lum(W>>1,k)>225) return k;}
-    return 0;};
+  // moldura: vindo de fora, pula o branco externo (se houver), depois a linha/borda escura, e para no branco de dentro
+  const inward=(get,n)=>{let k=0;while(k<n/3&&get(k)>225)k++;while(k<n/3&&get(k)<=225)k++;return k;};
+  const edge=(dx,dy)=>dx<0?Math.min(inward(k=>lum(k,H>>1),W),inward(k=>lum(k,Math.round(H*.2)),W)):inward(k=>lum(W>>1,k),H);
   const L=edge(-1,0)+4,T=edge(0,-1)+4,R=W-1-L,B=H-1-T;   // moldura com a mesma espessura dos dois lados
   // flood fill do branco a partir das bordas da área interna
   const seen=new Uint8Array(W*H),st=[];
