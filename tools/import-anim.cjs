@@ -160,7 +160,7 @@ const H = 72;
           if (isAnchor.has(c.id)) { frameOf[c.id] = anchors.findIndex(x => x.id === c.id); continue; }
           // cabe inteira no espaço de um quadro (drone atrás da cabeça, faísca perto do corpo): fica nesse quadro
           const zi = segs.findIndex(([z0, z1]) => c.x0 >= z0 - 2 && c.x1 <= z1 + 2);
-          if (zi >= 0 && segs.length === nz && !c.split && !(c.fx > .5)) { frameOf[c.id] = zi; continue; }   // brilho (rajada) segue a regra da esquerda
+          if (zi >= 0 && segs.length === nz && !c.split && !(c.fx > .5) && c.n > anchors[0].n * .02) { frameOf[c.id] = zi; continue; }   // miudezas (cápsulas, faíscas) seguem a regra da esquerda   // brilho (rajada) segue a regra da esquerda
           let best = 0, bd = 1e9; anchors.forEach((an, i) => { const d = c.cx >= an.cx ? c.cx - an.cx : (an.cx - c.cx) * 2.2; if (d < bd) { bd = d; best = i; } });
           frameOf[c.id] = best; } }
       const pf = new Int16Array(W * Hh).fill(-1);
