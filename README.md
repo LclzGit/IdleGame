@@ -23,6 +23,10 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.9: FORMAT-C (provisório)
+
+- FORMAT-C com a arte enviada, **provisória**: o autor quer refazer num estilo de robô que se transforma em torreta (andador → torreta com metralhadora giratória). Prompts novos no topo de `art/prompts-arte.md`; a transformação entra como a animação de "defesa" quando os vírus encostarem.
+
 ## v1.16.8: DEFRAG
 
 - DEFRAG: retrato novo e animações da arte do autor: guarda com o canhão rotativo, mira, feixe laser vermelho, recuo e volta à guarda; esteiras nos pés.

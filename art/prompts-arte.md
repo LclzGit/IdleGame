@@ -11,7 +11,39 @@
 
 Se uma animação vier com quadros muito diferentes entre si, gere de novo pedindo só 2 ou 3 quadros por vez.
 
-Retratos já prontos (não refazer): FIREWALL, SANDBOX-II, QUARENTENA, RESTORE-9, KILLSWITCH-7.
+Retratos e animações já prontos (não refazer): todos os tanques, SCANNER, TRACEROUTE, SHREDDER, PENTEST, SPECTRE, SNIFFER, CHECKSUM, DEFRAG. Falta: PATCHER. Refazer: FORMAT-C (seção logo abaixo).
+
+Retratos já prontos (lista antiga): FIREWALL, SANDBOX-II, QUARENTENA, RESTORE-9, KILLSWITCH-7.
+
+## ⚠ FORMAT-C — REFAZER (pendente)
+
+A arte atual está no jogo como provisória. Visual novo: robô de combate que **se transforma**. Anda como robô (modo recon) e, quando os vírus chegam, se ancora no chão e vira uma **torreta** com metralhadora giratória (referência de estilo: o Bastion, de Overwatch — não use o nome no prompt, só a descrição).
+No jogo: guarda e caminhada no modo robô; quando os vírus encostam, a folha de transformação entra no lugar da "defesa" e ele atira no modo torreta.
+
+**Retrato**
+```
+High-detail pixel art character portrait for a video game, bust shot (head, neck and upper shoulders), three-quarter view facing right, top of the head near the top of the frame, shoulders cropped by the bottom edge. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background. Rounded square frame with a thick dark gray border and a thin black inner line. Square 1024x1024. No text, no logo, no watermark. Avoid: full body, background scenery, gradient background, blurry, painterly, 3D render, realistic.
+```
+
+**Corpo inteiro (modo robô)**
+```
+Pixel art game sprite of a single character, full body from head to feet, side view facing right, standing ready with the forearm rotary cannon pointing to the right. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Strong silhouette that still reads at 70 pixels tall. Centered with empty margin around it. Plain solid white background, no floor, no shadow, no frame. 1024x1024. No text, no logo, no watermark. Avoid: cropped feet, facing left, front view, background, floor, shadow, 3D render, realistic.
+```
+
+**Movimentação (6 quadros, modo robô)**
+```
+Pixel art sprite sheet of ONE character, 6 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: a heavy looping walk cycle to the right in robot mode, 6 frames, stomping steps, body bobbing, cannon arm held forward. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
+```
+
+**Ataque (5 quadros, modo robô)**
+```
+Pixel art sprite sheet of ONE character, 5 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: an attack in robot mode, 5 frames: 1 guard stance, 2 aim the forearm rotary cannon, 3 firing a burst with a bright amber muzzle flash, 4 recoil, 5 back to guard stance. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
+```
+
+**Transformação e torreta (5 quadros — vira a "defesa" do jogo)**
+```
+Pixel art sprite sheet of ONE character, 5 frames in a single horizontal row, evenly spaced, same size, same character, same scale, same colors in every frame, side view facing right, feet on the same ground line, frames not overlapping. Animation: transforming into a stationary turret and firing, 5 frames: 1 robot guard stance, 2 legs folding down and armor plates opening, 3 fully deployed sentry turret mode anchored to the ground with a large rotary gatling gun on top and a front armor plate, 4 turret firing a heavy burst with a big amber muzzle flash and spent casings, 5 still in turret mode, barrels spinning down. A friendly-looking but heavy combat robot in olive drab and sand-colored armor plates with worn paint, a rounded head with one big round amber optic lens, stubby sturdy legs, a chunky rotary cannon built into the right forearm, a small antenna. Thick black outlines, crisp readable pixel clusters, cel shading with 3 tones per material, rim light on the left edges, one glowing accent color. Retro 16-bit SNES game art, no anti-aliasing blur. Plain solid white background, no floor, no shadow, no frame numbers. Wide image 1536x512. No text, no logo, no watermark. Avoid: different characters between frames, changing size or colors, facing left, overlapping frames, cropped feet, motion blur, grid lines.
+```
 
 ---
 
