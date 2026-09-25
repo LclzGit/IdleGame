@@ -23,6 +23,10 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.16.4: PENTEST
+
+- PENTEST: retrato novo e animações da arte do autor: guarda com o fuzil com mira, disparo com rajada verde, recuo com fumaça e volta à guarda.
+
 ## v1.16.3: SHREDDER
 
 - SHREDDER: retrato novo e animações da arte do autor: guarda com o fuzil de baioneta, mira, rajada verde com cápsulas voando, recuo e volta à guarda.
