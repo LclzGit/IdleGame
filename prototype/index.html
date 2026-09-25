@@ -74,13 +74,49 @@
   .rsq{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin-top:6px; font-size:10px}
   .rcard{display:grid; grid-template-columns:28px minmax(0, 1fr); gap:6px; align-items:center; padding:3px; background:#0e0c1d; border:1px solid #2a2450; min-width:0}
   .rcard img{border:1px solid #2a2450} .rcard b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .rpow{font-size:11px; margin:0 0 6px} .rpow .ok{color:var(--green)} .rpow .warn{color:var(--amber)} .rpow .bad{color:#ff3d7f}
-  .rpick{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px}
-  .rpcol{display:flex; flex-direction:column; gap:4px; min-width:0; max-height:300px; overflow-y:auto}
-  .rpcol > b{font-size:10px; text-transform:uppercase}
-  .rpag{display:grid; grid-template-columns:26px minmax(0, 1fr) auto; gap:5px; align-items:center; padding:3px; text-align:left; background:#0e0c1d; border:1px solid #2a2450; min-width:0; font-size:10px}
-  .rpag span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .rpag small{color:var(--amber)}
-  .rpag.on{border-color:var(--cyan); background:#10223a}
+  .rdos{display:grid; grid-template-columns:48px minmax(0, 1fr); gap:8px; align-items:center; padding:6px; margin-bottom:6px; border:1px solid color-mix(in srgb, var(--rc) 45%, #2a2450);
+    background:linear-gradient(90deg, color-mix(in srgb, var(--rc) 16%, #0b0a16), #0b0a16 70%)}
+  .rdos img{image-rendering:pixelated; filter:drop-shadow(0 0 6px var(--rc))} .rdos b{color:var(--rc); font-size:13px} .rdos small{color:#8f89b8}
+  .rdos > div{min-width:0}
+  .rthr{display:flex; flex-wrap:wrap; gap:3px; margin:3px 0} .rthr i{font-style:normal; font-size:9px; padding:1px 5px; border:1px solid #5a1a30; background:#2a0f1c; color:#ff9ab6}
+  .rform{position:relative; display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; padding:6px; border:1px solid #1f5a60;
+    background:radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--rc) 18%, transparent), transparent 70%), repeating-linear-gradient(90deg, rgba(92,225,230,.05) 0 1px, transparent 1px 16px), repeating-linear-gradient(0deg, rgba(92,225,230,.05) 0 1px, transparent 1px 16px), #07060f}
+  .rslot{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0; padding:4px 3px 5px; background:transparent; border:1px solid transparent; cursor:pointer; text-align:center}
+  .rslot:hover{border-color:#2a2450} .rslot.on{border-color:var(--cc); background:linear-gradient(to top, color-mix(in srgb, var(--cc) 14%, transparent), transparent)}
+  .rsl{font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--cc)}
+  .rfig{position:relative; height:104px; width:100%; display:flex; align-items:flex-end; justify-content:center}
+  .rfig::before{content:""; position:absolute; bottom:-2px; left:50%; width:78%; height:14px; transform:translateX(-50%); border-radius:50%;
+    background:radial-gradient(ellipse, color-mix(in srgb, var(--cc) 55%, transparent), transparent 70%); border:1px solid color-mix(in srgb, var(--cc) 60%, transparent)}
+  .rslot.on .rfig::before{animation:rpulse 1.4s ease-in-out infinite}
+  .rfig img{position:relative; height:96px; max-width:100%; object-fit:contain; filter:drop-shadow(0 0 4px color-mix(in srgb, var(--cc) 70%, transparent)); animation:ridle 2.6s ease-in-out infinite}
+  .rfig img.bustf{width:64px; height:64px !important; border:1px solid var(--cc); margin-bottom:10px}
+  .rslot.fresh .rfig img{animation:rscan .55s steps(8) both, ridle 2.6s .55s ease-in-out infinite}
+  .rnm{font-size:10px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap} .rnm i{font-style:normal; font-size:9px}
+  .rstat{font-size:9px; color:#8f89b8; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rtags{display:flex; flex-wrap:wrap; justify-content:center; gap:2px; min-height:13px} .rtags i{font-style:normal; font-size:8px; padding:0 3px; border:1px solid #2a2450; color:#c9c3ee; white-space:nowrap}
+  .rtags i.good{border-color:#1f6a48; color:var(--green)} .rtags i.bad{border-color:#5a1a30; color:#ff7a9c}
+  @keyframes ridle{50%{transform:translateY(-2px)}}
+  @keyframes rpulse{50%{opacity:.55}}
+  @keyframes rscan{from{clip-path:inset(100% 0 0 0); filter:brightness(3) drop-shadow(0 0 6px #fff)} to{clip-path:inset(0 0 0 0)}}
+  .rgauge{margin:6px 0; font-size:11px} .rgl{display:flex; justify-content:space-between; gap:6px; flex-wrap:wrap}
+  .rgl i{font-style:normal} .up{color:var(--green)} .dn{color:#ff3d7f}
+  .rgb{position:relative; height:7px; margin:3px 0 1px; background:#12101f; border:1px solid #2a2450} .rgb i{display:block; height:100%; transition:width .35s}
+  .rgb em{position:absolute; top:-3px; bottom:-3px; width:2px; background:#e7e3ff}
+  .rgauge.ok .rgb i{background:linear-gradient(90deg, #1f6a48, var(--green))} .rgauge.ok .rvd{color:var(--green)}
+  .rgauge.warn .rgb i{background:linear-gradient(90deg, #6a4a10, var(--amber))} .rgauge.warn .rvd{color:var(--amber)}
+  .rgauge.bad .rgb i{background:linear-gradient(90deg, #5a1a30, #ff3d7f)} .rgauge.bad .rvd{color:#ff3d7f}
+  .rtt{margin:6px 0 4px; font-size:11px}
+  .rtray{display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:5px}
+  .rag{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding:5px 3px 4px; min-width:0; background:#0e0c1d; border:1px solid #2a2450; cursor:pointer}
+  .rag.s4{border-color:#4a2f6e} .rag.s5{border-color:#6e4a1a; background:linear-gradient(to bottom, #1d160c, #0e0c1d)}
+  .rag:hover{transform:translateY(-1px); border-color:var(--cyan)} .rag.on{border-color:var(--cyan); background:#10223a}
+  .rag img{border:1px solid #2a2450}
+  .rnm2{font-size:9px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rmeta{font-size:9px; display:flex; gap:4px} .rmeta i{font-style:normal} .rmeta .rcur{color:var(--cyan)}
+  .rbest,.rbar{position:absolute; top:2px; font-size:7px; padding:0 2px; line-height:10px} .rbest{right:2px; background:var(--green); color:#04140b} .rbar{left:2px; background:#2a2450; color:#c9c3ee}
+  .ract{position:sticky; bottom:-8px; display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; margin-top:8px; padding:6px 0; background:linear-gradient(to top, #0b0a16 75%, transparent)}
+  .rgo{margin-left:auto; font-weight:700; color:#fff !important; background:color-mix(in srgb, var(--rc) 40%, #1a1030) !important; border:1px solid var(--rc) !important; animation:rglow 1.6s ease-in-out infinite}
+  @keyframes rglow{50%{box-shadow:0 0 10px color-mix(in srgb, var(--rc) 70%, transparent)}}
   .rcard.off{opacity:.45} .rcard .bar{height:4px; background:#101c14; margin-top:3px} .rcard .bar i{display:block; height:100%; background:var(--green)}
   .cfg section{padding:6px 0 8px; border-bottom:1px dashed var(--line)}
   .cfg section:last-child{border-bottom:0}
@@ -461,7 +497,7 @@
 </style>
 
 <main class="desk">
-  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.21</p>
+  <p class="wm"><b>DAEMON//BAR</b> · protótipo v1.22</p>
 </main>
 
 <footer class="dock">
@@ -3447,7 +3483,9 @@ function withTeam(team, fn) {
   applySlots();
   try { return fn(); } finally { Object.assign(S, old); applySlots(); }
 }
-const teamPow = team => withTeam(team, power);
+// poder contra o chefão: igual ao poder normal, mas o dano do ataque conta o bônus da subclasse contra chefes
+const teamPow = team => withTeam(team, () => { const sb = dpsSub(), m = sb === 'boss' ? 1.8 : sb === 'single' ? 1.35 : 1;
+  return heroes.reduce((a, h) => a + atk(h) * (h.def.id === 'sc' ? m : 1) / cdOf(h) * 4 + maxHp(h) * .5, 0); });
 function arenaUnit(k) {
   const def = HERO_DEF.find(d => d.id === k), h = {def}, H0 = A_HOME[k];
   return {k, h, aid:slotAid(k), name:def.name, x:H0.gx, y:H0.y, hx:H0.x, hy:H0.y, face:H0.f, hp:maxHp(h), max:maxHp(h), t:.4 + Math.random() * .5, dead:false, flash:0, lunge:0, act:'', walk:false, mv:null, react:0};
@@ -4210,16 +4248,56 @@ function raidPickOpen(id) {
   const R = raidOf(id); if (!R || !raidOpen(R) || !raidReady(R) || raid) return;
   const last = S.rteam || {}, team = {};
   for (const k in RSLOT) team[k] = last[k] && S.roster[last[k]] ? last[k] : S[RSLOT[k]];
-  raidPick = {id, team}; renderPanel();
+  raidPick = {id, team, slot:'fw', prev:0, anim:null}; renderPanel();
 }
+// Preparação da luta: dossiê do chefão, formação em pedestais, medidor de chance e bandeja de troca.
+// Cada agente da bandeja mostra quanto o poder do time muda se entrar no lugar do atual.
+const RP_CLS = {fw:{n:'Tanque', c:'#5ca8ff'}, sc:{n:'Ataque', c:'#ff8a3a'}, pt:{n:'Suporte', c:'#c9b8ff'}};
+const RP_TAG = {dmgRed:'aguenta pancada', reflect:'reflete dano', regen:'regenera', teamHp:'+vida do time', teamAtk:'+dano do time', heal:'cura', dodge:'esquiva',
+  bossSpd:'rápido contra chefes', teamSpd:'+velocidade do time', crit:'crítico', critX:'crítico', multishot:'multi-tiro', burst:'rajada', haste:'cadência', selfAtk:'dano alto'};
+function rpTags(T) {
+  const out = [];
+  if (T.sub && SUBS[T.sub]) out.push([T.sub === 'boss' ? '+80% no chefão' : T.sub === 'single' ? '+35% alvo único' : 'área: fraco aqui', T.sub === 'boss' ? 'good' : T.sub === 'single' ? '' : 'bad']);
+  for (const k in (T.passive || {})) if (RP_TAG[k] && !out.some(o => o[0] === RP_TAG[k])) out.push([RP_TAG[k], k === 'bossSpd' || k === 'heal' ? 'good' : '']);
+  return out.slice(0, 2);
+}
+const rpBody = id => { const F = typeof SHEET_SPR !== 'undefined' && SHEET_SPR[id]; return F && F.corpo ? F.corpo[0][0] : null; };
+function rpBest(k, team) { let best = team[k], bp = -1; for (const c of ownedOf(k)) { const p = teamPow({...team, [k]:c.id}); if (p > bp) { bp = p; best = c.id; } } return best; }
 function raidPickView() {
-  const R = raidOf(raidPick.id), T = raidPick.team, pw = teamPow(T), rp = raidPow(R), cls = pw >= rp ? 'ok' : pw >= rp * .7 ? 'warn' : 'bad';
-  const col = k => `<div class="rpcol"><b class="hint">${CLASSES[k].one}</b>${ownedOf(k).map(c => `<button type="button" class="rpag${T[k] === c.id ? ' on' : ''}" data-rtm="${k}:${c.id}" aria-pressed="${T[k] === c.id}" title="${c.name} · ${c.stars}★"><img src="${bustOf(c.id)}" width="26" height="26" alt=""><span>${c.name}</span><small>${c.stars}★</small></button>`).join('')}</div>`;
-  return `<div class="rhud" style="--rc:${R.c}"><img src="${raidIcon(R.id)}" width="28" height="28" alt=""><div><b style="color:${R.c}">${R.n}</b> <small class="hint">${R.y}</small>
-      <div class="hint">Monte o time pra esta luta. O time da barra não muda.</div></div><span></span></div>
-    <div class="rpow">poder do time <b class="${cls}">${fmtN(pw)}</b> · recomendado <b>${fmtN(rp)}</b></div>
-    <div class="rpick">${col('fw')}${col('sc')}${col('pt')}</div>
-    <div class="opts"><button type="button" data-rback>Voltar</button><button type="button" data-rstart>Iniciar luta</button></div>`;
+  const P = raidPick, R = raidOf(P.id), T = P.team, pw = teamPow(T), rp = raidPow(R), ratio = pw / rp;
+  const vd = ratio >= 1.15 ? ['Vitória provável', 'ok'] : ratio >= 1 ? ['Equilibrado', 'ok'] : ratio >= .7 ? ['Arriscado', 'warn'] : ['Muito difícil', 'bad'];
+  const tot = R.w.reduce((a, b) => a + b, 0), tiers = R.w.map((w, t) => w ? t : -1).filter(t => t >= 0);
+  const delta = P.prev ? Math.round((pw / P.prev - 1) * 100) : 0;
+  const slot = k => {
+    const C = charOf(T[k]), body = rpBody(C.id), on = P.slot === k, st = withTeam(T, () => { const h = heroes.find(x => x.def.id === k); return h ? [atk(h), maxHp(h)] : [0, 0]; });
+    return `<button type="button" class="rslot${on ? ' on' : ''}${P.anim === k || P.anim === 'all' ? ' fresh' : ''}" data-rslot="${k}" aria-pressed="${on}" style="--cc:${RP_CLS[k].c}">
+      <span class="rsl">${RP_CLS[k].n}</span>
+      <span class="rfig">${body ? `<img src="${body}" alt="">` : `<img class="bustf" src="${bustOf(C.id)}" alt="">`}</span>
+      <span class="rnm"><b>${C.name}</b> <i class="st${C.stars}">${stars(C.stars)}</i></span>
+      <span class="rstat">ATQ ${fmtN(st[0])} · VIDA ${fmtN(st[1])}</span>
+      <span class="rtags">${rpTags(C).map(([x, c]) => `<i class="${c}">${x}</i>`).join('')}</span>
+    </button>`;
+  };
+  const k = P.slot, cand = ownedOf(k).map(c => ({c, d:teamPow({...T, [k]:c.id}) - pw})).sort((a, b) => b.d - a.d), bestId = cand.length ? cand[0].c.id : null;
+  const tray = cand.map(({c, d}) => `<button type="button" class="rag s${c.stars}${T[k] === c.id ? ' on' : ''}" data-rtm="${k}:${c.id}" aria-pressed="${T[k] === c.id}" title="${c.name} · ${c.ptxt}">
+      <img src="${bustOf(c.id)}" width="40" height="40" alt="">
+      <span class="rnm2">${c.name}</span>
+      <span class="rmeta"><i class="st${c.stars}">${c.stars}★</i> ${T[k] === c.id ? '<i class="rcur">no time</i>' : `<i class="${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : ''}${fmtN(d)}</i>`}</span>
+      ${c.id === bestId && T[k] !== c.id && d > 0 ? '<span class="rbest">MELHOR</span>' : ''}${S[RSLOT[k]] === c.id ? '<span class="rbar">na barra</span>' : ''}
+    </button>`).join('');
+  return `<div class="rdos" style="--rc:${R.c}">
+      <img src="${raidIcon(R.id)}" width="48" height="48" alt="">
+      <div><b>${R.n}</b> <small>${R.y}</small>
+        <div class="rthr"><i>golpeia o tanque</i><i>marca áreas no chão</i><i>enfurece nos 20 s finais</i></div>
+        <div class="hint">Prêmio: ${R.items} ${R.items > 1 ? 'itens' : 'item'} ${tierTxt(tiers[0])}–${tierTxt(tiers[tiers.length - 1])} · pacotes · créditos</div></div>
+    </div>
+    <div class="rform" style="--rc:${R.c}">${slot('fw')}${slot('sc')}${slot('pt')}</div>
+    <div class="rgauge ${vd[1]}"><div class="rgl"><span>PODER CONTRA O CHEFÃO <b>${fmtN(pw)}</b>${delta ? ` <i class="${delta > 0 ? 'up' : 'dn'}">${delta > 0 ? '+' : ''}${delta}%</i>` : ''}</span><b class="rvd">${vd[0]}</b></div>
+      <div class="rgb"><i style="width:${Math.min(100, ratio / 1.5 * 100)}%"></i><em style="left:${100 / 1.5}%" title="recomendado ${fmtN(rp)}"></em></div>
+      <small class="hint">recomendado ${fmtN(rp)}</small></div>
+    <p class="rtt">Trocar ${RP_CLS[k].n.toLowerCase()} <small class="hint">· clique num pedestal pra trocar outra vaga</small></p>
+    <div class="rtray">${tray}</div>
+    <div class="ract"><button type="button" data-rback>Voltar</button><button type="button" data-rbar>Time da barra</button><button type="button" data-rauto>Melhor time</button><button type="button" class="rgo" data-rstart style="--rc:${R.c}">INICIAR LUTA ›</button></div>`;
 }
 function raidView() {
   if (raid) return raidFightView();
@@ -5613,7 +5691,10 @@ $('#pBody').addEventListener('click', e => {
   else if (d.ach) claimAch(d.ach);
   else if (d.cdx) { codexTab = d.cdx; renderPanel(); }
   else if (d.raid) raidPickOpen(d.raid);
-  else if (d.rtm) { const [k, id] = d.rtm.split(':'); if (raidPick && S.roster[id]) { raidPick.team[k] = id; renderPanel(); } }
+  else if (d.rtm) { const [k, id] = d.rtm.split(':'); if (raidPick && S.roster[id] && raidPick.team[k] !== id) { raidPick.prev = teamPow(raidPick.team); raidPick.team[k] = id; raidPick.anim = k; renderPanel(); raidPick.anim = null; } }
+  else if (d.rslot) { if (raidPick) { raidPick.slot = d.rslot; renderPanel(); } }
+  else if (d.rbar !== undefined) { if (raidPick) { raidPick.prev = teamPow(raidPick.team); for (const k in RSLOT) raidPick.team[k] = S[RSLOT[k]]; raidPick.anim = 'all'; renderPanel(); raidPick.anim = null; } }
+  else if (d.rauto !== undefined) { if (raidPick) { raidPick.prev = teamPow(raidPick.team); for (const k of ['sc', 'fw', 'pt']) raidPick.team[k] = rpBest(k, raidPick.team); raidPick.anim = 'all'; renderPanel(); raidPick.anim = null; } }
   else if (d.rback !== undefined) { raidPick = null; renderPanel(); }
   else if (d.rstart !== undefined) { if (raidPick) { S.rteam = {...raidPick.team}; startRaid(raidPick.id, S.rteam); } }
   else if (d.raidquit !== undefined) { if (raid) raidEnd(false, 'quit'); }

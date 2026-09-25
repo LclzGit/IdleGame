@@ -23,6 +23,14 @@ A interface é só a barra do jogo, com uma linha fina de HUD. Esquadrão, Inven
 - **Pacotes de download** (antes "chips de invocação"): Comum (1,5% por vírus, 30% no chefe; ★5 2%/★4 13%), Raro (0,3% / 8%; ★5 8%/★4 42%), Lendário (0,03% / 1,5%; ★5 30%/★4 70%).
 - **Repetidos** viram dados (★3 < ★4 < ★5, escalando com a fase mais alta liberada).
 
+## v1.22: preparação da luta contra o Chefão
+
+- **Dossiê do chefão:** ícone, ano, o que ele faz na luta (golpeia o tanque, marca áreas, enfurece no fim) e o prêmio.
+- **Formação em pedestais:** os três agentes aparecem de corpo inteiro, com ATQ, VIDA e etiquetas do que ajudam na luta (ex.: "+80% no chefão", "cura", "reflete dano"). Clique num pedestal para trocar aquela vaga; o agente novo entra com efeito de materializar.
+- **Medidor de chance:** poder contra o chefão (conta o bônus de Caça-chefes) com a marca do recomendado e o veredito: Vitória provável, Equilibrado, Arriscado ou Muito difícil. Mostra quanto o poder mudou na última troca.
+- **Bandeja de troca:** cada agente mostra quanto o poder sobe ou desce se entrar no time, já ordenado do melhor para o pior. Marcas "MELHOR" e "na barra".
+- **Atalhos:** "Time da barra", "Melhor time" e o botão **INICIAR LUTA** fixo embaixo.
+
 ## v1.21: escolher o time do Chefão
 
 - **Enfrentar** agora abre a montagem do time antes da luta: uma coluna para Tanque, Ataque e Suporte, com todos os agentes que você tem.
